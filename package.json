@@ -1,0 +1,27 @@
+{
+  "name": "evnotifybackend",
+  "version": "1.0.0",
+  "description": "backend for evnotify",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "mysql": "^2.13.0",
+    "password-hash": "^1.2.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GPlay97/EVNotifyBackend.git"
+  },
+  "author": "GPlay97",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GPlay97/EVNotifyBackend/issues"
+  },
+  "homepage": "https://github.com/GPlay97/EVNotifyBackend#readme"
+}
