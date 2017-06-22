@@ -185,20 +185,28 @@ exports.password = function(req, res) {
 
 /**
  * Function which fetches the settings from given account key and returns them
- * NOTE: requires prrevious authentication
+ * NOTE: requires previous authentication
  * @param  {String} akey        the account key
+ * @param  {Function} callback  the callback function
  * @return {Error|Object}       Error or the settings object
  */
-function getSettings(akey) {
-    // TODO
+function getSettings(akey, callback) {
+    var sql = mysql.format('SELECT email, telegram, soc, lng, push FROM accounts WHERE akey=?', [akey]);
+
+    db.query(sql, function(err, queryRes) {
+        callback(err, ((err)? null : queryRes[0]));
+    });
 }
 
 /**
  * Function which sets the settings for a given account key
- * @param {String} akey                 the account key
- * @param {Error|Boolean} settingsObj   Error object and boolean which indicates the success state
+ * NOTE: requires previous authentication
+ * @param {String} akey             the account key
+ * @param {Object} settingsObj      the new settings to be applied
+ * @param {Function} callback       the callback function
+ * @return {Error|Boolean}          Error object or boolean which indicates the success state
  */
-function setSettings(akey, settingsObj) {
+function setSettings(akey, settingsObj, callback) {
     // TODO
 }
 

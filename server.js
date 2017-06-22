@@ -16,6 +16,7 @@ app.post('/register', user.register);           // function to register an accou
 app.post('/getkey', user.key);                  // function to retrieve an account key
 app.post('/renewtoken', user.token);            // function to renew the account token
 app.post('/changepw', user.password);           // function to change the account password
+app.post('/settings', user.settings);           // function to get and set the accout settings
 
 // request function not found
 app.use(function(req, res) {
