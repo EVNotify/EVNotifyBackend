@@ -36,7 +36,7 @@ function generateKey(callback) {
  */
 exports.key = function(req, res) {
     res.contentType('application/json');
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader('Access-Control-Allow-Origin', '*');
 
     // generate key
     generateKey(function(err, key) {
@@ -85,7 +85,7 @@ function register(akey, password, callback) {
  */
 exports.register = function(req, res) {
     res.contentType('application/json');
-	res.setHeader("Access-Control-Allow-Origin", "*");
+	res.setHeader('Access-Control-Allow-Origin', '*');
 
     // check required params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.password) {
@@ -127,7 +127,7 @@ function login(akey, password, callback) {
  */
 exports.login = function(req, res){
     res.contentType('application/json');
-	res.setHeader("Access-Control-Allow-Origin", "*");
+	res.setHeader('Access-Control-Allow-Origin', '*');
 
     // check required params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.password) {
@@ -172,13 +172,89 @@ function changePW(akey, oldPassword, newpassword, callback) {
  */
 exports.password = function(req, res) {
     res.contentType('application/json');
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader('Access-Control-Allow-Origin', '*');
 
     // check params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.password && req.body.newpassword) {
         changePW(req.body.akey, req.body.password, req.body.newpassword, function(err, success) {
             if(!err) res.json({message: 'Password change succeeded'});
             else res.status(409).json({message: 'Password change failed', error: err});
+        });
+    } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
+};
+
+/**
+ * Function which fetches the settings from given account key and returns them
+ * NOTE: requires previous authentication
+ * @param  {String} akey        the account key
+ * @param  {Function} callback  the callback function
+ * @return {Error|Object}       Error or the settings object
+ */
+function getSettings(akey, callback) {
+    var sql = mysql.format('SELECT email, telegram, soc, lng, push FROM accounts WHERE akey=?', [akey]);
+
+    db.query(sql, function(err, queryRes) {
+        if(!err && queryRes && queryRes[0]) queryRes[0].email = encryption.decrypt(((queryRes[0].email)? queryRes[0].email : ''));  // decrypt mail
+        callback(err, ((err)? null : queryRes[0]));
+    });
+}
+
+/**
+ * Function which sets the settings for a given account key
+ * NOTE: requires previous authentication
+ * @param {String} akey             the account key
+ * @param {Object} settingsObj      the new settings to be applied
+ * @param {Function} callback       the callback function
+ * @return {Error|Boolean}          Error object or boolean which indicates the success state
+ */
+function setSettings(akey, settingsObj, callback) {
+    var sql = mysql.format('UPDATE accounts SET email=?, telegram=?, soc=?, lng=?, push=? WHERE akey=?', [
+        ((settingsObj.email)? encryption.encrypt(settingsObj.email) : ''),  // encrypt email
+        settingsObj.telegram,
+        settingsObj.soc,
+        settingsObj.lng,
+        settingsObj.push,
+        akey
+    ]);
+
+    db.query(sql, function(err, queryRes) {
+        callback(err, ((err)? null : queryRes[0]));
+    });
+}
+
+/**
+ * settings request handler
+ * @param  {ServerRequest} req server request
+ * @param  {ServerResponse} res server response
+ * @return {ServerResponse}
+ */
+exports.settings = function(req, res) {
+    res.contentType('application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    // check params
+    if(typeof req.body !== 'undefined' && req.body.akey && req.body.password && req.body.token && typeof req.body.option === 'string') {
+        // check if credentials are valid
+        login(req.body.akey, req.body.password, function(err, loginRes) {
+            if(!err && loginRes) {
+                // validate token
+                if(loginRes.token === req.body.token) {
+                    // check option
+                    if(req.body.option.toUpperCase() === 'GET') {
+                        // get settings and send the setting result to user
+                        getSettings(req.body.akey, function(err, getRes) {
+                            if(!err && getRes) res.json({message: 'Get settings succeeded', settings: getRes});
+                            else res.status(409).json({message: 'Get settings failed', error: err});
+                        });
+                    } else if(req.body.option.toUpperCase() === 'SET' && typeof req.body.optionObj === 'object') {
+                        // set settings and inform the user about the success state
+                        setSettings(req.body.akey, req.body.optionObj, function(err, setRes) {
+                            if(!err) res.json({message: 'Set settings succeeded'});
+                            else res.status(409).json({message: 'Set settings failed', error: err});
+                        });
+                    } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
+                } else res.status(401).json({message: 'Unauthorized', error: 401});
+            } else res.status(409).json({message: 'Login failed: ', error: err});
         });
     } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
 };
@@ -213,7 +289,7 @@ function renewToken(akey, password, callback) {
  */
 exports.token = function(req, res) {
     res.contentType('application/json');
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader('Access-Control-Allow-Origin', '*');
 
     // check params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.password) {
