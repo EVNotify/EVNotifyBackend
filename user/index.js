@@ -194,6 +194,7 @@ function getSettings(akey, callback) {
     var sql = mysql.format('SELECT email, telegram, soc, lng, push FROM accounts WHERE akey=?', [akey]);
 
     db.query(sql, function(err, queryRes) {
+        if(!err && queryRes && queryRes[0]) queryRes[0].email = encryption.decrypt(((queryRes[0].email)? queryRes[0].email) : '');  // decrypt mail
         callback(err, ((err)? null : queryRes[0]));
     });
 }
@@ -207,7 +208,18 @@ function getSettings(akey, callback) {
  * @return {Error|Boolean}          Error object or boolean which indicates the success state
  */
 function setSettings(akey, settingsObj, callback) {
-    // TODO
+    var sql = mysql.format('UPDATE accounts SET email=?, telegram=?, soc=?, lng=?, push=? WHERE akey=?', [
+        ((settingsObj.email)? encryption.encrypt(settingsObj.email) : ''),  // encrypt email
+        settingsObj.telegram,
+        settingsObj.soc,
+        settingsObj.lng,
+        settingsObj.push,
+        akey
+    ]);
+
+    db.query(sql, function(err, queryRes) {
+        callback(err, ((err)? null : queryRes[0]));
+    });
 }
 
 /**
