@@ -194,7 +194,7 @@ function getSettings(akey, callback) {
     var sql = mysql.format('SELECT email, telegram, soc, lng, push FROM accounts WHERE akey=?', [akey]);
 
     db.query(sql, function(err, queryRes) {
-        if(!err && queryRes && queryRes[0]) queryRes[0].email = encryption.decrypt(((queryRes[0].email)? queryRes[0].email) : '');  // decrypt mail
+        if(!err && queryRes && queryRes[0]) queryRes[0].email = encryption.decrypt(((queryRes[0].email)? queryRes[0].email : ''));  // decrypt mail
         callback(err, ((err)? null : queryRes[0]));
     });
 }
