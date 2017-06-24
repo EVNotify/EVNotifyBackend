@@ -2,7 +2,9 @@ var express = require('express'),
     app = express(),
     bodyParser = require('body-parser'),
     srv_config = require('./srv_config.json'),
-    user = require('./user');
+    user = require('./user'),
+    telegram = require('./notification/telegram/'),
+    notification = require('./notification');
 
 // required for parsing JSON
 app.use(bodyParser.json());         // to support JSON-encoded bodies
@@ -17,6 +19,7 @@ app.post('/getkey', user.key);                  // function to retrieve an accou
 app.post('/renewtoken', user.token);            // function to renew the account token
 app.post('/changepw', user.password);           // function to change the account password
 app.post('/settings', user.settings);           // function to get and set the accout settings
+app.post('/notification', notification.send);   // function to send all notifications to account
 
 // request function not found
 app.use(function(req, res) {
@@ -25,6 +28,8 @@ app.use(function(req, res) {
     res.status(404).json({message: 'Unknown operation. Unable to handle request', error: 404});
 });
 
+// start telegram bot
+telegram.startBot();
 
 // listen on port
 app.listen(srv_config.PORT, function () {
