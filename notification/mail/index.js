@@ -38,7 +38,6 @@ exports.sendMail = function(mail, lng) {
 
         mailTransporter.sendMail(mailOptions, function(err, mailInfo) {
             if(err) return console.log(err);
-            console.log('Message %s sent: %s', info.messageId, info.response);
         });
     }
 };
