@@ -142,24 +142,28 @@ exports.login = function(req, res){
 /**
  * Function which allows setting a new password
  * @param  {String}   akey        the akey from account
+ * @param  {String}   token       the token from account
  * @param  {String}   oldPassword the old password
  * @param  {String}   newpassword the new password to set
  * @param  {Function} callback    callback function
  * @return {Boolean|Error}               returns the state of success and in case of error an error object
  */
-function changePW(akey, oldPassword, newpassword, callback) {
+function changePW(akey, token, oldPassword, newpassword, callback) {
     // check credentials
     login(akey, oldPassword, function(err, loginRes) {
-        if(!err) {
-            var hashedPassword = passwordHash.generate(newpassword, {algorithm: 'sha512'}),
-                sql = mysql.format('UPDATE accounts SET pw_hash=? WHERE akey=?', [hashedPassword, akey]);
+        if(!err && loginRes) {
+            // validate token
+            if(loginRes.token === token) {
+                // hash password and update
+                var hashedPassword = passwordHash.generate(newpassword, {algorithm: 'sha512'}),
+                    sql = mysql.format('UPDATE accounts SET pw_hash=? WHERE akey=?', [hashedPassword, akey]);
 
-            if(hashedPassword) {
-                db.query(sql, function(err, queryRes) {
-                    callback(err, ((err)? false : true));
-                });
-            } else callback(500, false);
-            // hash password and update
+                if(hashedPassword) {
+                    db.query(sql, function(err, queryRes) {
+                        callback(err, ((err)? false : true));
+                    });
+                } else callback(500, false);
+            } else callback(401, false);
         } else callback(err, false);
     });
 }
@@ -176,7 +180,7 @@ exports.password = function(req, res) {
 
     // check params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.password && req.body.newpassword) {
-        changePW(req.body.akey, req.body.password, req.body.newpassword, function(err, success) {
+        changePW(req.body.akey, req.body.token, req.body.password, req.body.newpassword, function(err, success) {
             if(!err) res.json({message: 'Password change succeeded'});
             else res.status(409).json({message: 'Password change failed', error: err});
         });
