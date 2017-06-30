@@ -2,6 +2,7 @@ var express = require('express'),
     app = express(),
     nodemailer = require('nodemailer'),
     encryption = require('./../../encryption/'),
+    language = require('./../../translation'),
     srv_config = require('./../../srv_config.json');
 
 /**
@@ -32,8 +33,8 @@ exports.sendMail = function(mail, lng) {
             mailOptions = {
                 from: srv_config.MAIL_ADRESS,
                 to: encryption.decrypt(mail),
-                subject: 'EVNOTIFY_MAIL_SUBJECT',   // will be translated later
-                text: 'EVNOTIFY_MAIL_TEXT'
+                subject: language.translate('EVNOTIFY_MAIL_SUBJECT', lng),
+                text: language.translate('EVNOTIFY_MAIL_TEXT', lng)
             };
 
         mailTransporter.sendMail(mailOptions, function(err, mailInfo) {
