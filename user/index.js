@@ -179,7 +179,7 @@ exports.password = function(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
 
     // check params
-    if(typeof req.body !== 'undefined' && req.body.akey && req.body.password && req.body.newpassword) {
+    if(typeof req.body !== 'undefined' && req.body.akey && req.body.token && req.body.password && req.body.newpassword) {
         changePW(req.body.akey, req.body.token, req.body.password, req.body.newpassword, function(err, success) {
             if(!err) res.json({message: 'Password change succeeded'});
             else res.status(409).json({message: 'Password change failed', error: err});
