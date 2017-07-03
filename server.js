@@ -18,7 +18,7 @@ app.post('/register', user.register);           // function to register an accou
 app.post('/getkey', user.key);                  // function to retrieve an account key
 app.post('/renewtoken', user.token);            // function to renew the account token
 app.post('/changepw', user.password);           // function to change the account password
-app.post('/settings', user.settings);           // function to get and set the accout settings
+app.post('/settings', user.settings);           // function to get and set the account settings
 app.post('/notification', notification.send);   // function to send all notifications to account
 
 // request function not found
