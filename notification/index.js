@@ -34,9 +34,9 @@ exports.send = function(req, res) {
             if(!err && queryRes) {
                 if(queryRes[0].token === req.body.token) {
                     // send notifications in background depending on type
-                    if(queryRes[0].email) mail.sendMail(queryRes[0].email, queryRes[0].lng);
-                    // if(queryRes[0].push) push.sendPush(req.body.akey, queryRes[0].lng);
-                    if(queryRes[0].telegram) telegram.sendMessage(queryRes[0].telegram, queryRes[0].lng);
+                    if(queryRes[0].email) mail.sendMail(queryRes[0].email, queryRes[0].lng, req.body.error);
+                    // if(queryRes[0].push) push.sendPush(req.body.akey, queryRes[0].lng, req.body.error);
+                    if(queryRes[0].telegram) telegram.sendMessage(queryRes[0].telegram, queryRes[0].lng, req.body.error);
                     // let the notifications proceed in background, inform user
                     res.json({message: 'Notifications successfully sent'});
                 } else res.status(401).json({message: 'Unauthorized', error: 401});

@@ -85,6 +85,13 @@ exports.startBot = function() {
     });
 };
 
-exports.sendMessage = function(userID, lng) {
-    bot.sendMessage(userID, language.translate('TELEGRAM_NOTIFICATION_MESSAGE', lng));
+/**
+ * Function which sends message to specified user id
+ * @param  {Integer} userID the user id
+ * @param  {String} lng     the language to use for the notification
+ * @param  {Boolean} error  whether or not an error occured so we should inform the user
+ *                          if this param is not set/false, the success notification will be sent
+ */
+exports.sendMessage = function(userID, lng, error) {
+    bot.sendMessage(userID, ((error)? language.translate('TELEGRAM_NOTIFICATION_ERROR_MESSAGE', lng) : language.translate('TELEGRAM_NOTIFICATION_MESSAGE', lng)));
 };
