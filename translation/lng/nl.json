@@ -1,6 +1,8 @@
 {
     "EVNOTIFY_MAIL_SUBJECT": "EVNotify - Notificatie laadstatus",
     "EVNOTIFY_MAIL_TEXT": "De gewenste laadstatus is zojuist bereikt. Bedankt voor het gebruik van EVNotify.",
+    "EVNOTIFY_MAIL_ERROR_SUBJECT": "EVNotify - Notificatie laadproces afgebroken",
+    "EVNOTIFY_MAIL_ERROR_TEXT": "Het laadproces is afgebroken of de auto kan niet meer communiceren . Beter even gaan checken!",
     "TELEGRAM_START_TEXT": "Hoi! Ik ben de EVNotify Bot en ik zal je berichten over je laadstatus, als je wilt. Voer /subscribe in om te beginnen. Als je hulp nodig hebt, kun je altijd /help invoeren.",
     "TELEGRAM_HELP_TEXT": "Ik kan je informeren over je laadstatus van je elektrische voertuig. Voer /subscribe in om te starten. Als je geen notificaties meer wilt, voer dan /unsubscribe in.",
     "TELEGRAM_TOKEN_ENTER": "Ik kan je nu bijna berichten sturen. Ik heb echter eerst nog je token nodig. Je vindt dit in de app bij Settings/Instellingen. Deel dit nooit met anderen!",
@@ -9,4 +11,5 @@
     "TELEGRAM_UNSUBSCRIBTION_SUCCESSFULL": "Ik zal je geen berichten meer sturen. Mocht je je bedenken, dan kun je altijd weer /subscribe invoeren. ",
     "TELEGRAM_UNSUBSCRIBTION_FAILED": "Vreemd, er ging iets verkeerd met het verzoek je van de notificatielijst te verwijderen. Probeer het alsjeblieft later opnieuw met /unsubscribe.",
     "TELEGRAM_NOTIFICATION_MESSAGE": "Hallo! Ik wilde je even laten weten dat je elektrische voertuig de gewenste laadstatus heeft bereikt!"
+    "TELEGRAM_NOTIFICATION_ERROR_MESSAGE": "Hallo! Het lijkt erop dat het laadproces is afgebroken of er was een fout in de communicatie met de auto.  Beter even gaan checken!"
 }
