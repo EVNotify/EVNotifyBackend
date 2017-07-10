@@ -3,6 +3,7 @@ var express = require('express'),
     srv_config = require('./../../srv_config.json'),
     TelegramBot = require('node-telegram-bot-api'),
     mysql = require('mysql'),
+    language = require('./../../translation'),
     bot = new TelegramBot(srv_config.TELEGRAM_TOKEN, {polling: true}),
     opts = {reply_markup: JSON.stringify({force_reply: true})};
     db = mysql.createConnection({
@@ -55,7 +56,7 @@ function removeSubscribtion(userID, callback) {
 exports.startBot = function() {
     // help listener
     bot.onText(/\/help/, function(msg, match) {
-        bot.sendMessage(msg.chat.id, 'TELEGRAM_HELP_TEXT'); // translate later
+        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_HELP_TEXT', 'en')); // currently only in english
     });
 
     // subscribe listener
@@ -63,11 +64,11 @@ exports.startBot = function() {
         var chatID = msg.chat.id;
 
         // ask for token and add subscribtion for the account
-        bot.sendMessage(chatID, 'TELEGRAM_TOKEN_ENTER', opts).then(function(sent) {
+        bot.sendMessage(chatID, language.translate('TELEGRAM_TOKEN_ENTER', 'en'), opts).then(function(sent) {
             bot.onReplyToMessage(chatID, sent.message_id, function(response) {
                 addSubscribtion(chatID, response.text, function(err, subscribed) {
-                    if(!err && subscribed) bot.sendMessage(chatID, 'TELEGRAM_SUBSCRIBTION_SUCCESSFULL');
-                    else bot.sendMessage(chatID, 'TELEGRAM_SUBSCRIBTION_FAILED');
+                    if(!err && subscribed) bot.sendMessage(chatID, language.translate('TELEGRAM_SUBSCRIBTION_SUCCESSFULL', 'en'));
+                    else bot.sendMessage(chatID, language.translate('TELEGRAM_SUBSCRIBTION_FAILED', 'en'));
                 });
             });
         });
@@ -78,12 +79,19 @@ exports.startBot = function() {
         var chatID = msg.chat.id;
 
         removeSubscribtion(chatID, function(err, unsubscribed) {
-            if(!err && unsubscribed) bot.sendMessage(chatID, 'TELEGRAM_UNSUBSCRIBTION_SUCCESSFULL');
-            else bot.sendMessage(chatID, 'TELEGRAM_UNSUBSCRIBTION_FAILED');
+            if(!err && unsubscribed) bot.sendMessage(chatID, language.translate('TELEGRAM_UNSUBSCRIBTION_SUCCESSFULL', 'en'));
+            else bot.sendMessage(chatID, language.translate('TELEGRAM_UNSUBSCRIBTION_FAILED', 'en'));
         });
     });
 };
 
-exports.sendMessage = function(userID, lng) {
-    bot.sendMessage(userID, 'TELEGRAM_NOTIFICATION_MESSAGE');
+/**
+ * Function which sends message to specified user id
+ * @param  {Integer} userID the user id
+ * @param  {String} lng     the language to use for the notification
+ * @param  {Boolean} error  whether or not an error occured so we should inform the user
+ *                          if this param is not set/false, the success notification will be sent
+ */
+exports.sendMessage = function(userID, lng, error) {
+    bot.sendMessage(userID, ((error)? language.translate('TELEGRAM_NOTIFICATION_ERROR_MESSAGE', lng) : language.translate('TELEGRAM_NOTIFICATION_MESSAGE', lng)));
 };
