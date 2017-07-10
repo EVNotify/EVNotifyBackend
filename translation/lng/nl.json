@@ -10,6 +10,6 @@
     "TELEGRAM_SUBSCRIBTION_FAILED": "Sorry! Ik kan niks met dit token - weet je zeker dat het klopt? Probeer alsjeblieft opnieuw en voer /subscribe nogmaals in. ",
     "TELEGRAM_UNSUBSCRIBTION_SUCCESSFULL": "Ik zal je geen berichten meer sturen. Mocht je je bedenken, dan kun je altijd weer /subscribe invoeren. ",
     "TELEGRAM_UNSUBSCRIBTION_FAILED": "Vreemd, er ging iets verkeerd met het verzoek je van de notificatielijst te verwijderen. Probeer het alsjeblieft later opnieuw met /unsubscribe.",
-    "TELEGRAM_NOTIFICATION_MESSAGE": "Hallo! Ik wilde je even laten weten dat je elektrische voertuig de gewenste laadstatus heeft bereikt!"
+    "TELEGRAM_NOTIFICATION_MESSAGE": "Hallo! Ik wilde je even laten weten dat je elektrische voertuig de gewenste laadstatus heeft bereikt!",
     "TELEGRAM_NOTIFICATION_ERROR_MESSAGE": "Hallo! Het lijkt erop dat het laadproces is afgebroken of er was een fout in de communicatie met de auto.  Beter even gaan checken!"
 }
