@@ -195,7 +195,7 @@ exports.password = function(req, res) {
  * @return {Error|Object}       Error or the settings object
  */
 function getSettings(akey, callback) {
-    var sql = mysql.format('SELECT email, telegram, soc, lng, push FROM accounts WHERE akey=?', [akey]);
+    var sql = mysql.format('SELECT email, telegram, soc, curSoc, polling, autoSync, lng, push FROM accounts WHERE akey=?', [akey]);
 
     db.query(sql, function(err, queryRes) {
         if(!err && queryRes && queryRes[0]) queryRes[0].email = encryption.decrypt(((queryRes[0].email)? queryRes[0].email : ''));  // decrypt mail
@@ -212,17 +212,20 @@ function getSettings(akey, callback) {
  * @return {Error|Boolean}          Error object or boolean which indicates the success state
  */
 function setSettings(akey, settingsObj, callback) {
-    var sql = mysql.format('UPDATE accounts SET email=?, telegram=?, soc=?, lng=?, push=? WHERE akey=?', [
+    var sql = mysql.format('UPDATE accounts SET email=?, telegram=?, soc=?, curSoc=?, polling=?, autoSync=?, lng=?, push=? WHERE akey=?', [
         ((settingsObj.email)? encryption.encrypt(settingsObj.email) : ''),  // encrypt email
         settingsObj.telegram,
         settingsObj.soc,
+        settingsObj.curSoc,
+        settingsObj.polling,
+        settingsObj.autoSync,
         settingsObj.lng,
         settingsObj.push,
         akey
     ]);
 
     db.query(sql, function(err, queryRes) {
-        callback(err, ((err)? null : queryRes[0]));
+        callback(err, ((err)? false : true));
     });
 }
 
@@ -253,7 +256,7 @@ exports.settings = function(req, res) {
                     } else if(req.body.option.toUpperCase() === 'SET' && typeof req.body.optionObj === 'object') {
                         // set settings and inform the user about the success state
                         setSettings(req.body.akey, req.body.optionObj, function(err, setRes) {
-                            if(!err) res.json({message: 'Set settings succeeded'});
+                            if(!err && setRes) res.json({message: 'Set settings succeeded'});
                             else res.status(409).json({message: 'Set settings failed', error: err});
                         });
                     } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
@@ -301,5 +304,75 @@ exports.token = function(req, res) {
             if(!err && newToken) res.json({message: 'Token renewed', token: newToken});
             else res.status(409).json({message: 'Token renewal failed', error: err});
         });
+    } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
+};
+
+/**
+ * Function which validates given token and checks if token from akey matches with submitted token
+ * @param  {String}   akey     the account key
+ * @param  {String}   token    the token to validate
+ * @param  {Function} callback callback function
+ * @return {Error|Boolean}     whether or not the validation of token was successfull or if there was an error
+ */
+function validateToken(akey, token, callback) {
+    var sql = mysql.format('SELECT token FROM accounts WHERE akey=?', [akey]);
+
+    // validate token
+    db.query(sql, function(err, queryRes) {
+        callback(err, ((err)? false : ((queryRes[0].token === token)? true : false)));   // whether or not the token is equal
+    });
+}
+
+/**
+ * Function which checks if given account has the autoSync property turned on
+ * @param  {String}   akey     the account key to check for autoSync property
+ * @param  {String}   token    the token linked to account
+ * @param  {Function} callback callback function
+ * @return {Error|Boolean}     error or boolean if autoSync is on for user or not
+ */
+function hasSyncOn(akey, token, callback) {
+    // first validate token
+    validateToken(akey, token, function(err, valid) {
+        if(!err && valid) {
+            var sql = mysql.format('SELECT autoSync FROM accounts WHERE token=?', [token]);
+
+            db.query(sql, function(err, queryRes) {
+                callback(err, ((err)? false : ((queryRes[0].autoSync)? true : false)));
+            });
+        } else callback(err, null);
+    });
+}
+
+/**
+ * sync request handler
+ * @param  {ServerRequest} req server request
+ * @param  {ServerResponse} res server response
+ * @return {ServerResponse}
+ */
+exports.sync = function(req, res) {
+    res.contentType('application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    // check params
+    if(typeof req.body !== 'undefined' && req.body.akey && req.body.token && typeof req.body.type === 'string') {
+        // validate type
+        if((req.body.type.toUpperCase() === 'PUSH' && req.body.syncObj) || req.body.type.toUpperCase() === 'PULL') {
+            // validate token and sync property
+            hasSyncOn(req.body.akey, req.body.token, function(err, syncOn) {
+                if(!err && syncOn) {
+                    if(req.body.type.toUpperCase() === 'PUSH') {
+                        setSettings(req.body.akey, req.body.syncObj, function(err, pushRes) {
+                            if(!err && pushRes) res.json({message: 'Push for sync succeeded', syncRes: pushRes});
+                            else res.status(409).json({message: 'Push for sync failed', error: err});
+                        });
+                    } else {
+                        getSettings(req.body.akey, function(err, pullRes) {
+                            if(!err && pullRes) res.json({message: 'Pull for sync succeeded', syncRes: pullRes});
+                            else res.status(409).json({message: 'Pull for sync failed', error: err});
+                        });
+                    }
+                } else res.status(409).json({message: 'Sync not enabled: ', error: err});
+            });
+        } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
     } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
 };
