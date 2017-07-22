@@ -344,7 +344,7 @@ function hasSyncOn(akey, token, callback) {
 }
 
 /**
- * sync request handler
+ * sync request handler for pull and push complete settings
  * @param  {ServerRequest} req server request
  * @param  {ServerResponse} res server response
  * @return {ServerResponse}
@@ -374,5 +374,33 @@ exports.sync = function(req, res) {
                 } else res.status(409).json({message: 'Sync not enabled: ', error: err});
             });
         } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
+    } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
+};
+
+/**
+ * sync request handler for soc only
+ * NOTE: it only supports settings the soc!
+ *          will be used on autoSyncing the soc to decrease data usage
+ * @param  {ServerRequest} req server request
+ * @param  {ServerResponse} res server response
+ * @return {ServerResponse}
+ */
+exports.syncSoC = function(req, res) {
+    res.contentType('application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    // check params
+    if(typeof req.body !== 'undefined' && req.body.akey && req.body.token && typeof req.body.soc === 'number') {
+        // validate token and sync property
+        hasSyncOn(req.body.akey, req.body.token, function(err, syncOn) {
+            if(!err && syncOn) {
+                var sql = mysql.format('UPDATE accounts SET soc=? WHERE token=?', [req.body.soc, req.body.token]);
+
+                db.query(sql, function(err, queryRes) {
+                    if(!err && queryRes) res.json({message: 'Sync for soc succeeded'});
+                    else res.status(409).json({message: 'Sync for soc failed', error: err});
+                });
+            } else res.status(409).json({message: 'Sync not enabled: ', error: err});
+        });
     } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
 };
