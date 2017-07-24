@@ -195,7 +195,7 @@ exports.password = function(req, res) {
  * @return {Error|Object}       Error or the settings object
  */
 function getSettings(akey, callback) {
-    var sql = mysql.format('SELECT email, telegram, soc, curSoC, polling, autoSync, lng, push FROM accounts WHERE akey=?', [akey]);
+    var sql = mysql.format('SELECT email, telegram, soc, curSoC, device, polling, autoSync, lng, push FROM accounts WHERE akey=?', [akey]);
 
     db.query(sql, function(err, queryRes) {
         if(!err && queryRes && queryRes[0]) queryRes[0].email = encryption.decrypt(((queryRes[0].email)? queryRes[0].email : ''));  // decrypt mail
@@ -212,11 +212,12 @@ function getSettings(akey, callback) {
  * @return {Error|Boolean}          Error object or boolean which indicates the success state
  */
 function setSettings(akey, settingsObj, callback) {
-    var sql = mysql.format('UPDATE accounts SET email=?, telegram=?, soc=?, curSoC=?, polling=?, autoSync=?, lng=?, push=? WHERE akey=?', [
+    var sql = mysql.format('UPDATE accounts SET email=?, telegram=?, soc=?, curSoC=?, device=?, polling=?, autoSync=?, lng=?, push=? WHERE akey=?', [
         ((settingsObj.email)? encryption.encrypt(settingsObj.email) : ''),  // encrypt email
         settingsObj.telegram,
         settingsObj.soc,
         settingsObj.curSoC,
+        settingsObj.device,
         settingsObj.polling,
         settingsObj.autoSync,
         settingsObj.lng,
