@@ -47,7 +47,35 @@ function removeSubscribtion(userID, callback) {
         db.query(sql, function(err, queryRes) {
             callback(err, ((err)? false : true));
         });
-    } else callback('Unknown user', false);
+    } else callback('Missing user', false);
+}
+
+/**
+ * Function which fetches information about last submitted current state of charge
+ * to inform user about it.
+ * NOTE: requires autoSync property turned on
+ * @param  {Integer}   userID   the telegram user id to get the current state of charge
+ * @param  {Function} callback  callback function
+ */
+function getCurSoC(userID, callback) {
+    if(userID) {
+        var sql = mysql.format('SELECT autoSync, curSoC, lng FROM accounts WHERE telegram=?', [userID]);
+
+        db.query(sql, function(err, queryRes) {
+            if(!err && queryRes && queryRes[0]) {
+                var syncEnabled = ((queryRes[0].autoSync)? true : false);   // determine if sync enabled to inform user and return curSoc or error
+
+                callback(((syncEnabled)? null : 'Sync not enabled'), ((syncEnabled)? queryRes[0] : false));
+            } else callback(err, false);
+        });
+    } else callback('Missing user', false);
+}
+
+function sendSoCMessage(chatID) {
+    getCurSoC(chatID, function(err, socObj) {
+        if(!err && socObj) bot.sendMessage(chatID, language.translate('TELEGRAM_SOC', socObj.lng) + ' ' + socObj.curSoC + '%');
+        else bot.sendMessage(chatID, language.translate('TELEGRAM_SOC_ERROR', ((socObj)? socObj.lng : 'en')));
+    });
 }
 
 /**
@@ -82,6 +110,17 @@ exports.startBot = function() {
             if(!err && unsubscribed) bot.sendMessage(chatID, language.translate('TELEGRAM_UNSUBSCRIBTION_SUCCESSFULL', 'en'));
             else bot.sendMessage(chatID, language.translate('TELEGRAM_UNSUBSCRIBTION_FAILED', 'en'));
         });
+    });
+
+    // current soc listener
+    bot.onText(/\/soc/, function(msg, match) {
+        sendSoCMessage(msg.chat.id);
+    });
+    bot.onText(/ladezustand/i, function(msg, match) {
+        sendSoCMessage(msg.chat.id);
+    });
+    bot.onText(/state of charge/i, function(msg, match) {
+        sendSoCMessage(msg.chat.id);
     });
 };
 
