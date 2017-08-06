@@ -71,6 +71,13 @@ function getCurSoC(userID, callback) {
     } else callback('Missing user', false);
 }
 
+function sendSoCMessage(chatID) {
+    getCurSoC(chatID, function(err, socObj) {
+        if(!err && socObj) bot.sendMessage(chatID, language.translate('TELEGRAM_SOC', socObj.lng) + ' ' + socObj.curSoC + '%');
+        else bot.sendMessage(chatID, language.translate('TELEGRAM_SOC_ERROR', ((socObj)? socObj.lng : 'en')));
+    });
+}
+
 /**
  * Function which starts the telegram bot and listen for incoming messages
  */
@@ -107,12 +114,13 @@ exports.startBot = function() {
 
     // current soc listener
     bot.onText(/\/soc/, function(msg, match) {
-        var chatID = msg.chat.id;
-
-        getCurSoC(chatID, function(err, socObj) {
-            if(!err && socObj) bot.sendMessage(chatID, language.translate('TELEGRAM_SOC', socObj.lng) + ' ' + socObj.curSoC + '%');
-            else bot.sendMessage(chatID, language.translate('TELEGRAM_SOC_ERROR', ((socObj)? socObj.lng : 'en')));
-        });
+        sendSoCMessage(msg.chat.id);
+    });
+    bot.onText(/ladezustand/i, function(msg, match) {
+        sendSoCMessage(msg.chat.id);
+    });
+    bot.onText(/state of charge/i, function(msg, match) {
+        sendSoCMessage(msg.chat.id);
     });
 };
 
