@@ -57,9 +57,10 @@ function removeSubscribtion(userID, callback) {
  * @param  {Integer}   userID   the telegram user id to get the current state of charge
  * @param  {Function} callback  callback function
  */
-function getCurSoC(userID, callback) {
+function getCurSoC(userID, akey, callback) {
     if(userID) {
-        var sql = mysql.format('SELECT autoSync, curSoC, lng FROM accounts WHERE telegram=?', [userID]);
+        var sqlCMD = 'SELECT autoSync, curSoC, lng FROM accounts WHERE telegram=?' + ((akey)? ' AND akey=?' : ''),
+            sql = mysql.format(sqlCMD, ((akey)? [userID, akey] : [userID]));
 
         db.query(sql, function(err, queryRes) {
             if(!err && queryRes && queryRes[0]) {
@@ -71,8 +72,8 @@ function getCurSoC(userID, callback) {
     } else callback('Missing user', false);
 }
 
-function sendSoCMessage(chatID) {
-    getCurSoC(chatID, function(err, socObj) {
+function sendSoCMessage(chatID, akey) {
+    getCurSoC(chatID, akey, function(err, socObj) {
         if(!err && socObj) bot.sendMessage(chatID, language.translate('TELEGRAM_SOC', socObj.lng) + ' ' + socObj.curSoC + '%');
         else bot.sendMessage(chatID, language.translate('TELEGRAM_SOC_ERROR', ((socObj)? socObj.lng : 'en')));
     });
@@ -114,8 +115,13 @@ exports.startBot = function() {
 
     // current soc listener
     bot.onText(/\/soc/, function(msg, match) {
-        sendSoCMessage(msg.chat.id);
+        if(match.input === '/soc') sendSoCMessage(msg.chat.id); // only listen for direct /soc commands
     });
+    // soc listener for specific connected akey
+    bot.onText(/\/soc (.+)/, function(msg, match) {
+        sendSoCMessage(msg.chat.id, match[1]);
+    });
+    // soc listener text based messages
     bot.onText(/ladezustand/i, function(msg, match) {
         sendSoCMessage(msg.chat.id);
     });

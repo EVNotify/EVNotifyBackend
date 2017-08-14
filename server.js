@@ -4,10 +4,10 @@ var express = require('express'),
     fs = require('fs'),
     cors = require('cors'),
     https = require('https'),
-    httpsServer = https.createServer({
+    httpsServer = ((srv_config.DEBUG)? false : https.createServer({
         ca: fs.readFileSync(srv_config.CHAIN_PATH, 'utf8'),
         key: fs.readFileSync(srv_config.PRIVATE_KEY_PATH, 'utf8'),
-        cert : fs.readFileSync(srv_config.CERTIFICATE_PATH, 'utf8')}, app),
+        cert : fs.readFileSync(srv_config.CERTIFICATE_PATH, 'utf8')}, app)),
     bodyParser = require('body-parser'),
     user = require('./user'),
     telegram = require('./notification/telegram/'),
@@ -52,6 +52,8 @@ app.listen(srv_config.PORT, function () {
 });
 
 // listen on https port
-httpsServer.listen(srv_config.HTTPS_PORT, function() {
-    console.log('Server listening on https port ' + srv_config.HTTPS_PORT);
-});
+if(httpsServer) {
+    httpsServer.listen(srv_config.HTTPS_PORT, function() {
+        console.log('Server listening on https port ' + srv_config.HTTPS_PORT);
+    });
+}
