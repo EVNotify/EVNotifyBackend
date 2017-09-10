@@ -83,6 +83,10 @@ function sendSoCMessage(chatID, akey) {
  * Function which starts the telegram bot and listen for incoming messages
  */
 exports.startBot = function() {
+    // start listener
+    bot.onText(/\/start/, function(msg, match) {
+        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_START_TEXT', 'en')); // currently only in english
+    });
     // help listener
     bot.onText(/\/help/, function(msg, match) {
         bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_HELP_TEXT', 'en')); // currently only in english
