@@ -10,7 +10,8 @@
     "mysql": "^2.13.0",
     "node-telegram-bot-api": "^0.27.1",
     "nodemailer": "^4.0.1",
-    "password-hash": "^1.2.2"
+    "password-hash": "^1.2.2",
+    "rollbar": "^2.2.7"
   },
   "devDependencies": {},
   "scripts": {

@@ -4,6 +4,13 @@ var express = require('express'),
     fs = require('fs'),
     cors = require('cors'),
     https = require('https'),
+    Rollbar = require("rollbar"),
+    rollbar = new Rollbar({
+        accessToken: srv_config.ROLLBAR_TOKEN,
+        captureUncaught: true,
+        environment: ((srv_config.DEBUG)? 'development' : 'production'),
+        captureUnhandledRejections: true
+    });
     httpsServer = ((srv_config.DEBUG)? false : https.createServer({
         ca: fs.readFileSync(srv_config.CHAIN_PATH, 'utf8'),
         key: fs.readFileSync(srv_config.PRIVATE_KEY_PATH, 'utf8'),
@@ -41,6 +48,15 @@ app.use(function(req, res) {
      * will be declined and connection will not be established correctly
      */
     res.status(200).json({message: 'Unknown operation. Unable to handle request', error: 404});
+});
+
+// error handler
+app.use(rollbar.errorHandler());
+app.use(function onError(err, req, res, next) {
+    res.status(500).json({
+        message: 'Internal server occured while processing your request. It has been automatically reported and will be fixed as soon as possible.',
+        error: 500
+    });
 });
 
 // start telegram bot
