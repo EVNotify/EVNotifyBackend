@@ -10,7 +10,7 @@ var express = require('express'),
         captureUncaught: true,
         environment: ((srv_config.DEBUG)? 'development' : 'production'),
         captureUnhandledRejections: true
-    });
+    }),
     httpsServer = ((srv_config.DEBUG)? false : https.createServer({
         ca: fs.readFileSync(srv_config.CHAIN_PATH, 'utf8'),
         key: fs.readFileSync(srv_config.PRIVATE_KEY_PATH, 'utf8'),
