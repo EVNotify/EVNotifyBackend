@@ -6,7 +6,7 @@ var express = require('express'),
     language = require('./../../translation'),
     bot = new TelegramBot(srv_config.TELEGRAM_TOKEN, {polling: true}),
     opts = {reply_markup: JSON.stringify({force_reply: true})};
-    db = mysql.createConnection({
+    db = mysql.createPool({
         host     : srv_config.DB_HOST,
         user     : srv_config.DB_USER,
         password : srv_config.DB_PW,

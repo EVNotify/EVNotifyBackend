@@ -3,7 +3,7 @@ var passwordHash = require('password-hash'),
     encryption = require('./../encryption/'),
     srv_config = require('./../srv_config.json'),
     mysql = require('mysql'),
-    db = mysql.createConnection({
+    db = mysql.createPool({
         host     : srv_config.DB_HOST,
         user     : srv_config.DB_USER,
         password : srv_config.DB_PW,
