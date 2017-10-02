@@ -18,6 +18,7 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     user = require('./user'),
     telegram = require('./notification/telegram/'),
+    stations = require('./charging/stations/'),
     notification = require('./notification');
 
 // required for parsing JSON
@@ -38,6 +39,7 @@ app.post('/settings', user.settings);           // function to get and set the a
 app.post('/notification', notification.send);   // function to send all notifications to account
 app.post('/sync', user.sync);                   // function to sync data to allow fetching or setting the settings for multiple devices
 app.post('/syncsoc', user.syncSoC);             // function to sync the soc only (only setting the soc to decrease data usage)
+app.post('/getstations', stations.getStations); // function to get charging stations based on given area and filters
 
 // request function not found
 app.use(function(req, res) {
