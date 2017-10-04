@@ -44,6 +44,17 @@ exports.key = function(req, res) {
         else res.status(409).json({message: 'AKey creation failed', error: err});
     });
 };
+/**
+ * checks if a password is invalid
+ * @param {String} password the password to check
+ * @return {String | false} false if the password is valid, else a string containing the error message
+ */
+function isInvalidPassword(password) {
+    if (password.length < 6) {
+        return "The password must be at least 6 characters.";
+    }
+    return false;
+}
 
 /**
  * Function which creates an account for specified akey and generates token
@@ -53,6 +64,11 @@ exports.key = function(req, res) {
  * @return {Object|Error}      object which contains the generated random token or error information
  */
 function register(akey, password, callback) {
+    var invalidPassword = isInvalidPassword(password);
+    if (invalidPassword) {
+        return callback(invalidPassword);
+    }
+
     // generate password hash and create random token
     var generatedPW = passwordHash.generate(password, {algorithm: 'sha512'}),
         randomToken = crypto.randomBytes(10).toString('hex');
@@ -149,6 +165,11 @@ exports.login = function(req, res){
  * @return {Boolean|Error}               returns the state of success and in case of error an error object
  */
 function changePW(akey, token, oldPassword, newpassword, callback) {
+    var invalidPassword = isInvalidPassword(newpassword);
+    if (invalidPassword) {
+        return callback(invalidPassword);
+    }
+
     // check credentials
     login(akey, oldPassword, function(err, loginRes) {
         if(!err && loginRes) {
