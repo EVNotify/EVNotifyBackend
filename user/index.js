@@ -220,7 +220,7 @@ function getSettings(akey, callback) {
 
     db.query(sql, function(err, queryRes) {
         if(!err && queryRes && queryRes[0]) queryRes[0].email = encryption.decrypt(((queryRes[0].email)? queryRes[0].email : ''));  // decrypt mail
-        callback(err, ((err)? null : queryRes[0]));
+        callback(err, ((err)? null : ((queryRes && queryRes[0])? queryRes[0] : null)));
     });
 }
 
@@ -341,7 +341,7 @@ function validateToken(akey, token, callback) {
 
     // validate token
     db.query(sql, function(err, queryRes) {
-        callback(err, ((err)? false : ((queryRes[0].token === token)? true : false)));   // whether or not the token is equal
+        callback(err, ((err)? false : ((queryRes && queryRes[0] && queryRes[0].token === token)? true : false)));   // whether or not the token is equal
     });
 }
 
@@ -359,7 +359,7 @@ function hasSyncOn(akey, token, callback) {
             var sql = mysql.format('SELECT autoSync FROM accounts WHERE token=?', [token]);
 
             db.query(sql, function(err, queryRes) {
-                callback(err, ((err)? false : ((queryRes[0].autoSync)? true : false)));
+                callback(err, ((err)? false : ((queryRes && queryRes[0] && queryRes[0].autoSync)? true : false)));
             });
         } else callback(err, null);
     });
