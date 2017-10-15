@@ -38,3 +38,40 @@ exports.getStations = function(req, res) {
         });
     } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
 };
+
+/**
+ * Function which retrieves detailed information for given station
+ * @param  {Integer}   id       the station id
+ * @param  {Function} callback  callback function
+ * @return {void}
+ */
+function getStation(id, callback) {
+    request({
+        uri: srv_config.STATIONS_API_URL + '&ge_id=' + id,
+        method: 'GET',
+        timeout: 10000,
+        followRedirect: true,
+        maxRedirects: 10
+    }, function(err, resp, body) {
+        try {
+            callback(err, ((err)? null : JSON.parse(body)));
+        } catch (e) {
+            callback(500, null);
+        }
+    });
+}
+
+/**
+ * getStation request handler
+ * @param  {ServerRequest} req  ServerRequest
+ * @param  {ServerResponse} res ServerResponse
+ * @return {ServerResponse}
+ */
+exports.getStation = function(req, res) {
+    // check params
+    if(typeof req.body !== 'undefined' && req.body.id) {
+        getStation(req.body.id, function(err, stationRes) {
+            res.json({err: err, station: stationRes});
+        });
+    } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
+};
