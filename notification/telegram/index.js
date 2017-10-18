@@ -6,7 +6,7 @@ var express = require('express'),
     language = require('./../../translation'),
     bot = new TelegramBot(srv_config.TELEGRAM_TOKEN, {polling: true}),
     opts = {reply_markup: JSON.stringify({force_reply: true})};
-    db = mysql.createConnection({
+    db = mysql.createPool({
         host     : srv_config.DB_HOST,
         user     : srv_config.DB_USER,
         password : srv_config.DB_PW,
@@ -47,16 +47,51 @@ function removeSubscribtion(userID, callback) {
         db.query(sql, function(err, queryRes) {
             callback(err, ((err)? false : true));
         });
-    } else callback('Unknown user', false);
+    } else callback('Missing user', false);
+}
+
+/**
+ * Function which fetches information about last submitted current state of charge
+ * to inform user about it.
+ * NOTE: requires autoSync property turned on
+ * @param  {Integer}   userID   the telegram user id to get the current state of charge
+ * @param  {Function} callback  callback function
+ */
+function getCurSoC(userID, akey, callback) {
+    if(userID) {
+        var sqlCMD = 'SELECT autoSync, curSoC, lng FROM accounts WHERE telegram=?' + ((akey)? ' AND akey=?' : ''),
+            sql = mysql.format(sqlCMD, ((akey)? [userID, akey] : [userID]));
+
+        db.query(sql, function(err, queryRes) {
+            if(!err && queryRes && queryRes[0]) {
+                var syncEnabled = ((queryRes[0].autoSync)? true : false);   // determine if sync enabled to inform user and return curSoc or error
+
+                callback(((syncEnabled)? null : 'Sync not enabled'), ((syncEnabled)? queryRes[0] : false));
+            } else callback(err, false);
+        });
+    } else callback('Missing user', false);
+}
+
+function sendSoCMessage(chatID, akey) {
+    getCurSoC(chatID, akey, function(err, socObj) {
+        if(!err && socObj) bot.sendMessage(chatID, language.translate('TELEGRAM_SOC', socObj.lng) + ' ' + socObj.curSoC + '%');
+        else bot.sendMessage(chatID, language.translate('TELEGRAM_SOC_ERROR', ((socObj)? socObj.lng : 'en')));
+    });
 }
 
 /**
  * Function which starts the telegram bot and listen for incoming messages
  */
 exports.startBot = function() {
+    // start listener
+    bot.onText(/\/start\W*(\w+)?/i, function(msg, match) {
+        var lng = match[1] || 'en';
+        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_START_TEXT', lng, true));
+    });
     // help listener
-    bot.onText(/\/help/, function(msg, match) {
-        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_HELP_TEXT', 'en')); // currently only in english
+    bot.onText(/\/help\W*(\w+)?/i, function(msg, match) {
+        var lng = match[1] || 'en';
+        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_HELP_TEXT', lng, true));
     });
 
     // subscribe listener
@@ -82,6 +117,22 @@ exports.startBot = function() {
             if(!err && unsubscribed) bot.sendMessage(chatID, language.translate('TELEGRAM_UNSUBSCRIBTION_SUCCESSFULL', 'en'));
             else bot.sendMessage(chatID, language.translate('TELEGRAM_UNSUBSCRIBTION_FAILED', 'en'));
         });
+    });
+
+    // current soc listener
+    bot.onText(/\/soc/, function(msg, match) {
+        if(match.input === '/soc') sendSoCMessage(msg.chat.id); // only listen for direct /soc commands
+    });
+    // soc listener for specific connected akey
+    bot.onText(/\/soc (.+)/, function(msg, match) {
+        sendSoCMessage(msg.chat.id, match[1]);
+    });
+    // soc listener text based messages
+    bot.onText(/ladezustand/i, function(msg, match) {
+        sendSoCMessage(msg.chat.id);
+    });
+    bot.onText(/state of charge/i, function(msg, match) {
+        sendSoCMessage(msg.chat.id);
     });
 };
 
