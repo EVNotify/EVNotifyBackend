@@ -86,12 +86,12 @@ exports.startBot = function() {
     // start listener
     bot.onText(/\/start\W*(\w+)?/i, function(msg, match) {
         var lng = match[1] || 'en';
-        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_START_TEXT', lang, true));
+        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_START_TEXT', lng, true));
     });
     // help listener
     bot.onText(/\/help\W*(\w+)?/i, function(msg, match) {
         var lng = match[1] || 'en';
-        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_HELP_TEXT', lang, true));
+        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_HELP_TEXT', lng, true));
     });
 
     // subscribe listener
