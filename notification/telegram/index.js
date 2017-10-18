@@ -84,12 +84,15 @@ function sendSoCMessage(chatID, akey) {
  */
 exports.startBot = function() {
     // start listener
-    bot.onText(/\/start/, function(msg, match) {
-        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_START_TEXT', 'en')); // currently only in english
+    bot.onText(/\/start\W*(\w+)?/, function(msg, match) {
+        var lang = match[1] || 'en';
+        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_START_TEXT', lang));
     });
     // help listener
-    bot.onText(/\/help/, function(msg, match) {
-        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_HELP_TEXT', 'en')); // currently only in english
+    bot.onText(/\/help\W*(\w+)?/, function(msg, match) {
+        console.log(match);
+        var lang = match[1] || 'en';
+        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_HELP_TEXT', lang));
     });
 
     // subscribe listener
