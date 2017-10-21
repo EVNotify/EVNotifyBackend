@@ -10,7 +10,8 @@ var srv_config = require('./../../srv_config.json'),
  */
 function getStations(latLng, radius, callback) {
     request({
-        uri: srv_config.STATIONS_API_URL + '&lat=' + latLng.lat + '&lng=' + latLng.lng + '&radius=' + ((radius)? radius : 10) + '&orderby=distance',
+        uri: srv_config.GE_API_URL + '/chargepoints/' + srv_config.GE_API_KEY +
+            '&lat=' + latLng.lat + '&lng=' + latLng.lng + '&radius=' + ((radius)? radius : 10) + '&orderby=distance',
         method: 'GET',
         timeout: 10000,
         followRedirect: true,
@@ -47,7 +48,7 @@ exports.getStations = function(req, res) {
  */
 function getStation(id, callback) {
     request({
-        uri: srv_config.STATIONS_API_URL + '&ge_id=' + id,
+        uri: srv_config.GE_API_URL + '/chargepoints/' + srv_config.GE_API_KEY + '&ge_id=' + id,
         method: 'GET',
         timeout: 10000,
         followRedirect: true,
