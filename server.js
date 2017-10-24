@@ -42,6 +42,7 @@ app.post('/syncsoc', user.syncSoC);             // function to sync the soc only
 app.post('/getstations', stations.getStations); // function to get charging stations based on given area and filters
 app.post('/getstation', stations.getStation);   // function to get detailed information about specified station
 app.post('/getstationphoto', stations.getStationPhoto); // function to retrieve photo for given station photo id
+app.post('/getstationcards', stations.getStationCards); // function to retrieve list of available cards
 
 // request function not found
 app.use(function(req, res) {

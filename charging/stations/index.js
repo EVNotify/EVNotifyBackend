@@ -106,3 +106,36 @@ exports.getStationPhoto = function(req, res) {
         getStationPhoto(req.body.id, res);
     } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
 };
+
+/**
+ * Function which retrieves list of available chargings cards
+ * @param  {Function} callback  callback function
+ * @return {void}
+ */
+function getStationCards(callback) {
+    request({
+        uri: srv_config.GE_API_URL + '/chargepoints/chargecardlist/' + srv_config.GE_API_KEY,
+        method: 'GET',
+        timeout: 10000,
+        followRedirect: true,
+        maxRedirects: 10
+    }, function(err, resp, body) {
+        try {
+            callback(err, ((err)? null : JSON.parse(body)));
+        } catch (e) {
+            callback(500, null);
+        }
+    });
+}
+
+/**
+ * getStationCards request handler
+ * @param  {ServerRequest} req  ServerRequest
+ * @param  {ServerResponse} res ServerResponse
+ * @return {ServerResponse}
+ */
+exports.getStationCards = function(req, res) {
+    getStationCards(function(err, cardsRes) {
+        res.json({err: err, cards: cardsRes});
+    });
+};
