@@ -40,6 +40,9 @@ app.post('/notification', notification.send);   // function to send all notifica
 app.post('/sync', user.sync);                   // function to sync data to allow fetching or setting the settings for multiple devices
 app.post('/syncsoc', user.syncSoC);             // function to sync the soc only (only setting the soc to decrease data usage)
 app.post('/getstations', stations.getStations); // function to get charging stations based on given area and filters
+app.post('/getstation', stations.getStation);   // function to get detailed information about specified station
+app.post('/getstationphoto', stations.getStationPhoto); // function to retrieve photo for given station photo id
+app.post('/getstationcards', stations.getStationCards); // function to retrieve list of available cards
 
 // request function not found
 app.use(function(req, res) {
