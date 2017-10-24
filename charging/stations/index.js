@@ -76,3 +76,33 @@ exports.getStation = function(req, res) {
         });
     } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
 };
+
+/**
+ * Function which retrieves and streams the station photo of given id
+ * @param  {Integer} id         the station photo id to retrieve
+ * @param  {ServerResponse} res the ServerResponse
+ * @return {ServerResponse}
+ */
+function getStationPhoto(id, res) {
+    request({
+        uri: srv_config.GE_API_URL + '/chargepoints/photo/' + srv_config.GE_API_KEY + '&id=' + id,
+        method: 'GET',
+        timeout: 10000,
+        followRedirect: true,
+        maxRedirects: 10,
+        headers: {'content-type': 'image/jpeg'}
+    }).pipe(res);
+}
+
+/**
+ * getStationPhoto request handler
+ * @param  {ServerRequest} req  ServerRequest
+ * @param  {ServerResponse} res ServerResponse
+ * @return {ServerResponse}
+ */
+exports.getStationPhoto = function(req, res) {
+    // check params
+    if(typeof req.body !== 'undefined' && req.body.id) {
+        getStationPhoto(req.body.id, res);
+    } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
+};

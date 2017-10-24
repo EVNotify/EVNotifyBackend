@@ -41,6 +41,7 @@ app.post('/sync', user.sync);                   // function to sync data to allo
 app.post('/syncsoc', user.syncSoC);             // function to sync the soc only (only setting the soc to decrease data usage)
 app.post('/getstations', stations.getStations); // function to get charging stations based on given area and filters
 app.post('/getstation', stations.getStation);   // function to get detailed information about specified station
+app.post('/getstationphoto', stations.getStationPhoto); // function to retrieve photo for given station photo id
 
 // request function not found
 app.use(function(req, res) {
