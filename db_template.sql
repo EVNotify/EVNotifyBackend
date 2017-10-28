@@ -17,5 +17,5 @@ CREATE TABLE IF NOT EXISTS `settings` (
     `polling` INT(4) DEFAULT 30,
     `autoSync` INT(4) DEFAULT 30,
     PRIMARY KEY (`user`),
-    FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`),
+    FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
 );
