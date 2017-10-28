@@ -1,9 +1,11 @@
+-- accounts table structure
 CREATE TABLE IF NOT EXISTS `accounts` (
     `akey` VARCHAR(6) NOT NULL PRIMARY KEY,
     `pw_hash` VARCHAR(255) NOT NULL,
     `token` VARCHAR(20) NOT NULL UNIQUE
 );
 
+-- settings table structure
 CREATE TABLE IF NOT EXISTS `settings` (
     `user` VARCHAR(6) NOT NULL,
     `akey` VARCHAR(6) NOT NULL,
@@ -18,4 +20,12 @@ CREATE TABLE IF NOT EXISTS `settings` (
     `autoSync` INT(4) DEFAULT 30,
     PRIMARY KEY (`user`),
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
+);
+
+-- debug table structure
+CREATE TABLE IF NOT EXISTS `debug` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `data` MEDIUMTEXT DEFAULT NULL,
+    `timestamp` int(10) DEFAULT 0,
+    PRIMARY KEY (`id`)
 );
