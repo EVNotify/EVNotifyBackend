@@ -8,12 +8,7 @@ var express = require('express'),
     telegram = require('./telegram/'),
     // push = require('./push/'),
     mysql = require('mysql'),
-    db = mysql.createPool({
-        host     : srv_config.DB_HOST,
-        user     : srv_config.DB_USER,
-        password : srv_config.DB_PW,
-        database : srv_config.DB_DB
-    });
+    db = require('./../db/').getPool();
 
 /**
  * notification send handler

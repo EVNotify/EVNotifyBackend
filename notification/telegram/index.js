@@ -3,15 +3,10 @@ var express = require('express'),
     srv_config = require('./../../srv_config.json'),
     TelegramBot = require('node-telegram-bot-api'),
     mysql = require('mysql'),
-    language = require('./../../translation'),
+    language = require('./../../translation/'),
     bot = new TelegramBot(srv_config.TELEGRAM_TOKEN, {polling: true}),
     opts = {reply_markup: JSON.stringify({force_reply: true})};
-    db = mysql.createPool({
-        host     : srv_config.DB_HOST,
-        user     : srv_config.DB_USER,
-        password : srv_config.DB_PW,
-        database : srv_config.DB_DB
-    });;
+    db = require('./../../db/').getPool();
 
 /**
  * Function whichs registers the telegram user id for the account so user will receive notifications in future
