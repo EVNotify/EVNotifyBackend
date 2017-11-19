@@ -5,8 +5,11 @@
   "main": "server.js",
   "dependencies": {
     "body-parser": "^1.17.2",
+    "chai": "^4.1.2",
+    "chai-http": "^3.0.0",
     "cors": "^2.8.4",
     "express": "^4.15.3",
+    "mocha": "^4.0.1",
     "mysql": "^2.13.0",
     "node-telegram-bot-api": "^0.27.1",
     "nodemailer": "^4.0.1",
