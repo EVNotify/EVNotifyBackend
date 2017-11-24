@@ -4,7 +4,7 @@ var express = require('express'),
     TelegramBot = require('node-telegram-bot-api'),
     mysql = require('mysql'),
     language = require('./../../translation/'),
-    bot = new TelegramBot(srv_config.TELEGRAM_TOKEN, {polling: true}),
+    bot = ((!srv_config.TELEGRAM_TOKEN)? false : new TelegramBot(srv_config.TELEGRAM_TOKEN, {polling: true})),
     opts = {reply_markup: JSON.stringify({force_reply: true})};
     db = require('./../../db/').getPool();
 
@@ -78,55 +78,57 @@ function sendSoCMessage(chatID, akey) {
  * Function which starts the telegram bot and listen for incoming messages
  */
 exports.startBot = function() {
-    // start listener
-    bot.onText(/\/start/, function(msg, match) {
-        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_START_TEXT', 'en')); // currently only in english
-    });
-    // help listener
-    bot.onText(/\/help/, function(msg, match) {
-        bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_HELP_TEXT', 'en')); // currently only in english
-    });
+    if(bot) {
+        // start listener
+        bot.onText(/\/start/, function(msg, match) {
+            bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_START_TEXT', 'en')); // currently only in english
+        });
+        // help listener
+        bot.onText(/\/help/, function(msg, match) {
+            bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_HELP_TEXT', 'en')); // currently only in english
+        });
 
-    // subscribe listener
-    bot.onText(/\/subscribe/, function(msg, match) {
-        var chatID = msg.chat.id;
+        // subscribe listener
+        bot.onText(/\/subscribe/, function(msg, match) {
+            var chatID = msg.chat.id;
 
-        // ask for token and add subscribtion for the account
-        bot.sendMessage(chatID, language.translate('TELEGRAM_TOKEN_ENTER', 'en'), opts).then(function(sent) {
-            bot.onReplyToMessage(chatID, sent.message_id, function(response) {
-                addSubscribtion(chatID, response.text, function(err, subscribed) {
-                    if(!err && subscribed) bot.sendMessage(chatID, language.translate('TELEGRAM_SUBSCRIBTION_SUCCESSFULL', 'en'));
-                    else bot.sendMessage(chatID, language.translate('TELEGRAM_SUBSCRIBTION_FAILED', 'en'));
+            // ask for token and add subscribtion for the account
+            bot.sendMessage(chatID, language.translate('TELEGRAM_TOKEN_ENTER', 'en'), opts).then(function(sent) {
+                bot.onReplyToMessage(chatID, sent.message_id, function(response) {
+                    addSubscribtion(chatID, response.text, function(err, subscribed) {
+                        if(!err && subscribed) bot.sendMessage(chatID, language.translate('TELEGRAM_SUBSCRIBTION_SUCCESSFULL', 'en'));
+                        else bot.sendMessage(chatID, language.translate('TELEGRAM_SUBSCRIBTION_FAILED', 'en'));
+                    });
                 });
             });
         });
-    });
 
-    // unsubscribe listener
-    bot.onText(/\/unsubscribe/, function(msg, match) {
-        var chatID = msg.chat.id;
+        // unsubscribe listener
+        bot.onText(/\/unsubscribe/, function(msg, match) {
+            var chatID = msg.chat.id;
 
-        removeSubscribtion(chatID, function(err, unsubscribed) {
-            if(!err && unsubscribed) bot.sendMessage(chatID, language.translate('TELEGRAM_UNSUBSCRIBTION_SUCCESSFULL', 'en'));
-            else bot.sendMessage(chatID, language.translate('TELEGRAM_UNSUBSCRIBTION_FAILED', 'en'));
+            removeSubscribtion(chatID, function(err, unsubscribed) {
+                if(!err && unsubscribed) bot.sendMessage(chatID, language.translate('TELEGRAM_UNSUBSCRIBTION_SUCCESSFULL', 'en'));
+                else bot.sendMessage(chatID, language.translate('TELEGRAM_UNSUBSCRIBTION_FAILED', 'en'));
+            });
         });
-    });
 
-    // current soc listener
-    bot.onText(/\/soc/, function(msg, match) {
-        if(match.input === '/soc') sendSoCMessage(msg.chat.id); // only listen for direct /soc commands
-    });
-    // soc listener for specific connected akey
-    bot.onText(/\/soc (.+)/, function(msg, match) {
-        sendSoCMessage(msg.chat.id, match[1]);
-    });
-    // soc listener text based messages
-    bot.onText(/ladezustand/i, function(msg, match) {
-        sendSoCMessage(msg.chat.id);
-    });
-    bot.onText(/state of charge/i, function(msg, match) {
-        sendSoCMessage(msg.chat.id);
-    });
+        // current soc listener
+        bot.onText(/\/soc/, function(msg, match) {
+            if(match.input === '/soc') sendSoCMessage(msg.chat.id); // only listen for direct /soc commands
+        });
+        // soc listener for specific connected akey
+        bot.onText(/\/soc (.+)/, function(msg, match) {
+            sendSoCMessage(msg.chat.id, match[1]);
+        });
+        // soc listener text based messages
+        bot.onText(/ladezustand/i, function(msg, match) {
+            sendSoCMessage(msg.chat.id);
+        });
+        bot.onText(/state of charge/i, function(msg, match) {
+            sendSoCMessage(msg.chat.id);
+        });
+    }
 };
 
 /**
@@ -137,5 +139,9 @@ exports.startBot = function() {
  *                          if this param is not set/false, the success notification will be sent
  */
 exports.sendMessage = function(userID, lng, error) {
-    bot.sendMessage(userID, ((error)? language.translate('TELEGRAM_NOTIFICATION_ERROR_MESSAGE', lng) : language.translate('TELEGRAM_NOTIFICATION_MESSAGE', lng)));
+    if(bot) {
+        bot.sendMessage(userID,
+            ((error)? language.translate('TELEGRAM_NOTIFICATION_ERROR_MESSAGE', lng) : language.translate('TELEGRAM_NOTIFICATION_MESSAGE', lng))
+        );
+    }
 };
