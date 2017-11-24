@@ -17,7 +17,7 @@ var express = require('express'),
         cert : fs.readFileSync(srv_config.CERTIFICATE_PATH, 'utf8')}, app)),
     bodyParser = require('body-parser'),
     user = require('./user'),
-    telegram = require('./notification/telegram/'),
+    telegram = ((!srv_config.TELEGRAM_TOKEN)? false : require('./notification/telegram/')),
     stations = require('./charging/stations/'),
     notification = require('./notification');
 
@@ -56,7 +56,7 @@ app.use(function(req, res) {
 });
 
 // error handler
-app.use(rollbar.errorHandler());
+if(rollbar) app.use(rollbar.errorHandler());
 app.use(function onError(err, req, res, next) {
     res.status(500).json({
         message: 'Internal server occured while processing your request. It has been automatically reported and will be fixed as soon as possible.',
@@ -65,7 +65,7 @@ app.use(function onError(err, req, res, next) {
 });
 
 // start telegram bot
-telegram.startBot();
+if(telegram) telegram.startBot();
 
 // listen on port
 app.listen(srv_config.PORT, function () {
