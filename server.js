@@ -5,12 +5,12 @@ var express = require('express'),
     cors = require('cors'),
     https = require('https'),
     Rollbar = require("rollbar"),
-    rollbar = new Rollbar({
+    rollbar = ((!srv_config.ROLLBAR_TOKEN)? false : new Rollbar({
         accessToken: srv_config.ROLLBAR_TOKEN,
         captureUncaught: true,
         environment: ((srv_config.DEBUG)? 'development' : 'production'),
         captureUnhandledRejections: true
-    }),
+    })),
     httpsServer = ((srv_config.DEBUG)? false : https.createServer({
         ca: fs.readFileSync(srv_config.CHAIN_PATH, 'utf8'),
         key: fs.readFileSync(srv_config.PRIVATE_KEY_PATH, 'utf8'),

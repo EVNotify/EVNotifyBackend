@@ -2,5 +2,10 @@ language: node_js
 node_js:
   - "node"
   - "8"
+before_install:
+  - npm install
+script:
+  - node server.js &
+  - npm test
 services:
   - mysql
