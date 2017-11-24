@@ -56,13 +56,19 @@ app.use(function(req, res) {
 });
 
 // error handler
-if(rollbar) app.use(rollbar.errorHandler());
 app.use(function onError(err, req, res, next) {
-    res.status(500).json({
-        message: 'Internal server occured while processing your request. It has been automatically reported and will be fixed as soon as possible.',
-        error: 500
-    });
+    // determine critical error (so they will be reported to Rollbar)
+    if(err && err.status !== 500) {
+        res.status(err.status).send('Request could not be processed');
+    } else {
+        res.status(500).json({
+            message: 'Internal server occured while processing your request. It has been automatically reported and will be fixed as soon as possible.',
+            error: 500
+        });
+        next(err);
+    }
 });
+if(rollbar) app.use(rollbar.errorHandler());
 
 // start telegram bot
 if(telegram) telegram.startBot();
