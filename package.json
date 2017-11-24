@@ -19,7 +19,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "/bin/bash createEnv.sh && mocha tests/*",
+    "prepare": "/bin/bash createEnv.sh",
+    "test": "mocha tests/*",
     "start": "node server.js"
   },
   "repository": {
