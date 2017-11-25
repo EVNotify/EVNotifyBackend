@@ -372,3 +372,122 @@ describe('password change request', function() {
         });
     });
 });
+
+/**
+ * test for getSettings request
+ */
+describe('getSettings request', function() {
+    /**
+     * getSettings with missing parameters
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('getSettings with missing parameters', function(done) {
+        chai.request(RESTURL).post('settings').end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(422);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal(422);
+            res.body.should.have.property('message').equal('Missing parameters. Unable to handle request');
+            done();
+        });
+    });
+
+    /**
+     * getSettings with wrong credentials
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('getSettings with invalid credentials', function(done) {
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST', option: 'GET'
+        }).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(409);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal('invalid credentials');
+            res.body.should.have.property('message').equal('Login failed');
+            done();
+        });
+    });
+
+    /**
+     * getSettings with valid credentials, but with an invalid token
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('getSettings with invalid token', function(done) {
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: 'INVALID', password: 'SYSTEMTEST2', option: 'GET'
+        }).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(401);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal(401);
+            res.body.should.have.property('message').equal('Unauthorized');
+            done();
+        });
+    });
+
+    /**
+     * getSettings with valid credentials and token, but invalid option
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('getSettings with invalid option', function(done) {
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'INVALID'
+        }).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(422);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal(422);
+            res.body.should.have.property('message').equal('Missing parameters. Unable to handle request');
+            done();
+        });
+    });
+
+    /**
+     * getSettings with valid credentials, token and option to check if all required properties will be transmitted
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('getSettings with valid credentials and option', function(done) {
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'GET'
+        }).end(function(err, res) {
+            should.not.exist(err);
+            should.exist(res);
+            res.should.have.status(200);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.not.have.property('error');
+            res.body.should.have.property('message').equal('Get settings succeeded');
+            res.body.should.have.property('settings');
+            res.body.settings.should.be.an('object');
+            res.body.settings.should.have.property('email');
+            res.body.settings.should.have.property('telegram');
+            res.body.settings.should.have.property('soc');
+            res.body.settings.should.have.property('curSoC');
+            res.body.settings.should.have.property('device');
+            res.body.settings.should.have.property('polling');
+            res.body.settings.should.have.property('autoSync');
+            res.body.settings.should.have.property('lng');
+            res.body.settings.should.have.property('push');
+            done();
+        });
+    });
+});

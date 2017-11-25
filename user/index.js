@@ -278,7 +278,7 @@ exports.settings = function(req, res) {
                         });
                     } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
                 } else res.status(401).json({message: 'Unauthorized', error: 401});
-            } else res.status(409).json({message: 'Login failed: ', error: err});
+            } else res.status(409).json({message: 'Login failed', error: err});
         });
     } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
 };
