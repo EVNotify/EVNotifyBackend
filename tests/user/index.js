@@ -5,7 +5,18 @@ var chai = require('chai'),
     should = chai.should(),
     registeredAkey = false,
     unRegisteredAkey = false,
-    registeredToken = false;
+    registeredToken = false,
+    optionObj = {
+        email: 'EMAIL',
+        telegram: 1234,
+        soc: 50,
+        curSoC: 20,
+        device: 'DEVICE',
+        polling: 2,
+        autoSync: 10,
+        lng: 'LNG',
+        push: 1
+    };
 
 // init chai
 chai.use(chaiHttp);
@@ -487,6 +498,167 @@ describe('getSettings request', function() {
             res.body.settings.should.have.property('autoSync');
             res.body.settings.should.have.property('lng');
             res.body.settings.should.have.property('push');
+            done();
+        });
+    });
+});
+
+/**
+ * setSettings request
+ */
+describe('setSettings request', function() {
+    /**
+     * setSettings with missing parameters
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('setSettings with missing parameters', function(done) {
+        chai.request(RESTURL).post('settings').end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(422);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal(422);
+            res.body.should.have.property('message').equal('Missing parameters. Unable to handle request');
+            done();
+        });
+    });
+
+    /**
+     * setSettings with missing option object
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('setSettings with missing option object', function(done) {
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'SET'
+        }).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(422);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal(422);
+            res.body.should.have.property('message').equal('Missing parameters. Unable to handle request');
+            done();
+        });
+    });
+
+    /**
+     * setSettings with wrong credentials
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('setSettings with invalid credentials', function(done) {
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST', option: 'SET', optionObj: optionObj
+        }).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(409);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal('invalid credentials');
+            res.body.should.have.property('message').equal('Login failed');
+            done();
+        });
+    });
+
+    /**
+     * setSettings with valid credentials, but with an invalid token
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('setSettings with invalid token', function(done) {
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: 'INVALID', password: 'SYSTEMTEST2', option: 'SET', optionObj: optionObj
+        }).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(401);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal(401);
+            res.body.should.have.property('message').equal('Unauthorized');
+            done();
+        });
+    });
+
+    /**
+     * setSettings with valid credentials and token, but invalid option
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('setSettings with invalid option', function(done) {
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'INVALID', optionObj: optionObj
+        }).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(422);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal(422);
+            res.body.should.have.property('message').equal('Missing parameters. Unable to handle request');
+            done();
+        });
+    });
+
+    /**
+     * setSettings with valid credentials, token and optionObj to apply new settings
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('setSettings with valid credentials and option to apply new settings', function(done) {
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'SET', optionObj: optionObj
+        }).end(function(err, res) {
+            should.not.exist(err);
+            should.exist(res);
+            res.should.have.status(200);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.not.have.property('error');
+            res.body.should.have.property('message').equal('Set settings succeeded');
+            done();
+        });
+    });
+
+    /**
+     * getSettings to validate previous applied settings to be stored successfully within database
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('getSettings to validate stored new settings', function(done) {
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'GET'
+        }).end(function(err, res) {
+            should.not.exist(err);
+            should.exist(res);
+            res.should.have.status(200);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.not.have.property('error');
+            res.body.should.have.property('message').equal('Get settings succeeded');
+            res.body.should.have.property('settings');
+            res.body.settings.should.be.an('object');
+            res.body.settings.should.have.property('email').equal(optionObj.email);
+            res.body.settings.should.have.property('telegram').equal(optionObj.telegram);
+            res.body.settings.should.have.property('soc').equal(optionObj.soc);
+            res.body.settings.should.have.property('curSoC').equal(optionObj.curSoC);
+            res.body.settings.should.have.property('device').equal(optionObj.device);
+            res.body.settings.should.have.property('polling').equal(optionObj.polling);
+            res.body.settings.should.have.property('autoSync').equal(optionObj.autoSync);
+            res.body.settings.should.have.property('lng').equal(optionObj.lng);
+            res.body.settings.should.have.property('push').equal(optionObj.push);
             done();
         });
     });
