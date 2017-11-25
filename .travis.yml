@@ -7,5 +7,6 @@ before_install:
 script:
   - npm run prepare
   - node server.js &
+  - npm test
 services:
   - mysql
