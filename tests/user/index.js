@@ -6,6 +6,7 @@ var chai = require('chai'),
     registeredAkey = false,
     unRegisteredAkey = false,
     registeredToken = false,
+    newRegisteredToken = false,
     optionObj = {
         email: 'EMAIL',
         telegram: 1234,
@@ -217,7 +218,7 @@ describe('login request', function() {
 });
 
 /**
- * test for password change request
+ * test for changePW request
  */
 describe('password change request', function() {
     /**
@@ -504,7 +505,7 @@ describe('getSettings request', function() {
 });
 
 /**
- * setSettings request
+ * test for setSettings request
  */
 describe('setSettings request', function() {
     /**
@@ -659,6 +660,117 @@ describe('setSettings request', function() {
             res.body.settings.should.have.property('autoSync').equal(optionObj.autoSync);
             res.body.settings.should.have.property('lng').equal(optionObj.lng);
             res.body.settings.should.have.property('push').equal(optionObj.push);
+            done();
+        });
+    });
+});
+
+/**
+ * test for renewToken request
+ */
+describe('renewToken request', function() {
+    /**
+     * renewToken with missing parameters
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('renewToken with missing parameters', function(done) {
+        chai.request(RESTURL).post('renewtoken').end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(422);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal(422);
+            res.body.should.have.property('message').equal('Missing parameters. Unable to handle request');
+            done();
+        });
+    });
+
+    /**
+     * renewToken with wrong credentials
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('renewToken with invalid credentials', function(done) {
+        chai.request(RESTURL).post('renewtoken').set('content-type', 'application/json').send({
+            akey: registeredAkey, password: 'SYSTEMTEST'
+        }).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(409);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal('invalid credentials');
+            res.body.should.have.property('message').equal('Token renewal failed');
+            done();
+        });
+    });
+
+    /**
+     * renewToken and save new token
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('renewToken, save and compare', function(done) {
+        chai.request(RESTURL).post('renewtoken').set('content-type', 'application/json').send({
+            akey: registeredAkey, password: 'SYSTEMTEST2'
+        }).end(function(err, res) {
+            should.not.exist(err);
+            should.exist(res);
+            res.should.have.status(200);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.not.have.property('error');
+            res.body.should.have.property('message').equal('Token renewed');
+            res.body.should.have.property('token').not.equal(registeredToken);
+            newRegisteredToken = res.body.token;
+            done();
+        });
+    });
+
+    /**
+     * getSettings with old, now invalid, token
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('getSettings with old token', function(done) {
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'GET'
+        }).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(401);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal(401);
+            res.body.should.have.property('message').equal('Unauthorized');
+            done();
+        });
+    });
+
+    /**
+     * getSettings with new token
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('getSettings with new token', function(done) {
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: newRegisteredToken, password: 'SYSTEMTEST2', option: 'GET'
+        }).end(function(err, res) {
+            should.not.exist(err);
+            should.exist(res);
+            res.should.have.status(200);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('message').equal('Get settings succeeded');
+            res.body.should.have.property('settings');
+            res.body.settings.should.be.an('object');
             done();
         });
     });
