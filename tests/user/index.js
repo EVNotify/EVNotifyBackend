@@ -14,10 +14,11 @@ var chai = require('chai'),
         curSoC: 20,
         device: 'DEVICE',
         polling: 2,
-        autoSync: 10,
+        autoSync: 0,
         lng: 'LNG',
         push: 1
-    };
+    },
+    syncObj = optionObj;
 
 // init chai
 chai.use(chaiHttp);
@@ -771,6 +772,262 @@ describe('renewToken request', function() {
             res.body.should.have.property('message').equal('Get settings succeeded');
             res.body.should.have.property('settings');
             res.body.settings.should.be.an('object');
+            done();
+        });
+    });
+});
+
+/**
+ * test for sync request
+ */
+describe('sync request', function() {
+    /**
+     * sync with missing parameters
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('sync with missing parameters', function(done) {
+        chai.request(RESTURL).post('sync').end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(422);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal(422);
+            res.body.should.have.property('message').equal('Missing parameters. Unable to handle request');
+            done();
+        });
+    });
+
+    /**
+     * sync with wrong sync mode type
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('sync with wrong type', function(done) {
+        chai.request(RESTURL).post('sync').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: newRegisteredToken, type: 'INVALI'
+        }).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(422);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal(422);
+            res.body.should.have.property('message').equal('Missing parameters. Unable to handle request');
+            done();
+        });
+    });
+
+    /**
+     * sync with mode PUSH, but missing sync object
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('sync (push mode) with missing syncObj', function(done) {
+        chai.request(RESTURL).post('sync').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: newRegisteredToken, type: 'INVALID'
+        }).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(422);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal(422);
+            res.body.should.have.property('message').equal('Missing parameters. Unable to handle request');
+            done();
+        });
+    });
+
+    /**
+     * sync with mode PUSH, but autoSync disabled for user
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('sync (push mode) with sync disabled', function(done) {
+        chai.request(RESTURL).post('sync').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: newRegisteredToken, type: 'PUSH', syncObj: syncObj
+        }).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(409);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal(409);
+            res.body.should.have.property('message').equal('Sync not enabled');
+            done();
+        });
+    });
+
+    /**
+     * enables autoSync option
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('enable autoSync', function(done) {
+        optionObj.autoSync = 10;
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'SET', optionObj: optionObj
+        }).end(function(err, res) {
+            should.not.exist(err);
+            should.exist(res);
+            res.should.have.status(200);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.not.have.property('error');
+            res.body.should.have.property('message').equal('Set settings succeeded');
+            done();
+        });
+    });
+
+    /**
+     * sync with mode PUSH, autoSync enabled and a sync object
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('sync (push mode) with sync enabled and syncObj', function(done) {
+        syncObj.email = 'NEW_EMAIL';
+        syncObj.telegram = 4321;
+        syncObj.soc = 55;
+        syncObj.curSoC = 22;
+        syncObj.device = 'NEW_DEVICE';
+        syncObj.polling = 4;
+        syncObj.autoSync = 0;
+        syncObj.lng = 'NEW_LNG';
+        syncObj.push = 0;
+        chai.request(RESTURL).post('sync').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: newRegisteredToken, type: 'PUSH', syncObj: syncObj
+        }).end(function(err, res) {
+            should.not.exist(err);
+            should.exist(res);
+            res.should.have.status(200);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.not.have.property('error');
+            res.body.should.have.property('message').equal('Push for sync succeeded');
+            res.body.should.have.property('syncRes');
+            res.body.syncRes.should.be.an('object');
+            res.body.syncRes.should.have.property('email').equal(syncObj.email);
+            res.body.syncRes.should.have.property('telegram').equal(syncObj.telegram);
+            res.body.syncRes.should.have.property('soc').equal(syncObj.soc);
+            res.body.syncRes.should.have.property('curSoC').equal(syncObj.curSoC);
+            res.body.syncRes.should.have.property('device').equal(syncObj.device);
+            res.body.syncRes.should.have.property('polling').equal(syncObj.polling);
+            res.body.syncRes.should.have.property('autoSync').equal(syncObj.autoSync);
+            res.body.syncRes.should.have.property('lng').equal(syncObj.lng);
+            res.body.syncRes.should.have.property('push').equal(syncObj.push);
+            done();
+        });
+    });
+
+    /**
+     * Checks if synced settings are successfully stored within database
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('compare settings with synced settings', function(done) {
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: newRegisteredToken, password: 'SYSTEMTEST2', option: 'GET'
+        }).end(function(err, res) {
+            should.not.exist(err);
+            should.exist(res);
+            res.should.have.status(200);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('message').equal('Get settings succeeded');
+            res.body.should.have.property('settings');
+            res.body.settings.should.be.an('object');
+            res.body.settings.should.have.property('email').equal(syncObj.email);
+            res.body.settings.should.have.property('telegram').equal(syncObj.telegram);
+            res.body.settings.should.have.property('soc').equal(syncObj.soc);
+            res.body.settings.should.have.property('curSoC').equal(syncObj.curSoC);
+            res.body.settings.should.have.property('device').equal(syncObj.device);
+            res.body.settings.should.have.property('polling').equal(syncObj.polling);
+            res.body.settings.should.have.property('autoSync').equal(syncObj.autoSync);
+            res.body.settings.should.have.property('lng').equal(syncObj.lng);
+            res.body.settings.should.have.property('push').equal(syncObj.push);
+            done();
+        });
+    });
+
+    /**
+     * sync with mode PULL, but autoSync disabled
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('sync (pull mode) with sync disabled', function(done) {
+        chai.request(RESTURL).post('sync').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: newRegisteredToken, type: 'PULL'
+        }).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(409);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal(409);
+            res.body.should.have.property('message').equal('Sync not enabled');
+            done();
+        });
+    });
+
+    /**
+     * enables autoSync option
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('enable autoSync', function(done) {
+        syncObj.autoSync = 10;
+        chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'SET', optionObj: syncObj
+        }).end(function(err, res) {
+            should.not.exist(err);
+            should.exist(res);
+            res.should.have.status(200);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.not.have.property('error');
+            res.body.should.have.property('message').equal('Set settings succeeded');
+            done();
+        });
+    });
+
+    /**
+     * sync with mode PULL and autoSync enabled
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('sync (pull mode) with sync enabled', function(done) {
+        chai.request(RESTURL).post('sync').set('content-type', 'application/json').send({
+            akey: registeredAkey, token: newRegisteredToken, type: 'PUSH', syncObj: syncObj
+        }).end(function(err, res) {
+            should.not.exist(err);
+            should.exist(res);
+            res.should.have.status(200);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.not.have.property('error');
+            res.body.should.have.property('message').equal('Pull for sync succeeded');
+            res.body.should.have.property('syncRes');
+            res.body.syncRes.should.be.an('object');
+            res.body.syncRes.should.have.property('email').equal(syncObj.email);
+            res.body.syncRes.should.have.property('telegram').equal(syncObj.telegram);
+            res.body.syncRes.should.have.property('soc').equal(syncObj.soc);
+            res.body.syncRes.should.have.property('curSoC').equal(syncObj.curSoC);
+            res.body.syncRes.should.have.property('device').equal(syncObj.device);
+            res.body.syncRes.should.have.property('polling').equal(syncObj.polling);
+            res.body.syncRes.should.have.property('autoSync').equal(syncObj.autoSync);
+            res.body.syncRes.should.have.property('lng').equal(syncObj.lng);
+            res.body.syncRes.should.have.property('push').equal(syncObj.push);
             done();
         });
     });
