@@ -807,7 +807,7 @@ describe('sync request', function() {
      */
     it('sync with wrong type', function(done) {
         chai.request(RESTURL).post('sync').set('content-type', 'application/json').send({
-            akey: registeredAkey, token: newRegisteredToken, type: 'INVALI'
+            akey: registeredAkey, token: newRegisteredToken, type: 'INVALID'
         }).end(function(err, res) {
             should.exist(err);
             should.exist(res);
@@ -857,7 +857,7 @@ describe('sync request', function() {
             res.should.be.json;
             res.should.have.property('body');
             res.body.should.be.an('object');
-            res.body.should.have.property('error').equal(409);
+            res.body.should.have.property('error').to.be.null;
             res.body.should.have.property('message').equal('Sync not enabled');
             done();
         });
@@ -871,7 +871,7 @@ describe('sync request', function() {
     it('enable autoSync', function(done) {
         optionObj.autoSync = 10;
         chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
-            akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'SET', optionObj: optionObj
+            akey: registeredAkey, token: newRegisteredToken, password: 'SYSTEMTEST2', option: 'SET', optionObj: optionObj
         }).end(function(err, res) {
             should.not.exist(err);
             should.exist(res);
@@ -911,17 +911,7 @@ describe('sync request', function() {
             res.body.should.be.an('object');
             res.body.should.not.have.property('error');
             res.body.should.have.property('message').equal('Push for sync succeeded');
-            res.body.should.have.property('syncRes');
-            res.body.syncRes.should.be.an('object');
-            res.body.syncRes.should.have.property('email').equal(syncObj.email);
-            res.body.syncRes.should.have.property('telegram').equal(syncObj.telegram);
-            res.body.syncRes.should.have.property('soc').equal(syncObj.soc);
-            res.body.syncRes.should.have.property('curSoC').equal(syncObj.curSoC);
-            res.body.syncRes.should.have.property('device').equal(syncObj.device);
-            res.body.syncRes.should.have.property('polling').equal(syncObj.polling);
-            res.body.syncRes.should.have.property('autoSync').equal(syncObj.autoSync);
-            res.body.syncRes.should.have.property('lng').equal(syncObj.lng);
-            res.body.syncRes.should.have.property('push').equal(syncObj.push);
+            res.body.should.have.property('syncRes').to.be.true;
             done();
         });
     });
@@ -972,7 +962,7 @@ describe('sync request', function() {
             res.should.be.json;
             res.should.have.property('body');
             res.body.should.be.an('object');
-            res.body.should.have.property('error').equal(409);
+            res.body.should.have.property('error').to.be.null;
             res.body.should.have.property('message').equal('Sync not enabled');
             done();
         });
@@ -986,7 +976,7 @@ describe('sync request', function() {
     it('enable autoSync', function(done) {
         syncObj.autoSync = 10;
         chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
-            akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'SET', optionObj: syncObj
+            akey: registeredAkey, token: newRegisteredToken, password: 'SYSTEMTEST2', option: 'SET', optionObj: syncObj
         }).end(function(err, res) {
             should.not.exist(err);
             should.exist(res);
@@ -1007,7 +997,7 @@ describe('sync request', function() {
      */
     it('sync (pull mode) with sync enabled', function(done) {
         chai.request(RESTURL).post('sync').set('content-type', 'application/json').send({
-            akey: registeredAkey, token: newRegisteredToken, type: 'PUSH', syncObj: syncObj
+            akey: registeredAkey, token: newRegisteredToken, type: 'PULL'
         }).end(function(err, res) {
             should.not.exist(err);
             should.exist(res);

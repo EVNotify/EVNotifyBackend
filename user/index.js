@@ -80,7 +80,21 @@ function register(akey, password, callback) {
 
                     // save account and return required information
                     db.query(sql, function(err, queryRes) {
-                        callback(err, ((err)? null : {token: randomToken}));
+                        if(!err) {
+                            // link required settings table
+                            sql = mysql.format('INSERT INTO settings (user, akey) VALUES (?, ?)', [akey, akey]);
+
+                            db.query(sql, function(err, queryRes) {
+                                if(!err) {
+                                    // link required stats table
+                                    sql = mysql.format('INSERT INTO stats (user, akey) VALUES (?, ?)', [akey, akey]);
+
+                                    db.query(sql, function(err, queryRes) {
+                                        callback(err, ((err)? null : {token: randomToken}));
+                                    });
+                                } else callback(err, null);
+                            });
+                        } else callback(err, null);
                     });
                 }
             } else callback(err, null);
@@ -211,11 +225,12 @@ exports.password = function(req, res) {
  * @return {Error|Object}       Error or the settings object
  */
 function getSettings(akey, callback) {
-    var sql = mysql.format('SELECT email, telegram, soc, curSoC, device, polling, autoSync, lng, push FROM accounts WHERE akey=?', [akey]);
+    var sql = mysql.format('SELECT accounts.akey, email, telegram, soc, curSoC, device, polling, autoSync, lng, push FROM settings \
+        INNER JOIN accounts ON accounts.akey=settings.akey INNER JOIN stats ON accounts.akey=stats.akey WHERE accounts.akey=?', [akey]);
 
     db.query(sql, function(err, queryRes) {
         if(!err && queryRes && queryRes[0]) queryRes[0].email = encryption.decrypt(((queryRes[0].email)? queryRes[0].email : ''));  // decrypt mail
-        callback(err, ((err)? null : ((queryRes && queryRes[0])? queryRes[0] : null)));
+        callback(err, ((err)? null : ((queryRes && queryRes[0])? queryRes[0] : {})));
     });
 }
 
@@ -228,7 +243,8 @@ function getSettings(akey, callback) {
  * @return {Error|Boolean}          Error object or boolean which indicates the success state
  */
 function setSettings(akey, settingsObj, callback) {
-    var sql = mysql.format('UPDATE accounts SET email=?, telegram=?, soc=?, curSoC=?, device=?, polling=?, autoSync=?, lng=?, push=? WHERE akey=?', [
+    var sql = mysql.format('UPDATE settings INNER JOIN accounts ON accounts.akey=settings.akey INNER JOIN stats ON accounts.akey=stats.akey \
+        SET email=?, telegram=?, soc=?, curSoC=?, device=?, polling=?, autoSync=?, lng=?, push=? WHERE accounts.akey=?', [
         ((settingsObj.email)? encryption.encrypt(settingsObj.email) : ''),  // encrypt email
         settingsObj.telegram,
         settingsObj.soc,
@@ -351,7 +367,7 @@ function hasSyncOn(akey, token, callback) {
     // first validate token
     validateToken(akey, token, function(err, valid) {
         if(!err && valid) {
-            var sql = mysql.format('SELECT autoSync FROM accounts WHERE token=?', [token]);
+            var sql = mysql.format('SELECT autoSync FROM settings INNER JOIN accounts ON accounts.akey=settings.akey WHERE token=?', [token]);
 
             db.query(sql, function(err, queryRes) {
                 callback(err, ((err)? false : ((queryRes && queryRes[0] && queryRes[0].autoSync)? true : false)));
@@ -388,7 +404,7 @@ exports.sync = function(req, res) {
                             else res.status(409).json({message: 'Pull for sync failed', error: err});
                         });
                     }
-                } else res.status(409).json({message: 'Sync not enabled: ', error: err});
+                } else res.status(409).json({message: 'Sync not enabled', error: err});
             });
         } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
     } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
