@@ -35,8 +35,8 @@ exports.sendMail = function(mail, lng, error) {
             mailOptions = {
                 from: srv_config.MAIL_ADRESS,
                 to: encryption.decrypt(mail),
-                subject: ((error)? language.translate('EVNOTIFY_MAIL_ERROR_SUBJECT', lng) : language.translate('EVNOTIFY_MAIL_SUBJECT', lng)),
-                text: ((error)? language.translate('EVNOTIFY_MAIL_ERROR_TEXT', lng) : language.translate('EVNOTIFY_MAIL_TEXT', lng))
+                subject: ((error)? language.translate('EVNOTIFY_MAIL_ERROR_SUBJECT', lng, true) : language.translate('EVNOTIFY_MAIL_SUBJECT', lng, true)),
+                text: ((error)? language.translate('EVNOTIFY_MAIL_ERROR_TEXT', lng, true) : language.translate('EVNOTIFY_MAIL_TEXT', lng, true))
             };
 
         mailTransporter.sendMail(mailOptions, function(err, mailInfo) {

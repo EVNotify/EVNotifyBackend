@@ -22,7 +22,8 @@ exports.send = function(req, res) {
     // check required params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.token) {
         // validate token
-        var sql = mysql.format('SELECT email, push, telegram, lng, token FROM accounts WHERE akey=?', [req.body.akey]);
+        var sql = mysql.format('SELECT accounts.akey, email, push, telegram, lng, accounts.token FROM settings \
+            INNER JOIN accounts ON accounts.akey=settings.akey INNER JOIN stats ON accounts.akey=stats.akey WHERE accounts.akey=?', [req.body.akey]);
 
         // check if specified account exists
         db.query(sql, function(err, queryRes) {

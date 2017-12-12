@@ -20,7 +20,7 @@ function addSubscribtion(userID, token, callback) {
     // validate token
     db.query(sql, function(err, queryRes) {
         if(!err && queryRes && queryRes[0] && queryRes[0].token === token) {
-            var sql = mysql.format('UPDATE accounts SET telegram=? WHERE token=?', [userID, token]);
+            var sql = mysql.format('UPDATE settings INNER JOIN accounts ON accounts.akey=settings.akey SET telegram=? WHERE token=?', [userID, token]);
 
             // register telegram user id
             db.query(sql, function(err, queryRes) {
@@ -37,7 +37,7 @@ function addSubscribtion(userID, token, callback) {
  */
 function removeSubscribtion(userID, callback) {
     if(userID) {
-        var sql = mysql.format('UPDATE accounts SET telegram=0 WHERE telegram=?', [userID]);
+        var sql = mysql.format('UPDATE settings INNER JOIN accounts ON accounts.akey=settings.akey SET telegram=0 WHERE telegram=?', [userID]);
 
         db.query(sql, function(err, queryRes) {
             callback(err, ((err)? false : true));
@@ -54,7 +54,8 @@ function removeSubscribtion(userID, callback) {
  */
 function getCurSoC(userID, akey, callback) {
     if(userID) {
-        var sqlCMD = 'SELECT autoSync, curSoC, lng FROM accounts WHERE telegram=?' + ((akey)? ' AND akey=?' : ''),
+        var sqlCMD = 'SELECT autoSync, curSoC, lng FROM settings INNER JOIN accounts ON accounts.akey=settings.akey \
+            INNER JOIN stats ON accounts.akey=stats.akey WHERE telegram=?' + ((akey)? ' AND accounts.akey=?' : ''),
             sql = mysql.format(sqlCMD, ((akey)? [userID, akey] : [userID]));
 
         db.query(sql, function(err, queryRes) {
@@ -67,10 +68,19 @@ function getCurSoC(userID, akey, callback) {
     } else callback('Missing user', false);
 }
 
+/**
+ * Function which sends state of charge message to user
+ * NOTE: It will send the current state of charge to user only, if autoSync has been enabled.
+ * Else, user will be informed, that autoSync is not enabled
+ * @param  {Number} chatID  the chat / user id (telegram user id) to send the state of charge message
+ * @param  {String} [akey]  optional account key to retrieve the state of charge for, if more than one account linked to Telegram
+ *                          NOTE: User can only fetch it's own state of charge from own accounts
+ * @return {void}
+ */
 function sendSoCMessage(chatID, akey) {
     getCurSoC(chatID, akey, function(err, socObj) {
-        if(!err && socObj) bot.sendMessage(chatID, language.translate('TELEGRAM_SOC', socObj.lng) + ' ' + socObj.curSoC + '%');
-        else bot.sendMessage(chatID, language.translate('TELEGRAM_SOC_ERROR', ((socObj)? socObj.lng : 'en')));
+        if(!err && socObj) bot.sendMessage(chatID, language.translate('TELEGRAM_SOC', socObj.lng, true) + ' ' + socObj.curSoC + '%');
+        else bot.sendMessage(chatID, language.translate('TELEGRAM_SOC_ERROR', ((socObj)? socObj.lng : 'en'), true));
     });
 }
 
@@ -84,7 +94,7 @@ exports.startBot = function() {
             var lng = match[1] || 'en';
             bot.sendMessage(msg.chat.id, language.translate('TELEGRAM_START_TEXT', lng, true));
         });
-        
+
         // help listener
         bot.onText(/\/help\W*(\w+)?/i, function(msg, match) {
             var lng = match[1] || 'en';
@@ -144,7 +154,7 @@ exports.startBot = function() {
 exports.sendMessage = function(userID, lng, error) {
     if(bot) {
         bot.sendMessage(userID,
-            ((error)? language.translate('TELEGRAM_NOTIFICATION_ERROR_MESSAGE', lng) : language.translate('TELEGRAM_NOTIFICATION_MESSAGE', lng))
+            ((error)? language.translate('TELEGRAM_NOTIFICATION_ERROR_MESSAGE', lng, true) : language.translate('TELEGRAM_NOTIFICATION_MESSAGE', lng, true))
         );
     }
 };
