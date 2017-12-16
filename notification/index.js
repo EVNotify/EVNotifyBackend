@@ -27,7 +27,7 @@ exports.send = function(req, res) {
 
         // check if specified account exists
         db.query(sql, function(err, queryRes) {
-            if(!err && queryRes) {
+            if(!err && queryRes && queryRes[0]) {
                 if(queryRes[0].token === req.body.token) {
                     // send notifications in background depending on type
                     if(queryRes[0].email) mail.sendMail(queryRes[0].email, queryRes[0].lng, req.body.error);
