@@ -5,19 +5,19 @@ var express = require('express'),
     cors = require('cors'),
     https = require('https'),
     Rollbar = require("rollbar"),
-    rollbar = new Rollbar({
+    rollbar = ((!srv_config.ROLLBAR_TOKEN)? false : new Rollbar({
         accessToken: srv_config.ROLLBAR_TOKEN,
         captureUncaught: true,
         environment: ((srv_config.DEBUG)? 'development' : 'production'),
         captureUnhandledRejections: true
-    }),
+    })),
     httpsServer = ((srv_config.DEBUG)? false : https.createServer({
         ca: fs.readFileSync(srv_config.CHAIN_PATH, 'utf8'),
         key: fs.readFileSync(srv_config.PRIVATE_KEY_PATH, 'utf8'),
         cert : fs.readFileSync(srv_config.CERTIFICATE_PATH, 'utf8')}, app)),
     bodyParser = require('body-parser'),
     user = require('./user'),
-    telegram = require('./notification/telegram/'),
+    telegram = ((!srv_config.TELEGRAM_TOKEN)? false : require('./notification/telegram/')),
     stations = require('./charging/stations/'),
     notification = require('./notification');
 
@@ -68,10 +68,10 @@ app.use(function onError(err, req, res, next) {
         next(err);
     }
 });
-app.use(rollbar.errorHandler());
+if(rollbar) app.use(rollbar.errorHandler());
 
 // start telegram bot
-telegram.startBot();
+if(telegram) telegram.startBot();
 
 // listen on port
 app.listen(srv_config.PORT, function () {

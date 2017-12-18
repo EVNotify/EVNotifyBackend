@@ -1,0 +1,9 @@
+{
+    "PORT": 8000,
+    "DEBUG": true,
+    "DB_HOST": "localhost",
+    "DB_USER": "root",
+    "DB_PW": "",
+    "DB_DB": "evnotify_test",
+    "ENCRYPTION_KEY": "TEST"
+}

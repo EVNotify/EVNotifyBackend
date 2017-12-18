@@ -12,6 +12,6 @@
     "TELEGRAM_UNSUBSCRIBTION_FAILED": "Vreemd, er ging iets verkeerd met het verzoek je van de notificatielijst te verwijderen. Probeer het alsjeblieft later opnieuw met /unsubscribe.",
     "TELEGRAM_NOTIFICATION_MESSAGE": "Hallo! Ik wilde je even laten weten dat je elektrische voertuig de gewenste laadstatus heeft bereikt!",
     "TELEGRAM_NOTIFICATION_ERROR_MESSAGE": "Hallo! Het lijkt erop dat het laadproces is afgebroken of er was een fout in de communicatie met de auto.  Beter even gaan checken!",
-    "TELEGRAM_SOC": "",
-    "TELEGRAM_SOC_ERROR": ""
+    "TELEGRAM_SOC": "De nieuwste laadtoestand voor uw elektrische auto is",
+    "TELEGRAM_SOC_ERROR": "Ik kon de laadstatus van je elektrische auto helaas niet ophalen. Dit gebeurt vaak als AutoSync niet is geactiveerd in de instellingen."
 }

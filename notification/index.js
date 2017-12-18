@@ -8,12 +8,7 @@ var express = require('express'),
     telegram = require('./telegram/'),
     // push = require('./push/'),
     mysql = require('mysql'),
-    db = mysql.createPool({
-        host     : srv_config.DB_HOST,
-        user     : srv_config.DB_USER,
-        password : srv_config.DB_PW,
-        database : srv_config.DB_DB
-    });
+    db = require('./../db/').getPool();
 
 /**
  * notification send handler
@@ -27,11 +22,12 @@ exports.send = function(req, res) {
     // check required params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.token) {
         // validate token
-        var sql = mysql.format('SELECT email, push, telegram, lng, token FROM accounts WHERE akey=?', [req.body.akey]);
+        var sql = mysql.format('SELECT accounts.akey, email, push, telegram, lng, accounts.token FROM settings \
+            INNER JOIN accounts ON accounts.akey=settings.akey INNER JOIN stats ON accounts.akey=stats.akey WHERE accounts.akey=?', [req.body.akey]);
 
         // check if specified account exists
         db.query(sql, function(err, queryRes) {
-            if(!err && queryRes) {
+            if(!err && queryRes && queryRes[0]) {
                 if(queryRes[0].token === req.body.token) {
                     // send notifications in background depending on type
                     if(queryRes[0].email) mail.sendMail(queryRes[0].email, queryRes[0].lng, req.body.error);
