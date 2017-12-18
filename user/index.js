@@ -427,7 +427,7 @@ exports.syncSoC = function(req, res) {
         // validate token and sync property
         hasSyncOn(req.body.akey, req.body.token, function(err, syncOn) {
             if(!err && syncOn) {
-                var sql = mysql.format('UPDATE accounts SET curSoC=? WHERE token=?', [req.body.soc, req.body.token]);
+                var sql = mysql.format('UPDATE stats INNER JOIN accounts ON accounts.akey=stats.akey SET curSoC=? WHERE token=?', [req.body.soc, req.body.token]);
 
                 db.query(sql, function(err, queryRes) {
                     if(!err && queryRes) res.json({message: 'Sync for soc succeeded'});
