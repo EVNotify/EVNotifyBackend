@@ -3,6 +3,7 @@ node_js:
   - "node"
   - "8"
 before_script:
+  - npm run createEnv
   - node server.js &
   - sleep 30
 services:
