@@ -1,6 +1,3 @@
--- database creation
--- CREATE DATABASE IF NOT EXISTS `evnotify_test`;
--- USE `evnotify_test`;
 -- accounts table structure
 CREATE TABLE IF NOT EXISTS `accounts` (
     `akey` VARCHAR(6) NOT NULL PRIMARY KEY,
