@@ -19,9 +19,10 @@
   },
   "devDependencies": {},
   "scripts": {
-    "prepare": "/bin/bash createEnv.sh",
+    "pretest": "npm run createEnv",
     "test": "mocha tests/*",
-    "start": "node server.js"
+    "start": "node server.js",
+    "createEnv": "/bin/bash createEnv.sh"
   },
   "repository": {
     "type": "git",
