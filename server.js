@@ -59,7 +59,9 @@ app.use(function(req, res) {
 app.use(function onError(err, req, res, next) {
     // determine critical error (so they will be reported to Rollbar)
     if(err && err.status !== 500) {
-        res.status(err.status).send('Request could not be processed');
+        res.status(err.status || 400).send('Request could not be processed');
+        // track unprocessable request to rollbar to eventually find bugs
+        rollbar.warning('Request could not be processed', req);
     } else {
         res.status(500).json({
             message: 'Internal server occured while processing your request. It has been automatically reported and will be fixed as soon as possible.',
