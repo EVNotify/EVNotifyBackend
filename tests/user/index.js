@@ -319,7 +319,7 @@ describe('password change request', function() {
             res.should.be.json;
             res.should.have.property('body');
             res.body.should.be.an('object');
-            res.body.should.have.property('error').equal('The password must be at least 6 characters.');
+            res.body.should.have.property('error').equal('The password must be a string with at least 6 characters.');
             res.body.should.have.property('message').equal('Password change failed');
             done();
         });

@@ -45,8 +45,8 @@ exports.key = function(req, res) {
  * @return {String | false} false if the password is valid, else a string containing the error message
  */
 function isInvalidPassword(password) {
-    if (password.length < 6) {
-        return "The password must be at least 6 characters.";
+    if (typeof password !== 'string' || password.length < 6) {
+        return "The password must be a string with at least 6 characters.";
     }
     return false;
 }
@@ -59,14 +59,17 @@ function isInvalidPassword(password) {
  * @return {Object|Error}      object which contains the generated random token or error information
  */
 function register(akey, password, callback) {
-    var invalidPassword = isInvalidPassword(password);
-    if (invalidPassword) {
-        return callback(invalidPassword);
-    }
+    var invalidPassword = isInvalidPassword(password),
+        generatedPW,
+        randomToken;
+
+    if (invalidPassword) return callback(invalidPassword);
 
     // generate password hash and create random token
-    var generatedPW = passwordHash.generate(password, {algorithm: 'sha512'}),
+    try {
+        generatedPW = passwordHash.generate(password, {algorithm: 'sha512'});
         randomToken = crypto.randomBytes(10).toString('hex');
+    } catch (e) {}
 
     if(generatedPW && randomToken) {
         var sql = mysql.format('SELECT akey FROM accounts WHERE akey=?', [akey]);
@@ -174,7 +177,9 @@ exports.login = function(req, res){
  * @return {Boolean|Error}               returns the state of success and in case of error an error object
  */
 function changePW(akey, token, oldPassword, newpassword, callback) {
-    var invalidPassword = isInvalidPassword(newpassword);
+    var invalidPassword = isInvalidPassword(newpassword),
+        hashedPassword;
+
     if (invalidPassword) {
         return callback(invalidPassword);
     }
@@ -185,14 +190,17 @@ function changePW(akey, token, oldPassword, newpassword, callback) {
             // validate token
             if(loginRes.token === token) {
                 // hash password and update
-                var hashedPassword = passwordHash.generate(newpassword, {algorithm: 'sha512'}),
-                    sql = mysql.format('UPDATE accounts SET pw_hash=? WHERE akey=?', [hashedPassword, akey]);
+                try {
+                    hashedPassword = passwordHash.generate(newpassword, {algorithm: 'sha512'});
+                } catch (e) {}
+
+                var sql = mysql.format('UPDATE accounts SET pw_hash=? WHERE akey=?', [hashedPassword, akey]);
 
                 if(hashedPassword) {
                     db.query(sql, function(err, queryRes) {
                         callback(err, ((err)? false : true));
                     });
-                } else callback(500, false);
+                } else callback(400, false);
             } else callback(401, false);
         } else callback(err, false);
     });
