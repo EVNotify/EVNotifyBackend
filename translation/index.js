@@ -20,6 +20,7 @@ exports.translate = function (text, lng, englishFallback) {
  * @param  {String} text             the text to translate
  * @param  {String} lng              the language in which the text should be translated
  * @param  {String} englishFallback  if set to a truthy value, english will be used for unknown languages and missng translations.
+ * @param  {Object} data             the replacements for placeholders, where the keys are the ids of the placeholders in the text and the values are the respective replacements
  * @return {String}                  the translated text in the specified language
  */
 exports.translateWithData = function (text, lng, data, englishFallback) {
