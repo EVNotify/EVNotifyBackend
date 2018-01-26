@@ -12,6 +12,6 @@
     "TELEGRAM_UNSUBSCRIBTION_FAILED": "Merkwürdig. Da ist etwas schiefgelaufen beim Versuch, Dich aus der Benachrichtigungsliste zu entfernen. Versuche es zu einem späteren Zeitpunkt bitte mit /unsubscribe erneut.",
     "TELEGRAM_NOTIFICATION_MESSAGE": "Hallo! Ich wollte Dir nur kurz Bescheid geben, dass Dein Elektroauto den gewünschten Ladezustand erreicht hat!",
     "TELEGRAM_NOTIFICATION_ERROR_MESSAGE": "Hallo! Es scheint so, als sei der Ladevorgang abgebrochen worden oder es gab einen Fehler bei der Kommunikation mit dem Auto. Am besten mal nachschauen!",
-    "TELEGRAM_SOC": "Der zuletzt übermittelte Ladezustand Deines Elektroautos beträgt",
+    "TELEGRAM_SOC": "Der zuletzt übermittelte Ladezustand Deines Elektroautos beträgt {SOC}%",
     "TELEGRAM_SOC_ERROR": "Ich konnte den letzten Ladezustand Deines Elektroautos leider nicht abrufen. Dies liegt meistens daran, dass kein AutoSync in den Einstellungen aktiviert wurde."
 }

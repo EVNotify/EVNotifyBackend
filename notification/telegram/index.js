@@ -79,7 +79,7 @@ function getCurSoC(userID, akey, callback) {
  */
 function sendSoCMessage(chatID, akey) {
     getCurSoC(chatID, akey, function(err, socObj) {
-        if(!err && socObj) bot.sendMessage(chatID, language.translate('TELEGRAM_SOC', socObj.lng, true) + ' ' + socObj.curSoC + '%');
+        if(!err && socObj) bot.sendMessage(chatID, language.translateWithData('TELEGRAM_SOC', socObj.lng, {SOC:socObj.curSoC}, true));
         else bot.sendMessage(chatID, language.translate('TELEGRAM_SOC_ERROR', ((socObj)? socObj.lng : 'en'), true));
     });
 }

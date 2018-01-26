@@ -15,12 +15,14 @@
     "nodemailer": "^4.0.1",
     "password-hash": "^1.2.2",
     "request": "^2.82.0",
-    "rollbar": "^2.2.7"
+    "rollbar": "^2.2.7",
+    "stringinject": "^2.0.2"
   },
   "devDependencies": {},
   "scripts": {
     "pretest": "npm run createEnv",
     "test": "mocha tests/*",
+    "testTranslation": "mocha tests/translation/*",
     "start": "node server.js",
     "createEnv": "/bin/bash createEnv.sh"
   },
