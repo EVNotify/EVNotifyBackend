@@ -22,7 +22,6 @@
   "scripts": {
     "pretest": "npm run createEnv",
     "test": "mocha tests/*",
-    "testTranslation": "mocha tests/translation/*",
     "start": "node server.js",
     "createEnv": "/bin/bash createEnv.sh"
   },
