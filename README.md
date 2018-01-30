@@ -1,3 +1,4 @@
+[![Waffle.io - Columns and their card count](https://badge.waffle.io/GPlay97/EVNotifyBackend.png?columns=all)](https://waffle.io/GPlay97/EVNotifyBackend?utm_source=badge)
 # EVNotifyBackend
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/GPlay97/EVNotifyBackend.svg)](https://greenkeeper.io/)
