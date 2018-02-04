@@ -29,6 +29,12 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 // required for cross origin resource sharing (CORS)
 app.use(cors(null, {credentials: true}));
 
+// rollbar user tracking
+app.use(function(req, res, next) {
+    req.rollbar_person = {id: ((req.body)? req.body.akey : null)};
+    next();
+});
+
 // different routes for the specific functions
 app.post('/login', user.login);                 // function to login an account
 app.post('/register', user.register);           // function to register an account
@@ -58,8 +64,8 @@ app.use(function(req, res) {
 // error handler
 app.use(function onError(err, req, res, next) {
     // determine critical error (so they will be reported to Rollbar)
-    if(err && err.status !== 500) {
-        res.status(err.status || 400).send('Request could not be processed');
+    if(err && err.status && err.status !== 500) {
+        res.status(err.status || 400).json({message: 'Request could not be processed', error: err.status || 400});
         // track unprocessable request to rollbar to eventually find bugs
         rollbar.warning('Request could not be processed', req);
     } else {
