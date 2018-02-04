@@ -154,3 +154,37 @@ describe('test dutch translation', function() {
         done();
     });
 });
+
+var replacedTelegramSoc = 'The latest state of charge for your electric car is 12%';
+
+describe('translateWithData replaces placeholders in string', function () {
+    it('string without placeholder is unchanged', function(done) {
+        should.equal(translation.translateWithData('EVNOTIFY_MAIL_SUBJECT', 'en', {EVNotify:"failed"}, false), en.EVNOTIFY_MAIL_SUBJECT);
+        done();
+    });
+
+    it('data is inserted into string with placeholder', function(done) {
+        should.equal(translation.translateWithData('TELEGRAM_SOC', 'en', {SOC: '12'}, false), replacedTelegramSoc);
+        done();
+    });
+
+    it('string with placeholder is unchanged without matching data', function(done) {
+        should.equal(translation.translateWithData('TELEGRAM_SOC', 'en', {SOC2: '12'}, false), en.TELEGRAM_SOC);
+        done();
+    });
+
+    it('string without placeholder is unchanged on fallback', function(done) {
+        should.equal(translation.translateWithData('EVNOTIFY_MAIL_SUBJECT', 'unknown', {EVNotify:"failed"}, true), en.EVNOTIFY_MAIL_SUBJECT);
+        done();
+    });
+
+    it('data is inserted into string with placeholder on fallback', function(done) {
+        should.equal(translation.translateWithData('TELEGRAM_SOC', 'unknown', {SOC: '12'}, true), replacedTelegramSoc);
+        done();
+    });
+
+    it('string with placeholder is unchanged without matching on Fallback', function(done) {
+        should.equal(translation.translateWithData('TELEGRAM_SOC', 'unknown', {SOC2: '12'}, true), en.TELEGRAM_SOC);
+        done();
+    });
+});
