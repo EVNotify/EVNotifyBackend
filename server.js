@@ -45,6 +45,7 @@ app.post('/settings', user.settings);           // function to get and set the a
 app.post('/notification', notification.send);   // function to send all notifications to account
 app.post('/sync', user.sync);                   // function to sync data to allow fetching or setting the settings for multiple devices
 app.post('/syncsoc', user.syncSoC);             // function to sync the soc only (only setting the soc to decrease data usage)
+app.post('/socinfo', user.socInfo);             // function to retrieve soc and its information (only getting the soc to decrease data usage)
 app.post('/getstations', stations.getStations); // function to get charging stations based on given area and filters
 app.post('/getstation', stations.getStation);   // function to get detailed information about specified station
 app.post('/getstationphoto', stations.getStationPhoto); // function to retrieve photo for given station photo id

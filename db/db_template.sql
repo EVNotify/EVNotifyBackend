@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS `settings` (
     `soc` INT(3) DEFAULT 70,
     `lng` VARCHAR(20) DEFAULT 'en',
     `push` TINYINT(1) DEFAULT 0,
+    `consumption` FLOAT(99, 2) DEFAULT 13,
     `device` VARCHAR(100) DEFAULT NULL,
     `polling` INT(4) DEFAULT 30,
     `autoSync` INT(4) DEFAULT 30,

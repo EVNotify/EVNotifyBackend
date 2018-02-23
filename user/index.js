@@ -435,11 +435,62 @@ exports.syncSoC = function(req, res) {
         // validate token and sync property
         hasSyncOn(req.body.akey, req.body.token, function(err, syncOn) {
             if(!err && syncOn) {
-                var sql = mysql.format('UPDATE stats INNER JOIN accounts ON accounts.akey=stats.akey SET curSoC=? WHERE token=?', [req.body.soc, req.body.token]);
+                var sql = mysql.format('UPDATE stats INNER JOIN accounts ON accounts.akey=stats.akey SET curSoC=?, lastSoC=? WHERE token=?',
+                    [req.body.soc, parseInt(new Date().getTime() / 1000), req.body.token]);
 
                 db.query(sql, function(err, queryRes) {
                     if(!err && queryRes) res.json({message: 'Sync for soc succeeded'});
                     else res.status(409).json({message: 'Sync for soc failed', error: err});
+                });
+            } else res.status(409).json({message: 'Sync not enabled: ', error: err});
+        });
+    } else res.status(422).json({message: 'Missing parameters. Unable to handle request', error: 422});
+};
+
+/**
+ * Function which calculates estimated range for given state of charge based on manual consumption value
+ * @param  {Number} soc         the state of charge to calculate the range for
+ * @param  {Number} consumption the consumption
+ * @return {String}             formatted string for estimated range
+ */
+function calculateEstimatedRange(soc, consumption) {
+    if(typeof soc !== 'number') return '?';
+    // TODO calulcation based on car
+    if(soc < 10) soc = '0' + soc.toString();    // correct low values
+    return parseInt((28 / (consumption || 13)) * 100 * ((soc === 100)? 1 : '0.' + soc)) + 'km / ' + // current
+        parseInt((28 / (consumption || 13)) * 100) + 'km';  // total
+    // TODO use range retrieved directly from car..
+}
+
+/**
+ * soc info request handler
+ * NOTE: Retrieves the last submitted state of charge as well as the timestamp for it.
+ *      It will also calculate the estimated range
+ * @param  {ServerRequest} req  server request
+ * @param  {ServerResponse} res server response
+ * @return {ServerResponse}
+ */
+exports.socInfo = function(req, res) {
+    res.contentType('application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    // check params
+    if(typeof req.body !== 'undefined' && req.body.akey && req.body.token) {
+        // validate token and sync property
+        hasSyncOn(req.body.akey, req.body.token, function(err, syncOn) {
+            if(!err && syncOn) {
+                var sql = mysql.format('SELECT curSoC, lastSoC, consumption FROM stats INNER JOIN settings ON stats.akey=settings.akey \
+                    INNER JOIN accounts ON stats.akey=accounts.akey WHERE token=?', [req.body.token]);
+
+                db.query(sql, function(err, queryRes) {
+                    if(!err && queryRes && queryRes[0]) {
+                        // send soc information
+                        res.json({message: 'Soc info succeeded', socInfo: {
+                            soc: queryRes[0].curSoC,
+                            timestamp: queryRes[0].lastSoC,
+                            range: calculateEstimatedRange(queryRes[0].curSoC, queryRes[0].consumption)
+                        }});
+                    } else res.status(409).json({message: 'Soc info failed', error: err});
                 });
             } else res.status(409).json({message: 'Sync not enabled: ', error: err});
         });
