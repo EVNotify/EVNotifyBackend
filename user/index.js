@@ -233,7 +233,7 @@ exports.password = function(req, res) {
  * @return {Error|Object}       Error or the settings object
  */
 function getSettings(akey, callback) {
-    var sql = mysql.format('SELECT accounts.akey, email, telegram, soc, curSoC, device, polling, autoSync, lng, push FROM settings \
+    var sql = mysql.format('SELECT accounts.akey, email, telegram, soc, curSoC, lastSoC, consumption, device, polling, autoSync, lng, push FROM settings \
         INNER JOIN accounts ON accounts.akey=settings.akey INNER JOIN stats ON accounts.akey=stats.akey WHERE accounts.akey=?', [akey]);
 
     db.query(sql, function(err, queryRes) {
@@ -252,11 +252,13 @@ function getSettings(akey, callback) {
  */
 function setSettings(akey, settingsObj, callback) {
     var sql = mysql.format('UPDATE settings INNER JOIN accounts ON accounts.akey=settings.akey INNER JOIN stats ON accounts.akey=stats.akey \
-        SET email=?, telegram=?, soc=?, curSoC=?, device=?, polling=?, autoSync=?, lng=?, push=? WHERE accounts.akey=?', [
+        SET email=?, telegram=?, soc=?, curSoC=?, lastSoC=?, consumption=?, device=?, polling=?, autoSync=?, lng=?, push=? WHERE accounts.akey=?', [
         ((settingsObj.email)? encryption.encrypt(settingsObj.email) : ''),  // encrypt email
         settingsObj.telegram,
         settingsObj.soc,
         settingsObj.curSoC,
+        settingsObj.lastSoC,
+        settingsObj.consumption,
         settingsObj.device,
         settingsObj.polling,
         settingsObj.autoSync,
