@@ -441,8 +441,16 @@ exports.syncSoC = function(req, res) {
                     [req.body.soc, parseInt(new Date().getTime() / 1000), req.body.token]);
 
                 db.query(sql, function(err, queryRes) {
-                    if(!err && queryRes) res.json({message: 'Sync for soc succeeded'});
-                    else res.status(409).json({message: 'Sync for soc failed', error: err});
+                    if(!err && queryRes) {
+                        // register within statistics
+                        var sql = mysql.format('INSERT INTO statistics (`akey`, `type`, `value`, `timestamp`) VALUES (?,?,?,?)',
+                            [req.body.akey, 'soc', req.body.soc, parseInt(new Date().getTime() / 1000)]);
+
+                        db.query(sql, function(err, queryRes) {
+                            if(!err && queryRes) res.json({message: 'Sync for soc succeeded'});
+                            else res.status(409).json({message: 'Sync for soc failed', error: err});
+                        });
+                    } else res.status(409).json({message: 'Sync for soc failed', error: err});
                 });
             } else res.status(409).json({message: 'Sync not enabled: ', error: err});
         });

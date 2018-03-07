@@ -39,3 +39,14 @@ CREATE TABLE IF NOT EXISTS `debug` (
     `timestamp` int(10) DEFAULT 0,
     PRIMARY KEY (`id`)
 );
+
+-- statistics table structure
+CREATE TABLE IF NOT EXISTS `statistics` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `akey` VARCHAR(6) NOT NULL,
+    `type` VARCHAR(36) DEFAULT NULL,
+    `value` MEDIUMTEXT DEFAULT NULL,
+    `timestamp` INT(10) DEFAULT 0,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
+);
