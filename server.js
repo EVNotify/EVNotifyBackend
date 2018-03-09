@@ -17,6 +17,8 @@ var express = require('express'),
         cert : fs.readFileSync(srv_config.CERTIFICATE_PATH, 'utf8')}, app)),
     bodyParser = require('body-parser'),
     user = require('./user'),
+    mysql = require('mysql'),
+    db = require('./db').getPool(),
     telegram = ((!srv_config.TELEGRAM_TOKEN)? false : require('./notification/telegram/')),
     stations = require('./charging/stations/'),
     notification = require('./notification');
@@ -33,6 +35,18 @@ app.use(cors(null, {credentials: true}));
 app.use(function(req, res, next) {
     req.rollbar_person = {id: ((req.body)? req.body.akey : null)};
     next();
+});
+
+// last activity track
+app.use(function(req, res, next) {
+    if(typeof req.body !== 'undefined' && req.body.akey) {
+        var sql = mysql.format('UPDATE accounts SET lastactivity=? WHERE akey=?', [parseInt(new Date().getTime() / 1000), req.body.akey]);
+
+        // update last activity from user in database
+        db.query(sql, function(err, queryRes) {
+            next(); // just proceed
+        });
+    } else next();  // just proceed
 });
 
 // different routes for the specific functions

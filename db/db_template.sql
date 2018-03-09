@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS `accounts` (
     `akey` VARCHAR(6) NOT NULL PRIMARY KEY,
     `pw_hash` VARCHAR(255) NOT NULL,
+    `lastactivity` INT(10) DEFAULT 0,
     `token` VARCHAR(20) NOT NULL UNIQUE
 );
 
