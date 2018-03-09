@@ -96,6 +96,44 @@ describe('register request', function() {
     });
 
     /**
+     * Registers account with too short password
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('register new account', function(done) {
+        chai.request(RESTURL).post('register').set('content-type', 'application/json').send({akey: registeredAkey, password: 'TEST'}).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(409);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal('The password must be a string with at least 6 characters.');
+            res.body.should.have.property('message').equal('Registration failed');
+            done();
+        });
+    });
+
+    /**
+     * Registers account with wrong password type (integer)
+     * @param  {Function} done  callback function which will be called after successfull execution
+     * @return {void}
+     */
+    it('register new account', function(done) {
+        chai.request(RESTURL).post('register').set('content-type', 'application/json').send({akey: registeredAkey, password: 123456}).end(function(err, res) {
+            should.exist(err);
+            should.exist(res);
+            res.should.have.status(409);
+            res.should.be.json;
+            res.should.have.property('body');
+            res.body.should.be.an('object');
+            res.body.should.have.property('error').equal('The password must be a string with at least 6 characters.');
+            res.body.should.have.property('message').equal('Registration failed');
+            done();
+        });
+    });
+
+    /**
      * Registers a new account with previous random generated akey to retrieve token
      * @param  {Function} done  callback function which will be called after successfull execution
      * @return {void}
