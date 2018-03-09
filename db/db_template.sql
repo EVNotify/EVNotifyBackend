@@ -48,5 +48,8 @@ CREATE TABLE IF NOT EXISTS `statistics` (
     `value` MEDIUMTEXT DEFAULT NULL,
     `timestamp` INT(10) DEFAULT 0,
     PRIMARY KEY (`id`),
-    FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
+    FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`),
+    KEY `akey2` (`akey`) USING BTREE,
+    KEY `type` (`type`) USING BTREE,
+    KEY `timestamp` (`timestamp`) USING BTREE
 );
