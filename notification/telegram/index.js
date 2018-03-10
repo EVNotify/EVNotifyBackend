@@ -4,6 +4,7 @@ var express = require('express'),
     TelegramBot = require('node-telegram-bot-api'),
     mysql = require('mysql'),
     language = require('./../../translation/'),
+    helper = require('./../../helper'),
     bot = ((!srv_config.TELEGRAM_TOKEN)? false : new TelegramBot(srv_config.TELEGRAM_TOKEN, {polling: true})),
     opts = {reply_markup: JSON.stringify({force_reply: true})};
     db = require('./../../db/').getPool();
@@ -54,7 +55,7 @@ function removeSubscribtion(userID, callback) {
  */
 function getCurSoC(userID, akey, callback) {
     if(userID) {
-        var sqlCMD = 'SELECT autoSync, curSoC, lng FROM settings INNER JOIN accounts ON accounts.akey=settings.akey \
+        var sqlCMD = 'SELECT autoSync, curSoC, lastSoC, consumption, lng FROM settings INNER JOIN accounts ON accounts.akey=settings.akey \
             INNER JOIN stats ON accounts.akey=stats.akey WHERE telegram=?' + ((akey)? ' AND accounts.akey=?' : ''),
             sql = mysql.format(sqlCMD, ((akey)? [userID, akey] : [userID]));
 
@@ -79,8 +80,11 @@ function getCurSoC(userID, akey, callback) {
  */
 function sendSoCMessage(chatID, akey) {
     getCurSoC(chatID, akey, function(err, socObj) {
-        if(!err && socObj) bot.sendMessage(chatID, language.translateWithData('TELEGRAM_SOC', socObj.lng, {SOC:socObj.curSoC}, true));
-        else bot.sendMessage(chatID, language.translate('TELEGRAM_SOC_ERROR', ((socObj)? socObj.lng : 'en'), true));
+        if(!err && socObj) {
+            bot.sendMessage(chatID, language.translateWithData('TELEGRAM_SOC', socObj.lng, {
+                SOC:socObj.curSoC, TIME: helper.unixToTimeString(socObj.lastSoC), RANGE: helper.calculateEstimatedRange(socObj.curSoC, socObj.consumption)
+            }, true));
+        } else bot.sendMessage(chatID, language.translate('TELEGRAM_SOC_ERROR', ((socObj)? socObj.lng : 'en'), true));
     });
 }
 
@@ -139,6 +143,12 @@ exports.startBot = function() {
             sendSoCMessage(msg.chat.id);
         });
         bot.onText(/state of charge/i, function(msg, match) {
+            sendSoCMessage(msg.chat.id);
+        });
+        bot.onText(/reichweite/i, function(msg, match) {
+            sendSoCMessage(msg.chat.id);
+        });
+        bot.onText(/range/i, function(msg, match) {
             sendSoCMessage(msg.chat.id);
         });
     }

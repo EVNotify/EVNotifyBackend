@@ -12,6 +12,6 @@
     "TELEGRAM_UNSUBSCRIBTION_FAILED": "Strange, something went wrong with your request to remove you from the notification list. Please try again at a later time with /unsubscribe.",
     "TELEGRAM_NOTIFICATION_MESSAGE": "Hello! I just wanted to notify you that your electric vehicle now has reached the desired charging status!",
     "TELEGRAM_NOTIFICATION_ERROR_MESSAGE": "Hello! It seems as if the charging process had been interrupted or there was an error within the communication with the car. Better have a look!",
-    "TELEGRAM_SOC": "The latest state of charge for your electric car is {SOC}%",
+    "TELEGRAM_SOC": "The latest state of charge for your electric car is {SOC}%. This will take you about {RANGE}. Last stand: {TIME}",
     "TELEGRAM_SOC_ERROR": "I could not retrieve the state of charge of your electric car unfortunately. This happens often when AutoSync has not been activated in the settings."
 }

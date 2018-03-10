@@ -2,6 +2,7 @@ var passwordHash = require('password-hash'),
     crypto = require('crypto'),
     encryption = require('./../encryption/'),
     srv_config = require('./../srv_config.json'),
+    helper = require('./../helper'),
     mysql = require('mysql'),
     db = require('./../db/').getPool();
 
@@ -458,21 +459,6 @@ exports.syncSoC = function(req, res) {
 };
 
 /**
- * Function which calculates estimated range for given state of charge based on manual consumption value
- * @param  {Number} soc         the state of charge to calculate the range for
- * @param  {Number} consumption the consumption
- * @return {String}             formatted string for estimated range
- */
-function calculateEstimatedRange(soc, consumption) {
-    if(typeof soc !== 'number') return '?';
-    // TODO calulcation based on car
-    if(soc < 10) soc = '0' + soc.toString();    // correct low values
-    return parseInt((28 / (consumption || 13)) * 100 * ((soc === 100)? 1 : '0.' + soc)) + 'km / ' + // current
-        parseInt((28 / (consumption || 13)) * 100) + 'km';  // total
-    // TODO use range retrieved directly from car..
-}
-
-/**
  * soc info request handler
  * NOTE: Retrieves the last submitted state of charge as well as the timestamp for it.
  *      It will also calculate the estimated range
@@ -498,7 +484,7 @@ exports.socInfo = function(req, res) {
                         res.json({message: 'Soc info succeeded', socInfo: {
                             soc: queryRes[0].curSoC,
                             timestamp: queryRes[0].lastSoC,
-                            range: calculateEstimatedRange(queryRes[0].curSoC, queryRes[0].consumption)
+                            range: helper.calculateEstimatedRange(queryRes[0].curSoC, queryRes[0].consumption)
                         }});
                     } else res.status(409).json({message: 'Soc info failed', error: err});
                 });
