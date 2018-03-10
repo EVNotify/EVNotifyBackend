@@ -1,6 +1,7 @@
 var chai = require('chai'),
     should = chai.should(),
     translation = require('./../../translation/'),
+    helper = require('./../../helper'),
     de = require('./../../translation/lng/de.json'),
     en = require('./../../translation/lng/en.json'),
     nl = require('./../../translation/lng/nl.json');
@@ -155,7 +156,8 @@ describe('test dutch translation', function() {
     });
 });
 
-var replacedTelegramSoc = 'The latest state of charge for your electric car is 12%';
+var curTime = parseInt(new Date().getTime() / 1000),
+    replacedTelegramSoc = 'The latest state of charge for your electric car is 12%. This will take you about 25km / 215km. Last stand: ' + helper.unixToTimeString(curTime);
 
 describe('translateWithData replaces placeholders in string', function () {
     it('string without placeholder is unchanged', function(done) {
@@ -164,12 +166,14 @@ describe('translateWithData replaces placeholders in string', function () {
     });
 
     it('data is inserted into string with placeholder', function(done) {
-        should.equal(translation.translateWithData('TELEGRAM_SOC', 'en', {SOC: '12'}, false), replacedTelegramSoc);
+        should.equal(translation.translateWithData('TELEGRAM_SOC', 'en', {
+            SOC: '12', RANGE: helper.calculateEstimatedRange(12), TIME: helper.unixToTimeString(curTime)}, false), replacedTelegramSoc);
         done();
     });
 
     it('string with placeholder is unchanged without matching data', function(done) {
-        should.equal(translation.translateWithData('TELEGRAM_SOC', 'en', {SOC2: '12'}, false), en.TELEGRAM_SOC);
+        should.equal(translation.translateWithData('TELEGRAM_SOC', 'en', {
+            SOC2: '12', RANGE2: helper.calculateEstimatedRange(12), TIME2: helper.unixToTimeString(curTime)}, false), en.TELEGRAM_SOC);
         done();
     });
 
@@ -179,12 +183,14 @@ describe('translateWithData replaces placeholders in string', function () {
     });
 
     it('data is inserted into string with placeholder on fallback', function(done) {
-        should.equal(translation.translateWithData('TELEGRAM_SOC', 'unknown', {SOC: '12'}, true), replacedTelegramSoc);
+        should.equal(translation.translateWithData('TELEGRAM_SOC', 'unknown', {
+            SOC: '12', RANGE: helper.calculateEstimatedRange(12), TIME: helper.unixToTimeString(curTime)}, true), replacedTelegramSoc);
         done();
     });
 
     it('string with placeholder is unchanged without matching on Fallback', function(done) {
-        should.equal(translation.translateWithData('TELEGRAM_SOC', 'unknown', {SOC2: '12'}, true), en.TELEGRAM_SOC);
+        should.equal(translation.translateWithData('TELEGRAM_SOC', 'unknown', {
+            SOC2: '12', RANGE2: helper.calculateEstimatedRange(12), TIME2: helper.unixToTimeString(curTime)}, true), en.TELEGRAM_SOC);
         done();
     });
 });
