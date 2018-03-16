@@ -31,8 +31,10 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 // required for cross origin resource sharing (CORS)
 app.use(cors(null, {credentials: true}));
 
-// rollbar user tracking
+// rollbar user tracking and akey fix
 app.use(function(req, res, next) {
+    // ensure that akey is string
+    if(req.body && req.body.akey) req.body.akey = ((typeof req.body.akey.toString === 'function')? req.body.akey.toString() : '');
     req.rollbar_person = {id: ((req.body)? req.body.akey : null)};
     next();
 });
