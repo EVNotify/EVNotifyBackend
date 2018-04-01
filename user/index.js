@@ -31,9 +31,6 @@ function generateKey(callback) {
  * @return {ServerResponse}
  */
 exports.key = function(req, res) {
-    res.contentType('application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
     // generate key
     generateKey(function(err, key) {
         if(!err && key) res.json({message: 'AKey created', akey: key});
@@ -113,9 +110,6 @@ function register(akey, password, callback) {
  * @return {ServerResponse}
  */
 exports.register = function(req, res) {
-    res.contentType('application/json');
-	res.setHeader('Access-Control-Allow-Origin', '*');
-
     // check required params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.password) {
         // register account
@@ -155,9 +149,6 @@ function login(akey, password, callback) {
  * @return {ServerResponse}
  */
 exports.login = function(req, res){
-    res.contentType('application/json');
-	res.setHeader('Access-Control-Allow-Origin', '*');
-
     // check required params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.password) {
         // login account
@@ -214,9 +205,6 @@ function changePW(akey, token, oldPassword, newpassword, callback) {
  * @return {ServerResponse}
  */
 exports.password = function(req, res) {
-    res.contentType('application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
     // check params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.token && req.body.password && req.body.newpassword) {
         changePW(req.body.akey, req.body.token, req.body.password, req.body.newpassword, function(err, success) {
@@ -280,9 +268,6 @@ function setSettings(akey, settingsObj, callback) {
  * @return {ServerResponse}
  */
 exports.settings = function(req, res) {
-    res.contentType('application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
     // check params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.password && req.body.token && typeof req.body.option === 'string') {
         // check if credentials are valid
@@ -339,9 +324,6 @@ function renewToken(akey, password, callback) {
  * @return {ServerResponse}
  */
 exports.token = function(req, res) {
-    res.contentType('application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
     // check params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.password) {
         renewToken(req.body.akey, req.body.password, function(err, newToken) {
@@ -394,9 +376,6 @@ function hasSyncOn(akey, token, callback) {
  * @return {ServerResponse}
  */
 exports.sync = function(req, res) {
-    res.contentType('application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
     // check params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.token && typeof req.body.type === 'string') {
         // validate type
@@ -430,9 +409,6 @@ exports.sync = function(req, res) {
  * @return {ServerResponse}
  */
 exports.syncSoC = function(req, res) {
-    res.contentType('application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
     // check params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.token && typeof req.body.soc === 'number') {
         // validate token and sync property
@@ -467,9 +443,6 @@ exports.syncSoC = function(req, res) {
  * @return {ServerResponse}
  */
 exports.socInfo = function(req, res) {
-    res.contentType('application/json');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
     // check params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.token) {
         // validate token and sync property

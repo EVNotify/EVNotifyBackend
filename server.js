@@ -5,6 +5,7 @@ var express = require('express'),
     cors = require('cors'),
     https = require('https'),
     Rollbar = require("rollbar"),
+    session = require('express-session'),
     rollbar = ((!srv_config.ROLLBAR_TOKEN)? false : new Rollbar({
         accessToken: srv_config.ROLLBAR_TOKEN,
         captureUncaught: true,
@@ -23,13 +24,21 @@ var express = require('express'),
     stations = require('./charging/stations/'),
     notification = require('./notification');
 
+// session handling (for EVNotify Web)
+app.use(session({
+    secret: srv_config.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: ((srv_config.DEBUG)? false : true)}
+}));
+
 // required for parsing JSON
 app.use(bodyParser.json());         // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
 // required for cross origin resource sharing (CORS)
-app.use(cors(null, {credentials: true}));
+app.use(cors({credentials: true, origin: true}));
 
 // rollbar user tracking and akey fix
 app.use(function(req, res, next) {
@@ -51,6 +60,14 @@ app.use(function(req, res, next) {
     } else next();  // just proceed
 });
 
+// set required headers
+app.use(function(req, res, next) {
+    res.contentType('application/json');
+    res.setHeader('Access-Control-Allow-Origin', req.get('origin') || '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    next();
+});
+
 // different routes for the specific functions
 app.post('/login', user.login);                 // function to login an account
 app.post('/register', user.register);           // function to register an account
@@ -69,8 +86,6 @@ app.post('/getstationcards', stations.getStationCards); // function to retrieve 
 
 // request function not found
 app.use(function(req, res) {
-    res.contentType('application/json');
-	res.setHeader('Access-Control-Allow-Origin', '*');
     /**
      * we need to send http state 200 back to client - otherwise cors request calls (or requests such as an option call)
      * will be declined and connection will not be established correctly

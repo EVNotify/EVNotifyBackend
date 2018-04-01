@@ -16,9 +16,6 @@ var express = require('express'),
  * @param  {ServerResponse} res server response
  */
 exports.send = function(req, res) {
-    res.contentType('application/json');
-	res.setHeader('Access-Control-Allow-Origin', '*');
-
     // check required params
     if(typeof req.body !== 'undefined' && req.body.akey && req.body.token) {
         // validate token
