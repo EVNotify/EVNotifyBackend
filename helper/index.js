@@ -22,10 +22,21 @@ module.exports = {
      * @return {String}             the formatted string (if invalid date, '?' will be returned)
      */
     unixToTimeString: function(timestamp) {
-        var date = new Date(timestamp * 1000);
+        var date = new Date(timestamp * 1000),
+            seconds = date.getSeconds(),
+            minutes = date.getMinutes(),
+            hours = date.getHours(),
+            day = date.getDate(),
+            month = date.getMonth() + 1;
 
-        return ((date.toString() !== 'Invalid Date')?
-                date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + ' ' +
-                date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() : '?');
+        if(date.toString() === 'Invalid Date') return '?';
+
+        seconds = ((seconds < 10)? '0' + seconds : seconds); // correct low values
+        minutes = ((minutes < 10)? '0' + minutes : minutes); // correct low values
+        hours = ((hours < 10)? '0' + hours : hours); // correct low values
+        day = ((day < 10)? '0' + day : day); // correct low values
+        month = ((month < 10)? '0' + month : month); // correct low values
+
+        return date.getFullYear() + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
     }
 };

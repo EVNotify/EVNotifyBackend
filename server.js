@@ -113,14 +113,17 @@ if(rollbar) app.use(rollbar.errorHandler());
 // start telegram bot
 if(telegram) telegram.startBot();
 
-// listen on port
-app.listen(srv_config.PORT, function () {
-    console.log('Server listening on port ' + srv_config.PORT);
-});
-
-// listen on https port
-if(httpsServer) {
+if(srv_config.DEBUG && srv_config.PORT) {
+    // listen on http port
+    app.listen(srv_config.PORT, function () {
+        console.log('Server listening on port ' + srv_config.PORT);
+    });
+} else if(httpsServer && srv_config.HTTPS_PORT) {
+    // listen on https port
     httpsServer.listen(srv_config.HTTPS_PORT, function() {
         console.log('Server listening on https port ' + srv_config.HTTPS_PORT);
     });
+} else {
+    console.error('No server could be started');
+    process.exit();
 }
