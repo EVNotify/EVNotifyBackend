@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `stats` (
     `akey` VARCHAR(6) NOT NULL,
     `curSoC` INT(3) DEFAULT 0,
     `lastSoC` INT(13) DEFAULT 0,
+    `lastNotification` INT(13) DEFAULT 0,
     PRIMARY KEY (`user`),
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
 );

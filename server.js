@@ -63,7 +63,7 @@ app.use(function(req, res, next) {
 // set required headers
 app.use(function(req, res, next) {
     res.contentType('application/json');
-    res.setHeader('Access-Control-Allow-Origin', req.get('origin') || '*');
+    res.setHeader('Access-Control-Allow-Origin', ((req.get('origin') == null || req.get('origin') === 'null')? '*' : req.get('origin') || '*'));
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     next();
 });
