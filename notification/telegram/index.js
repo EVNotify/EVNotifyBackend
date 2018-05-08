@@ -158,13 +158,19 @@ exports.startBot = function() {
  * Function which sends message to specified user id
  * @param  {Integer} userID the user id
  * @param  {String} lng     the language to use for the notification
+ * @param  {Number} curSoC  the current state of charge, which will be attached as info within mail (with calculated range)
+ * @param  {Number} consumption the consumption value to use for range calculation
  * @param  {Boolean} error  whether or not an error occured so we should inform the user
  *                          if this param is not set/false, the success notification will be sent
  */
-exports.sendMessage = function(userID, lng, error) {
+exports.sendMessage = function(userID, lng, curSoC, consumption, error) {
     if(bot) {
+        curSoC = parseInt(curSoC || 0).toString(); // use string for string replacement within translation
+
         bot.sendMessage(userID,
-            ((error)? language.translate('TELEGRAM_NOTIFICATION_ERROR_MESSAGE', lng, true) : language.translate('TELEGRAM_NOTIFICATION_MESSAGE', lng, true))
+            ((error)? 
+                language.translateWithData('TELEGRAM_NOTIFICATION_ERROR_MESSAGE', lng, {SOC: curSoC}, true) : 
+                language.translateWithData('TELEGRAM_NOTIFICATION_MESSAGE', lng, {SOC: curSoC, RANGE: helper.calculateEstimatedRange(parseInt(curSoC), consumption)}, true))
         );
     }
 };
