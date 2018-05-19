@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `settings` (
     `akey` VARCHAR(6) NOT NULL,
     `email` VARCHAR(100) DEFAULT NULL,
     `telegram` INT(100) DEFAULT 0,
+    `summary` TINYINT(1) DEFAULT 0,
     `soc` INT(3) DEFAULT 70,
     `lng` VARCHAR(20) DEFAULT 'en',
     `push` TINYINT(1) DEFAULT 0,

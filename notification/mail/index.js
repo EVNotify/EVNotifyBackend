@@ -52,3 +52,36 @@ exports.sendMail = function(mail, lng, curSoC, consumption, error) {
         });
     }
 };
+
+/**
+ * Sends summary of last submitted state of charge to specified mail (e.g. for cron)
+ * @param {String} mail the mail where to send the message to
+ * @param {String} lng the user language
+ * @param {Number} curSoC the current (last submitted) state of charge
+ * @param {Number} consumption the consumption of user
+ * @param {Number} lastSoC timestamp of last submitted state of charge
+ */
+exports.sendSummary = function(mail, lng, curSoC, consumption, lastSoC) {
+    curSoC = parseInt(curSoC || 0).toString(); // use string for string replacement within translation
+
+    // decrypt and validate mail
+    if(validateEmail(encryption.decrypt(mail))) {
+        var mailTransporter = nodemailer.createTransport({
+            service: srv_config.MAIL_SERVICE,
+            auth: {
+                user: srv_config.MAIL_USER,
+                pass: srv_config.MAIL_PASSWORD
+            }
+        }),
+        mailOptions = {
+            from: srv_config.MAIL_ADRESS,
+            to: encryption.decrypt(mail),
+            subject: language.translateWithData('EVNOTIFY_MAIL_SUBJECT', lng, {SOC: curSoC}, true),
+            text: language.translateWithData('TELEGRAM_SOC', lng, {SOC: curSoC, RANGE: helper.calculateEstimatedRange(parseInt(curSoC), consumption), TIME: helper.unixToTimeString(lastSoC)}, true)
+        };
+
+        mailTransporter.sendMail(mailOptions, function(err, mailInfo) {
+            if(err) return console.log(err);
+        });
+    }
+};

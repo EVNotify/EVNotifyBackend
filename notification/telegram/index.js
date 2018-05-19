@@ -174,3 +174,12 @@ exports.sendMessage = function(userID, lng, curSoC, consumption, error) {
         );
     }
 };
+
+/**
+ * Sends summary message to specified telegram account (e.g. for cron job)
+ * @param {Number} telegramID the telegram user id
+ * @param {String} akey the user account id
+ */
+exports.sendSummary = function(telegramID, akey) {
+    if(bot) sendSoCMessage(telegramID, akey);
+};
