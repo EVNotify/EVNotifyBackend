@@ -22,7 +22,8 @@ var express = require('express'),
     db = require('./db').getPool(),
     telegram = ((!srv_config.TELEGRAM_TOKEN)? false : require('./notification/telegram/')),
     stations = require('./charging/stations/'),
-    notification = require('./notification');
+    notification = require('./notification'),
+    notificationCron = require('./notification/cron/');
 
 // session handling (for EVNotify Web)
 app.use(session({
@@ -76,6 +77,7 @@ app.post('/renewtoken', user.token);            // function to renew the account
 app.post('/changepw', user.password);           // function to change the account password
 app.post('/settings', user.settings);           // function to get and set the account settings
 app.post('/notification', notification.send);   // function to send all notifications to account
+app.post('/notificationcron', notificationCron.cronNotification);   // function to start the notification cron job (summary)
 app.post('/sync', user.sync);                   // function to sync data to allow fetching or setting the settings for multiple devices
 app.post('/syncsoc', user.syncSoC);             // function to sync the soc only (only setting the soc to decrease data usage)
 app.post('/socinfo', user.socInfo);             // function to retrieve soc and its information (only getting the soc to decrease data usage)

@@ -3,3 +3,4 @@ pm2_config.json
 node_modules/
 deploy.sh
 package-lock.json
+launch.json
