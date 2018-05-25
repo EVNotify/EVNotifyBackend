@@ -9,12 +9,13 @@ var crypto = require('crypto'),
  * @return {String|Boolean} The encrypted data or false, if invalid data
  */
 exports.encrypt = function(data) {
-    if(typeof data !== 'string') return false;
+    if(typeof data !== 'string' || !data.length) return false;
 
-    var cipher = crypto.createCipher(algorithm,encryptionKey),
-        crypted = cipher.update(data,'utf8','hex');
+    var iv = crypto.randomBytes(16),
+        cipher = crypto.createCipheriv(algorithm, encryptionKey, iv),
+        encrypted = cipher.update(data);
 
-    return crypted += cipher.final('hex');
+    return iv.toString('hex') + ':' + Buffer.concat([encrypted, cipher.final()]).toString('hex');
 };
 
 /**
@@ -23,10 +24,11 @@ exports.encrypt = function(data) {
  * @return {String|Boolean} The decrypted data or false, if invalid data
  */
 exports.decrypt = function(data) {
-    if(typeof data !== 'string') return false;
+    if(typeof data !== 'string' || !data.length) return false;
 
-    var decipher = crypto.createDecipher(algorithm,encryptionKey),
-        dec = decipher.update(data,'hex','utf8');
+    var parts = data.split(':'),
+        decipher = crypto.createDecipheriv(algorithm, encryptionKey, new Buffer(parts.shift(), 'hex')),
+        decrypted = decipher.update(new Buffer(parts.join(':'),'hex'));
 
-    return dec+= decipher.final('utf8');
+    return Buffer.concat([decrypted, decipher.final()]).toString();
 };

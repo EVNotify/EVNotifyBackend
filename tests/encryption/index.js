@@ -30,12 +30,12 @@ describe('test encryption', function() {
     });
 
     /**
-     * Encrypt the same string again and check if encrypted string equals with previous one
+     * Encrypt the same string again and check if encrypted string not equals with previous one
      * @param  {Function} done  callback function which will be called after successfull execution
      * @return {void}
      */
     it('test encryption with same valid string', function(done) {
-        should.equal(encryption.encrypt('TEST'), encrypted);
+        should.not.equal(encryption.encrypt('TEST'), encrypted);
         done();
     });
 
