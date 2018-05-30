@@ -1,11 +1,18 @@
 var express = require('express'),
     app = express(),
+    moesifExpress = require('moesif-express'),
     srv_config = require('./srv_config.json'),
     fs = require('fs'),
     cors = require('cors'),
     https = require('https'),
     Rollbar = require("rollbar"),
     session = require('express-session'),
+    moesif = ((!srv_config.MOESIF_TOKEN)? false : moesifExpress({
+        applicationId: srv_config.MOESIF_TOKEN,
+        identifyUser: function(req, res) {
+            return ((req.body)? req.body.akey : undefined);
+        }
+    })),
     rollbar = ((!srv_config.ROLLBAR_TOKEN)? false : new Rollbar({
         accessToken: srv_config.ROLLBAR_TOKEN,
         captureUncaught: true,
@@ -48,6 +55,9 @@ app.use(function(req, res, next) {
     req.rollbar_person = {id: ((req.body)? req.body.akey : null)};
     next();
 });
+
+// moesif middleware
+if(moesif) app.use(moesif);
 
 // last activity track
 app.use(function(req, res, next) {
