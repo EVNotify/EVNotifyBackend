@@ -81,12 +81,13 @@ getStatistics((err, statsRes) => {
                 console.log({
                     amountOfData: valuesToInspect.length,
                     isCharging,
-                    valueDifference: (valueDifference = firstValue - lastValue),
+                    valueDifference: (valueDifference = ((isCharging)? firstValue - lastValue : lastValue - firstValue)),
                     timeDifference: (timeDifference = firstTimestamp - lastTimestamp),
                     percentageLeft: (percentageLeft = ((isCharging)? 100 - firstValue : firstValue)),
+                    firstTimestamp: new Date(firstTimestamp * 1000).toLocaleString(),
                     predicted: ((
-                        (predicted = new Date((firstTimestamp * 1000) + ( (timeDifference / valueDifference) * percentageLeft )
-                    ) instanceof Date && !isNaN(predicted))? predicted.toLocaleString() : new Date(lastTimestamp * 1000).toLocaleString()))
+                        (predicted = new Date(((firstTimestamp + ( (timeDifference / valueDifference) * percentageLeft ) ) * 1000)
+                    )) instanceof Date && !isNaN(predicted))? predicted.toLocaleString() : new Date(lastTimestamp * 1000).toLocaleString())
                 });
             }
         });
