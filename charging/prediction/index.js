@@ -85,9 +85,15 @@ getStatistics((err, statsRes) => {
                     timeDifference: (timeDifference = firstTimestamp - lastTimestamp),
                     percentageLeft: (percentageLeft = ((isCharging)? 100 - firstValue : firstValue)),
                     firstTimestamp: new Date(firstTimestamp * 1000).toLocaleString(),
-                    predicted: ((
-                        (predicted = new Date(((firstTimestamp + ( (timeDifference / valueDifference) * percentageLeft ) ) * 1000)
-                    )) instanceof Date && !isNaN(predicted))? predicted.toLocaleString() : new Date(lastTimestamp * 1000).toLocaleString())
+                    predicted: Array.from(Array(percentageLeft).keys()).map(step => {
+                        return {
+                            value: firstValue + (step + 1),
+                            timestamp: ((
+                                (predicted = new Date(((firstTimestamp + ( (timeDifference / valueDifference) * (step + 1)) ) * 1000))
+                                ) instanceof Date && !isNaN(predicted))? predicted.toLocaleString() : new Date(lastTimestamp * 1000).toLocaleString()
+                            )
+                        };
+                    })
                 });
             }
         });
