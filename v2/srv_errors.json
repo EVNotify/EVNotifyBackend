@@ -1,0 +1,10 @@
+{
+    "UNKNOWN_ROUTE": {
+        "code": 1000,
+        "message": "Requested route does not exist. Unable to handle request."
+    },
+    "INVALID_PARAMETERS": {
+        "code": 1100,
+        "message": "Missing or invalid parameters."
+    }
+}
