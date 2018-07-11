@@ -30,7 +30,8 @@ const express = require('express'),
         applicationId: srv_config.MOESIF_TOKEN,
         identifyUser: (req, res) => req.body.akey
     }) : false),
-    db = require('./modules/db');
+    db = require('./modules/db'),
+    account = require('./modules/account');
 
 // ensure that session secret is valid
 if (!srv_config.SESSION_SECRET || typeof srv_config.SESSION_SECRET !== 'string') throw new Error('No session secret given within config');
@@ -92,7 +93,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// TODO routes
+app.get('/key', account.getKey);
 
 // requested route does not exist
 app.use((req, res) => res.status(404).json({

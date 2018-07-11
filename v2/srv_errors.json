@@ -6,5 +6,9 @@
     "INVALID_PARAMETERS": {
         "code": 1100,
         "message": "Missing or invalid parameters."
+    },
+    "DB_QUERY": {
+        "code": 1200,
+        "message": "Error on database query."
     }
 }
