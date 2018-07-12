@@ -38,5 +38,13 @@
     "HASH_FAILED": {
         "code": 1600,
         "message": "Generation of password hash failed."
+    },
+    "USER_NOT_EXISTING": {
+        "code": 1700,
+        "message": "Requested user does not exist."
+    },
+    "INVALID_CREDENTIALS": {
+        "code": 1800,
+        "message": "Entered credentials are invalid."
     }
 }
