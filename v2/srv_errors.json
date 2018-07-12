@@ -1,7 +1,15 @@
 {
+    "BAD_REQUEST": {
+        "code": 400,
+        "message": "Bad request. Your request could not be processed. This has been automatically reported."
+    },
     "UNPROCESSABLE_ENTITY": {
         "code": 422,
         "message": "Your request could not be processed. This is either a client side error or a server error."
+    },
+    "INTERNAL_SERVER_ERROR": {
+        "code": 500,
+        "message": "Internal server error occured. It has been automatically reported."
     },
     "UNKNOWN_ROUTE": {
         "code": 1000,

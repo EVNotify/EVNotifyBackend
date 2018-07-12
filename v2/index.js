@@ -81,7 +81,7 @@ if (moesif) app.use(moesif);
 
 // last activity track
 app.use((req, res, next) => {
-    if(req.body.akey) db.query('UPDATE accounts SET lastactivity=? WHERE akey=?', [parseInt(new Date() / 1000), req.body.akey], () => next());
+    if (req.body.akey) db.query('UPDATE accounts SET lastactivity=? WHERE akey=?', [parseInt(new Date() / 1000), req.body.akey], () => next());
     else next();
 });
 
@@ -100,6 +100,30 @@ app.post('/register', account.register);
 app.use((req, res) => res.status(404).json({
     error: srv_errors.UNKNOWN_ROUTE
 }));
+
+// error handler
+app.use(function onError(err, req, res, next) {
+    /**
+     * Rollbar automatically handles critical errors
+     * If status 500, just send info and prevent further processing
+     * Otherwise proceed - but send warning to rollbar log
+     */
+    if (err && err.status && err.status !== 500) {
+        // just a warning
+        res.status(err.status || 400).json({
+            error: srv_errors.BAD_REQUEST,
+            debug: ((srv_config.DEBUG) ? err : null)
+        });
+        rollbar.warning('Bad request', req);
+    } else {
+        // critical - prevent further processing
+        res.status(500).json({
+            error: srv_errors.INTERNAL_SERVER_ERROR,
+            debug: ((srv_config.DEBUG && err) ? err.message || err : null)
+        });
+        next(err);
+    }
+});
 
 // rollbar middleware
 if (rollbar) app.use(rollbar.errorHandler());
