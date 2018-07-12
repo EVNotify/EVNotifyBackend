@@ -1,4 +1,8 @@
 {
+    "UNPROCESSABLE_ENTITY": {
+        "code": 422,
+        "message": "Your request could not be processed. This is either a client side error or a server error."
+    },
     "UNKNOWN_ROUTE": {
         "code": 1000,
         "message": "Requested route does not exist. Unable to handle request."
@@ -10,5 +14,21 @@
     "DB_QUERY": {
         "code": 1200,
         "message": "Error on database query."
+    },
+    "MALFORMED_AKEY": {
+        "code": 1300,
+        "message": "AKey format is not valid. Must be a string with 6 characters."
+    },
+    "MALFORMED_PASSWORD": {
+        "code": 1400,
+        "message": "Password must be a string with at least 6 characters and less than 72 characters."
+    },
+    "ALREADY_REGISTERED": {
+        "code": 1500,
+        "message": "Requested AKey already registered."
+    },
+    "HASH_FAILED": {
+        "code": 1600,
+        "message": "Generation of password hash failed."
     }
 }

@@ -94,6 +94,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/key', account.getKey);
+app.post('/register', account.register);
 
 // requested route does not exist
 app.use((req, res) => res.status(404).json({
