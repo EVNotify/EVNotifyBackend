@@ -46,5 +46,9 @@
     "INVALID_CREDENTIALS": {
         "code": 1800,
         "message": "Entered credentials are invalid."
+    },
+    "INVALID_TOKEN": {
+        "code": 1900,
+        "message": "Provided token is invalid or no longer valid."
     }
 }

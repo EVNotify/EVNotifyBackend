@@ -31,7 +31,8 @@ const express = require('express'),
         identifyUser: (req, res) => req.body.akey
     }) : false),
     db = require('./modules/db'),
-    account = require('./modules/account');
+    account = require('./modules/account'),
+    settings = require('./modules/settings');
 
 // ensure that session secret is valid
 if (!srv_config.SESSION_SECRET || typeof srv_config.SESSION_SECRET !== 'string') throw new Error('No session secret given within config');
@@ -97,6 +98,7 @@ app.use((req, res, next) => {
 app.get('/key', account.getKey);
 app.post('/register', account.register);
 app.post('/login', account.login);
+app.get('/settings', settings.getSettings);
 
 // requested route does not exist
 app.use((req, res) => res.status(404).json({
