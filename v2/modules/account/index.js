@@ -86,11 +86,8 @@ const register = (akey, password, callback) => {
                                     db.query('INSERT INTO stats (user, akey) VALUES (?, ?)', [
                                         akey, akey
                                     ], (err, dbRes) => {
-                                        if (!err && dbRes) {
-                                            callback(null, {
-                                                token
-                                            });
-                                        } else callback(err);
+                                        if (!err && dbRes) callback(null, token);
+                                        else callback(err);
                                     });
                                 } else callback(err);
                             });
