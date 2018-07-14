@@ -25,13 +25,32 @@ const validateToken = (akey, token, callback) => {
  * @param {Function} callback callback function
  */
 const getSettings = (akey, callback) => {
-    db.query('SELECT accounts.akey, email, telegram, soc, curSoC, lastSoC, consumption, device, lng, summary FROM settings \
-        INNER JOIN accounts ON accounts.akey=settings.akey INNER JOIN stats ON accounts.akey=stats.akey WHERE accounts.akey=?', [
+    db.query('SELECT email, telegram, soc, consumption, car, device, lng, summary FROM settings WHERE akey=?', [
         akey
     ], (err, dbRes) => {
         // TODO decrypt email
         callback(err, ((!err && dbRes && dbRes[0]) ? dbRes[0] : null));
     });
+};
+
+/**
+ * Sets the settings for given akey and given settings object
+ * @param {String} akey the akey where to set the settings
+ * @param {Object} settings the settings object to set
+ * @param {Function} callback callback function
+ */
+const setSettings = (akey, settings, callback) => {
+    db.query('UPDATE settings SET email=?, telegram=?, soc=?, consumption=?, car=?, device=?, lng=?, summary=? WHERE akey=?', [
+            settings.email, // TODO encrypt email
+            settings.telegram,
+            settings.soc,
+            settings.consumption,
+            settings.car,
+            settings.device,
+            settings.lng,
+            settings.summary,
+            akey
+    ], (err, dbRes) => callback(err, ((!err && dbRes && dbRes[0]) ? dbRes[0] : null)));
 };
 
 module.exports = {
@@ -84,6 +103,41 @@ module.exports = {
      * @param {Object} res the server response
      */
     setSettings: (req, res) => {
-        // TODO
+        // check required params
+        if (!req.body.akey || !req.body.token || typeof req.body.settings !== 'object' || req.body.settings == null) {
+            return res.status(400).json({
+                error: srv_errors.INVALID_PARAMETERS
+            });
+        }
+        // validate token
+        validateToken(req.body.akey, req.body.token, (err, valid) => {
+            if (!err) {
+                if (valid) {
+                    // set settings
+                    setSettings(req.body.akey, req.body.settings, (err, settings) => {
+                        if (!err) {
+                            res.json({
+                                settings: req.body.settings
+                            });
+                        } else {
+                            res.status(422).json({
+                                error: srv_errors.UNPROCESSABLE_ENTITY,
+                                debug: ((srv_config.DEBUG) ? err : null)
+                            });
+                        }
+                    });
+                } else {
+                    // invalid token
+                    res.status(401).json({
+                        error: srv_errors.INVALID_TOKEN
+                    });
+                }
+            } else {
+                res.status(422).json({
+                    error: srv_errors.UNPROCESSABLE_ENTITY,
+                    debug: ((srv_config.DEBUG) ? err : null)
+                });
+            }
+        });
     }
 };

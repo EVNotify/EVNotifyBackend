@@ -99,6 +99,7 @@ app.get('/key', account.getKey);
 app.post('/register', account.register);
 app.post('/login', account.login);
 app.get('/settings', settings.getSettings);
+app.put('/settings', settings.setSettings);
 
 // requested route does not exist
 app.use((req, res) => res.status(404).json({
