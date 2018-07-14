@@ -5,7 +5,8 @@
  */
 const srv_config = require('./../../srv_config.json'),
     srv_errors = require('./../../srv_errors.json'),
-    db = require('./../db');
+    db = require('./../db'),
+    encryption = require('./../encryption');
 
 /**
  * Fetches token from database for given akey and compares it with given token
@@ -28,7 +29,7 @@ const getSettings = (akey, callback) => {
     db.query('SELECT email, telegram, soc, consumption, car, device, lng, summary FROM settings WHERE akey=?', [
         akey
     ], (err, dbRes) => {
-        // TODO decrypt email
+        if (!err && dbRes && dbRes[0] && dbRes[0].email) dbRes[0].email = encryption.decrypt(dbRes[0].email);
         callback(err, ((!err && dbRes && dbRes[0]) ? dbRes[0] : null));
     });
 };
@@ -41,15 +42,15 @@ const getSettings = (akey, callback) => {
  */
 const setSettings = (akey, settings, callback) => {
     db.query('UPDATE settings SET email=?, telegram=?, soc=?, consumption=?, car=?, device=?, lng=?, summary=? WHERE akey=?', [
-            settings.email, // TODO encrypt email
-            settings.telegram,
-            settings.soc,
-            settings.consumption,
-            settings.car,
-            settings.device,
-            settings.lng,
-            settings.summary,
-            akey
+        encryption.encrypt(settings.email),
+        settings.telegram,
+        settings.soc,
+        settings.consumption,
+        settings.car,
+        settings.device,
+        settings.lng,
+        settings.summary,
+        akey
     ], (err, dbRes) => callback(err, ((!err && dbRes && dbRes[0]) ? dbRes[0] : null)));
 };
 
