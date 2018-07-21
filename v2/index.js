@@ -68,9 +68,11 @@ app.use(cors({
 
 // add additional keys before processing the request
 app.use((req, res, next) => {
+    // fix akey to force string
+    req.body.akey = ((req.body.akey && typeof req.body.akey.toString === 'function') ? req.body.akey.toString() : '');
     // attach akey to be tracked by rollbar
     req.rollbar_person = {
-        id: ((req.body.akey && typeof req.body.akey.toString === 'function') ? req.body.akey.toString() : null)
+        id:  req.body.akey || null
     };
     // attach api_version to be tracked by moesif
     req.api_version = '2';
