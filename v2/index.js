@@ -72,7 +72,7 @@ app.use((req, res, next) => {
     req.body.akey = ((req.body.akey && typeof req.body.akey.toString === 'function') ? req.body.akey.toString() : '');
     // attach akey to be tracked by rollbar
     req.rollbar_person = {
-        id:  req.body.akey || null
+        id: req.body.akey || null
     };
     // attach api_version to be tracked by moesif
     req.api_version = '2';
@@ -102,6 +102,26 @@ app.post('/register', account.register);
 app.post('/login', account.login);
 app.get('/settings', settings.getSettings);
 app.put('/settings', settings.setSettings);
+app.post('/debug', (req, res) => {
+    if (typeof req.body.data === 'string') {
+        db.query('INSERT INTO debug (data, timestamp) VALUES (?, ?)', [
+            req.body.data, parseInt(new Date() / 1000)
+        ], (err, dbRes) => {
+            if (!err && dbRes) {
+                res.json({status: true});
+            } else {
+                res.status(422).json({
+                    error: srv_errors.UNPROCESSABLE_ENTITY,
+                    debug: ((srv_config.DEBUG) ? err : null)
+                });
+            }
+        });
+    } else {
+        res.status(400).json({
+            error: srv_errors.INVALID_PARAMETERS
+        });
+    }
+});
 
 // requested route does not exist
 app.use((req, res) => res.status(404).json({
