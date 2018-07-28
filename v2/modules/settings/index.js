@@ -42,7 +42,7 @@ const getSettings = (akey, callback) => {
  */
 const setSettings = (akey, settings, callback) => {
     db.query('UPDATE settings SET email=?, telegram=?, soc=?, consumption=?, car=?, device=?, lng=?, summary=? WHERE akey=?', [
-        encryption.encrypt(settings.email),
+        ((settings.email) ? encryption.encrypt(settings.email) : ''),
         settings.telegram,
         settings.soc,
         settings.consumption,
