@@ -6,19 +6,8 @@
 const srv_config = require('./../../srv_config.json'),
     srv_errors = require('./../../srv_errors.json'),
     db = require('./../db'),
+    token = require('./../token'),
     encryption = require('./../encryption');
-
-/**
- * Fetches token from database for given akey and compares it with given token
- * @param {String} akey the akey
- * @param {String} token the token of the akey to validate
- * @param {Function} callback callback function
- */
-const validateToken = (akey, token, callback) => {
-    db.query('SELECT token FROM accounts WHERE akey=?', [akey], (err, dbRes) => {
-        callback(err, (!err && dbRes && dbRes[0] && dbRes[0].token === token));
-    });
-};
 
 /**
  * Retrieves settings from database for given akey
@@ -68,7 +57,7 @@ module.exports = {
             });
         }
         // validate token
-        validateToken(req.query.akey, req.query.token, (err, valid) => {
+        token.validateToken(req.query.akey, req.query.token, (err, valid) => {
             if (!err) {
                 if (valid) {
                     // retrieve the settings
@@ -111,7 +100,7 @@ module.exports = {
             });
         }
         // validate token
-        validateToken(req.body.akey, req.body.token, (err, valid) => {
+        token.validateToken(req.body.akey, req.body.token, (err, valid) => {
             if (!err) {
                 if (valid) {
                     // set settings
