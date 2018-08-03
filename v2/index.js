@@ -104,6 +104,7 @@ app.post('/login', account.login);
 app.get('/settings', settings.getSettings);
 app.put('/settings', settings.setSettings);
 app.post('/soc', sync.postSoC);
+app.get('/soc', sync.getSoC);
 app.post('/debug', (req, res) => {
     if (typeof req.body.data === 'string') {
         db.query('INSERT INTO debug (data, timestamp) VALUES (?, ?)', [
