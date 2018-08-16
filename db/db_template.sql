@@ -36,6 +36,16 @@ CREATE TABLE IF NOT EXISTS `stats` (
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
 );
 
+CREATE TABLE IF NOT EXISTS `sync` (
+    `user` VARCHAR(6) NOT NULL,
+    `akey` VARCHAR(6) NOT NULL,
+    `soc_display` FLOAT DEFAULT 0,
+    `soc_bms` FLOAT DEFAULT 0,
+    `last_soc` INT(13) DEFAULT 0,
+    PRIMARY KEY (`user`),
+    FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
+);
+
 -- debug table structure
 CREATE TABLE IF NOT EXISTS `debug` (
     `id` int NOT NULL AUTO_INCREMENT,

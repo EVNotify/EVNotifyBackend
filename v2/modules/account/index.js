@@ -83,7 +83,7 @@ const register = (akey, password, callback) => {
                                 akey, akey
                             ], (err, dbRes) => {
                                 if (!err && dbRes) {
-                                    db.query('INSERT INTO stats (user, akey) VALUES (?, ?)', [
+                                    db.query('INSERT INTO sync (user, akey) VALUES (?, ?)', [
                                         akey, akey
                                     ], (err, dbRes) => {
                                         if (!err && dbRes) callback(null, token);

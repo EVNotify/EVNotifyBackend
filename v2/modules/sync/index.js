@@ -10,31 +10,38 @@ const srv_config = require('./../../srv_config.json'),
 
 /**
  * Updates the current state of charge value within database and adds statistic record
+ * NOTE: If display or bms value missing, the other corresponding value will be used for that missing property
  * @param {String} akey the AKey
- * @param {Number} soc the state of charge to set
+ * @param {Object} socObj the state of charge object containing display and/or bms soc value to set
  * @param {Function} callback callback function
  */
-const postSoC = (akey, soc, callback) => {
+const postSoC = (akey, socObj, callback) => {
     const now = parseInt(new Date() / 1000);
 
-    db.query('UPDATE stats SET curSoC=?, lastSoC=? WHERE akey=?', [
-        soc, now, akey
+    let soc;
+    
+    // if missing, use general soc
+    if (typeof socObj.display === 'undefined') soc = socObj.bms;
+    else if (typeof socObj.bms === 'undefined') soc = socObj.display;
+
+    db.query('UPDATE sync SET soc_display=?, soc_bms=?, last_soc=? WHERE akey=?', [
+        soc || socObj.display, soc || socObj.bms, now, akey
     ], (err, dbRes) => {
         if (!err && dbRes) {
             db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                akey, 'soc', soc, now
+                akey, 'soc', ((typeof socObj.display !== 'undefined')? socObj.display : socObj.bms), now
             ], (err, dbRes) => callback(err, (!err && dbRes)));
         } else callback(err);
     });
 };
 
 /**
- * Retrieves the last submitted state of charge value and timestamp from database
+ * Retrieves the last submitted state of charge values and timestamp from database
  * @param {String} akey the AKey
  * @param {Function} callback callback function
  */
 const getSoC = (akey, callback) => {
-    db.query('SELECT curSoC, lastSoC FROM stats WHERE akey=?', [
+    db.query('SELECT soc_display, soc_bms, last_soc FROM sync WHERE akey=?', [
         akey
     ], (err, queryRes) => callback(err, ((!err && queryRes) ? queryRes[0] : null)));
 };
@@ -46,8 +53,10 @@ module.exports = {
      * @param {Object} res the server response
      */
     postSoC: (req, res) => {
-        // check required params // TODO validation of soc (+float within db template?)
-        if (!req.body.akey || !req.body.token || !req.body.soc) {
+        // check required params
+        if (!req.body.akey || !req.body.token || (typeof req.body.display === 'undefined' && typeof req.body.bms === 'undefined') ||
+            !(((typeof req.body.display !== 'undefined') ? typeof req.body.display === 'number' && !isNaN(req.body.display) : true)) ||
+            !(((typeof req.body.bms !== 'undefined') ? typeof req.body.bms === 'number' && !isNaN(req.body.bms) : true))) {
             return res.status(400).json({
                 error: srv_errors.INVALID_PARAMETERS
             });
@@ -56,10 +65,13 @@ module.exports = {
         token.validateToken(req.body.akey, req.body.token, (err, valid) => {
             if (!err) {
                 if (valid) {
-                    postSoC(req.body.akey, req.body.soc, (err, synced) => {
+                    postSoC(req.body.akey, {
+                        display: req.body.display,
+                        bms: req.body.bms
+                    }, (err, synced) => {
                         if (!err && synced) {
                             res.json({
-                                synced
+                                synced: true
                             });
                         } else {
                             res.status(422).json({
@@ -99,10 +111,7 @@ module.exports = {
                 if (valid) {
                     getSoC(req.query.akey, (err, socObj) => {
                         if (!err && socObj != null) {
-                            res.json({
-                                soc: socObj.curSoC,
-                                timestamp: socObj.lastSoC
-                            });
+                            res.json(socObj);
                         } else {
                             res.status(422).json({
                                 error: srv_errors.UNPROCESSABLE_ENTITY,
