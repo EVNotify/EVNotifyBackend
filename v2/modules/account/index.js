@@ -110,7 +110,7 @@ const login = (akey, password, callback) => {
         if (!err && Array.isArray(dbRes)) {
             if (!dbRes.length) return callback(srv_errors.USER_NOT_EXISTING);
             // compare the hash
-            bcrypt.compare(password, dbRes[0].pw_hash, (err, valid) => callback(err, ((valid) ? dbRes[0].token : null)));
+            bcrypt.compare(password, dbRes[0].pw_hash, (err, valid) => callback(((err || !valid)? err || srv_errors.INVALID_CREDENTIALS : null), ((valid) ? dbRes[0].token : null)));
         } else callback(err);
     });
 };
@@ -158,6 +158,11 @@ module.exports = {
             }
         });
     },
+    /**
+     * login request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
     login: (req, res) => {
         // validate params
         if (!validParams(req, res)) return;
@@ -183,5 +188,9 @@ module.exports = {
                 });
             }
         });
-    }
+    },
+    /**
+     * login exported function
+     */
+    loginFunction: login
 };
