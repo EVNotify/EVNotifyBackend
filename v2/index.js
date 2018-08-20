@@ -33,6 +33,7 @@ const express = require('express'),
     db = require('./modules/db'),
     account = require('./modules/account'),
     sync = require('./modules/sync'),
+    token = require('./modules/token'),
     settings = require('./modules/settings');
 
 // ensure that session secret is valid
@@ -105,6 +106,7 @@ app.get('/settings', settings.getSettings);
 app.put('/settings', settings.setSettings);
 app.post('/soc', sync.postSoC);
 app.get('/soc', sync.getSoC);
+app.put('/renewtoken', token.renewToken);
 app.post('/debug', (req, res) => {
     if (typeof req.body.data === 'string') {
         db.query('INSERT INTO debug (data, timestamp) VALUES (?, ?)', [
