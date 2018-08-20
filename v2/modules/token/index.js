@@ -21,6 +21,13 @@ const validateToken = (akey, token, callback) => {
     });
 };
 
+/**
+ * Renews the token of the account and replaces existing one with new generated one
+ * @param {String} akey the akey
+ * @param {String} token the token of the account
+ * @param {String} password the password of the account
+ * @param {Function} callback callback function
+ */
 const renewToken = (akey, token, password, callback) => {
     // authenticate first
     account.loginFunction(akey, password, (err, dbToken) => {

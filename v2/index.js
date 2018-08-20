@@ -102,6 +102,7 @@ app.use((req, res, next) => {
 app.get('/key', account.getKey);
 app.post('/register', account.register);
 app.post('/login', account.login);
+app.post('/changepw', account.changePW);
 app.get('/settings', settings.getSettings);
 app.put('/settings', settings.setSettings);
 app.post('/soc', sync.postSoC);

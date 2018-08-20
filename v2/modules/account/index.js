@@ -110,7 +110,34 @@ const login = (akey, password, callback) => {
         if (!err && Array.isArray(dbRes)) {
             if (!dbRes.length) return callback(srv_errors.USER_NOT_EXISTING);
             // compare the hash
-            bcrypt.compare(password, dbRes[0].pw_hash, (err, valid) => callback(((err || !valid)? err || srv_errors.INVALID_CREDENTIALS : null), ((valid) ? dbRes[0].token : null)));
+            bcrypt.compare(password, dbRes[0].pw_hash, (err, valid) => callback(((err || !valid) ? err || srv_errors.INVALID_CREDENTIALS : null), ((valid) ? dbRes[0].token : null)));
+        } else callback(err);
+    });
+};
+
+/**
+ * Changes the current password of the account to the new given one
+ * @param {String} akey the akey
+ * @param {String} token the token of the account
+ * @param {String} oldpassword the old password of the account
+ * @param {String} newpassword the new password to set for the account
+ * @param {Function} callback callback function
+ */
+const changePW = (akey, token, oldpassword, newpassword, callback) => {
+    // authenticate
+    login(akey, oldpassword, (err, dbToken) => {
+        if (!err && dbToken) {
+            // compare token
+            if (dbToken === token) {
+                // set new password and update
+                bcrypt.hash(newpassword, 10, (err, pwdHash) => {
+                    if (!err && pwdHash) {
+                        db.query('UPDATE accounts SET pw_hash=? WHERE akey=?', [
+                            pwdHash, akey
+                        ], (err, dbRes) => callback(err, dbRes));
+                    } else callback(srv_errors.HASH_FAILED);
+                });
+            } else callback(srv_errors.INVALID_TOKEN);
         } else callback(err);
     });
 };
@@ -192,5 +219,32 @@ module.exports = {
     /**
      * login exported function
      */
-    loginFunction: login
+    loginFunction: login,
+    /**
+     * changePW request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
+    changePW: (req, res) => {
+        // validate params
+        if (!req.body.akey || !req.body.token || typeof req.body.oldpassword !== 'string' ||
+            typeof req.body.newpassword !== 'string' || req.body.newpassword.length < 6 || req.body.oldpassword.length > 72) {
+            return res.status(400).json({
+                error: srv_errors.INVALID_PARAMETERS
+            });
+        }
+        // change the password
+        changePW(req.body.akey, req.body.token, req.body.oldpassword, req.body.newpassword, (err, changed) => {
+            if (!err && changed) {
+                res.json({
+                    changed: true
+                });
+            } else {
+                res.status(422).json({
+                    error: srv_errors.UNPROCESSABLE_ENTITY,
+                    debug: ((srv_config.DEBUG) ? err : null)
+                });
+            }
+        });
+    }
 };
