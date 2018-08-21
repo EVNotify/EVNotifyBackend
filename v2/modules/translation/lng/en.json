@@ -1,5 +1,6 @@
 {
     "SOC_HISTORY": "State of charge history",
-    "SOC": "State of charge",
+    "SOC_DISPLAY": "State of charge (Display)",
+    "SOC_BMS": "State of charge (BMS)",
     "DATE_TIME": "Date/Time"
 }

@@ -1,5 +1,6 @@
 {
     "SOC_HISTORY": "Ladezustandshistorie",
-    "SOC": "Ladezustand",
+    "SOC_DISPLAY": "Ladezustand (Display)",
+    "SOC_BMS": "Ladezustand (BMS)",
     "DATE_TIME": "Datum/Uhrzeit"
 }

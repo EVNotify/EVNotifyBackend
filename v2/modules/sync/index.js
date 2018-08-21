@@ -10,7 +10,6 @@ const srv_config = require('./../../srv_config.json'),
 
 /**
  * Updates the current state of charge value within database and adds statistic record
- * NOTE: If display or bms value missing, the other corresponding value will be used for that missing property
  * @param {String} akey the AKey
  * @param {Object} socObj the state of charge object containing display and/or bms soc value to set
  * @param {Function} callback callback function
@@ -18,19 +17,19 @@ const srv_config = require('./../../srv_config.json'),
 const postSoC = (akey, socObj, callback) => {
     const now = parseInt(new Date() / 1000);
 
-    let soc;
-    
-    // if missing, use general soc
-    if (typeof socObj.display === 'undefined') soc = socObj.bms;
-    else if (typeof socObj.bms === 'undefined') soc = socObj.display;
-
     db.query('UPDATE sync SET soc_display=?, soc_bms=?, last_soc=? WHERE akey=?', [
-        soc || socObj.display, soc || socObj.bms, now, akey
+        socObj.display, socObj.bms, now, akey
     ], (err, dbRes) => {
         if (!err && dbRes) {
             db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                akey, 'soc', ((typeof socObj.display !== 'undefined')? socObj.display : socObj.bms), now
-            ], (err, dbRes) => callback(err, (!err && dbRes)));
+                akey, 'soc_display', socObj.display, now
+            ], (err, dbRes) => {
+                if (!err && dbRes) {
+                    db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
+                        akey, 'soc_bms', socObj.bms, now
+                    ], (err, dbRes) => callback(err, (!err && dbRes)));
+                } else callback(err);
+            });
         } else callback(err);
     });
 };
