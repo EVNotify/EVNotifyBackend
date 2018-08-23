@@ -16,7 +16,7 @@
     "moesif-express": "^2.4.4",
     "mysql": "^2.13.0",
     "node-telegram-bot-api": "^0.30.0",
-    "nodemailer": "^4.0.1",
+    "nodemailer": "^4.6.8",
     "npm": "^6.1.0",
     "password-hash": "^1.2.2",
     "request": "^2.82.0",
