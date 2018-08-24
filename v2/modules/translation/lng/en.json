@@ -2,5 +2,9 @@
     "SOC_HISTORY": "State of charge history",
     "SOC_DISPLAY": "State of charge (Display)",
     "SOC_BMS": "State of charge (BMS)",
-    "DATE_TIME": "Date/Time"
+    "DATE_TIME": "Date/Time",
+    "MAIL_SUBJECT": "EVNotify - Charge status of {SOC} reached",
+    "MAIL_SUBJECT_ABORT": "EVNotify - INTERRUPTED at {SOC}",
+    "MAIL_SOC_TEXT": "The desired state of charge of {SOC}% has just been reached. With that, you can drive about {RANGE}.",
+    "MAIL_SOC_TEXT_ABORT": "The charge had been interrupted at {SOC} or the communication with the car failed.."
 }

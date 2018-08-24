@@ -6,28 +6,38 @@
 const srv_config = require('./../../srv_config.json'),
     srv_errors = require('./../../srv_errors.json'),
     db = require('./../db'),
-    token = require('./../token');
+    mail = require('./mail');
 
+/**
+ * send Notification request
+ * @param {Object} req the server request
+ * @param {Object} res the server response
+ */
 const send = (req, res) => {
     let userObj;
 
     // check required params
-    if (req.body.akey && req.body.token) {
+    if (!req.body.akey || !req.body.token) {
         return res.status(400).json({
             error: srv_errors.INVALID_PARAMETERS
         });
     }
     // retrieve required information
-    db.query('SELECT accounts.akey, token, car, email, telegram, lng, curSoC, consumption, lastNotification, telegram, email FROM accounts \
-        INNER JOIN stats ON accounts.akey=stats.akey INNER JOIN settings ON settings.akey=accounts.akey WHERE accounts.akey=?', [
+    db.query('SELECT accounts.akey, token, car, email, telegram, lng, soc_display, soc_bms, consumption, last_notification, telegram, email FROM accounts \
+        INNER JOIN sync ON accounts.akey=sync.akey INNER JOIN settings ON settings.akey=accounts.akey WHERE accounts.akey=?', [
         req.body.akey
     ], (err, dbRes) => {
         if (!err && dbRes && (userObj = dbRes[0]) != null) {
             // validate token
             if (userObj.token === req.body.token) {
-                // valid, compare lastNotification timestamp to determine if limit reached
-                if ((userObj.lastNotification || 0) + 5 < parseInt(new Date() / 1000)) {
-                    // route the notifications in background // TODO
+                // valid, compare last_notification timestamp to determine if limit reached
+                if ((userObj.last_notification || 0) + 5 < parseInt(new Date() / 1000)) {
+                    // route the notifications in background
+                    if (userObj.email) mail.sendMail(userObj, req.body.abort);
+                    res.json({
+                        notified: true
+                    });
+                    // TODO update last notification..
                 } else {
                     // too many request
                     res.status(429).json({

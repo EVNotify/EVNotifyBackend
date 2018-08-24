@@ -35,7 +35,8 @@ const express = require('express'),
     sync = require('./modules/sync'),
     token = require('./modules/token'),
     report = require('./modules/report'),
-    settings = require('./modules/settings');
+    settings = require('./modules/settings'),
+    notifications = require('./modules/notification');
 
 // ensure that session secret is valid
 if (!srv_config.SESSION_SECRET || typeof srv_config.SESSION_SECRET !== 'string') throw new Error('No session secret given within config');
@@ -110,6 +111,7 @@ app.post('/soc', sync.postSoC);
 app.get('/soc', sync.getSoC);
 app.put('/renewtoken', token.renewToken);
 app.get('/report', report.downloadReport);
+app.post('/notification', notifications.send);
 app.post('/debug', (req, res) => {
     if (typeof req.body.data === 'string') {
         db.query('INSERT INTO debug (data, timestamp) VALUES (?, ?)', [
@@ -149,7 +151,7 @@ app.use(function onError(err, req, res, next) {
             error: srv_errors.BAD_REQUEST,
             debug: ((srv_config.DEBUG) ? err : null)
         });
-        rollbar.warning('Bad request', req);
+        if (rollbar) rollbar.warning('Bad request', req);
     } else {
         // critical - prevent further processing
         res.status(500).json({

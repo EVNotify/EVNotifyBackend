@@ -2,5 +2,9 @@
     "SOC_HISTORY": "Ladezustandshistorie",
     "SOC_DISPLAY": "Ladezustand (Display)",
     "SOC_BMS": "Ladezustand (BMS)",
-    "DATE_TIME": "Datum/Uhrzeit"
+    "DATE_TIME": "Datum/Uhrzeit",
+    "MAIL_SUBJECT": "EVNotify - Ladezustand mit {SOC} erreicht",
+    "MAIL_SUBJECT_ABORT": "EVNotify - ABBRUCH bei {SOC}",
+    "MAIL_SOC_TEXT": "Der gewünschte Ladezustand von {SOC} wurde soeben erreicht. Damit wirst Du ungefähr {RANGE} weit fahren können.",
+    "MAIL_SOC_TEXT_ABORT": "Der Ladevorgang ist bei {SOC} abgebrochen oder die Kommunikation mit dem Auto war nicht mehr möglich."
 }

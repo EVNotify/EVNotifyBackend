@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS `sync` (
     `soc_display` FLOAT DEFAULT 0,
     `soc_bms` FLOAT DEFAULT 0,
     `last_soc` INT(13) DEFAULT 0,
+    `last_notification` INT(13) DEFAULT 0,
     PRIMARY KEY (`user`),
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
 );
