@@ -24,7 +24,7 @@ const send = (req, res) => {
         });
     }
     // retrieve required information
-    db.query('SELECT accounts.akey, token, car, email, telegram, lng, soc_display, soc_bms, consumption, last_notification, FROM accounts \
+    db.query('SELECT accounts.akey, token, car, email, telegram, lng, soc_display, soc_bms, consumption, last_notification FROM accounts \
         INNER JOIN sync ON accounts.akey=sync.akey INNER JOIN settings ON settings.akey=accounts.akey WHERE accounts.akey=?', [
         req.body.akey
     ], (err, dbRes) => {
