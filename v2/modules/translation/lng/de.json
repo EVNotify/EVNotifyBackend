@@ -6,5 +6,16 @@
     "MAIL_SUBJECT": "EVNotify - Ladezustand mit {SOC} erreicht",
     "MAIL_SUBJECT_ABORT": "EVNotify - ABBRUCH bei {SOC}",
     "MAIL_SOC_TEXT": "Der gewünschte Ladezustand von {SOC} wurde soeben erreicht. Damit wirst Du ungefähr {RANGE} weit fahren können.",
-    "MAIL_SOC_TEXT_ABORT": "Der Ladevorgang ist bei {SOC} abgebrochen oder die Kommunikation mit dem Auto war nicht mehr möglich."
+    "MAIL_SOC_TEXT_ABORT": "Der Ladevorgang ist bei {SOC} abgebrochen oder die Kommunikation mit dem Auto war nicht mehr möglich.",
+    "TELEGRAM_SOC": "Der gewünschte Ladezustand von {SOC} wurde soeben erreicht. Damit wirst Du ungefähr {RANGE} weit fahren können.",
+    "TELEGRAM_SOC_ERROR": "Der aktuelle Ladezustand konnte nicht abgerufen werden.",
+    "TELEGRAM_START_TEXT": "Hallo! Ich bin der EVNotify Bot und benachrichtige Dich über Deinen Ladezustand, wenn Du magst. Gib einfach /subscribe ein, um loszulegen! Falls Du Hilfe brauchst, kannst Du jederzeit /help eingeben.",
+    "TELEGRAM_HELP_TEXT": "Ich kann Dich über den Ladezustand Deines Elektroautos benachrichtigen. Hierfür einfach /subscribe eingeben. Möchtest Du nicht weiter von mir benachrichtigt werden, einfach /unsubscribe eingeben.",
+    "TELEGRAM_TOKEN_ENTER": "Gleich kann ich Dich benachrichtigen. Vorher benötige ich allerdings noch Deinen Token. Diesen findest Du in der App unter Einstellungen (Benutzer - Zugangsdaten). Teile diesen niemals mit Dritten!",
+    "TELEGRAM_SUBSCRIBTION_SUCCESSFULL": "Super! Ich kann Dich ab sofort benachrichtigen. Stelle den gewünschten Wert in der App ein und ich werde Dich benachrichtigen, sobald dieser erreicht wurde.",
+    "TELEGRAM_SUBSCRIBTION_FAILED": "Huch?! Irgendwie kann ich mit dem Token nicht wirklich was anfangen - sicher, dass dieser korrekt ist? Probiere es mit /subscribe erneut.",
+    "TELEGRAM_UNSUBSCRIBTION_SUCCESSFULL": "Ich werde Dich nicht weiter benachrichtigen. Falls Du es Dir doch anders überlegst, kannst Du jederzeit wieder /subscribe eingeben.",
+    "TELEGRAM_UNSUBSCRIBTION_FAILED": "Merkwürdig. Da ist etwas schiefgelaufen beim Versuch, Dich aus der Benachrichtigungsliste zu entfernen. Versuche es zu einem späteren Zeitpunkt bitte mit /unsubscribe erneut.",
+    "TELEGRAM_NOTIFICATION_MESSAGE": "Hallo! Ich wollte Dir nur kurz Bescheid geben, dass Dein Elektroauto den gewünschten Ladezustand von {SOC} erreicht hat! Damit wirst Du ungefähr {RANGE} weit fahren können.",
+    "TELEGRAM_NOTIFICATION_ABORT_MESSAGE": "Hallo! Es scheint so, als sei der Ladevorgang bei {SOC} abgebrochen worden oder es gab einen Fehler bei der Kommunikation mit dem Auto. Am besten mal nachschauen!"
 }
