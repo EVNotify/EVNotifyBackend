@@ -35,6 +35,38 @@ const postSoC = (akey, socObj, callback) => {
 };
 
 /**
+ * Updates the current location with current gps speed within database and adds statistic records for them
+ * @param {String} akey the AKey
+ * @param {Object} locationObj the location object containing latitude, longitude and speed
+ * @param {Function} callback callback function
+ */
+const postLocation = (akey, locationObj, callback) => {
+    const now = parseInt(new Date() / 1000);
+
+    db.query('UPDATE sync SET latitude=?, longitude=?, gps_speed=?, last_location=? WHERE akey=?', [
+        locationObj.latitude, locationObj.longitude, locationObj.speed, now, akey
+    ], (err, dbRes) => {
+        if (!err && dbRes) {
+            db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
+                akey, 'latitude', locationObj.latitude, now
+            ], (err, dbRes) => {
+                if (!err && dbRes) {
+                    db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
+                        akey, 'longitude', locationObj.longitude, now
+                    ], (err, dbRes) => {
+                        if (!err && dbRes) {
+                            db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
+                                akey, 'gps_speed', locationObj.speed, now
+                            ], callback(err, (!err && dbRes)));
+                        } else callback(err);
+                    });
+                } else callback(err);
+            });
+        } else callback(err);
+    });
+};
+
+/**
  * Retrieves the last submitted state of charge values and timestamp from database
  * @param {String} akey the AKey
  * @param {Function} callback callback function
@@ -111,6 +143,48 @@ module.exports = {
                     getSoC(req.query.akey, (err, socObj) => {
                         if (!err && socObj != null) {
                             res.json(socObj);
+                        } else {
+                            res.status(422).json({
+                                error: srv_errors.UNPROCESSABLE_ENTITY,
+                                debug: ((srv_config.DEBUG) ? err : null)
+                            });
+                        }
+                    });
+                } else {
+                    // invalid token
+                    res.status(401).json({
+                        error: srv_errors.INVALID_TOKEN
+                    });
+                }
+            } else {
+                res.status(422).json({
+                    error: srv_errors.UNPROCESSABLE_ENTITY,
+                    debug: ((srv_config.DEBUG) ? err : null)
+                });
+            }
+        });
+    },
+    /**
+     * postLocation request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
+    postLocation: (req, res) => {
+        // check required params
+        if (!req.body.akey || !req.body.token || !req.body.location == null || typeof req.body.location !== 'object') {
+            return res.status(400).json({
+                error: srv_errors.INVALID_PARAMETERS
+            });
+        }
+        // validate token
+        token.validateToken(req.body.akey, req.body.token, (err, valid) => {
+            if (!err) {
+                if (valid) {
+                    postLocation(req.body.akey, req.body.location, (err, synced) => {
+                        if (!err && synced) {
+                            res.json({
+                                synced: true
+                            });
                         } else {
                             res.status(422).json({
                                 error: srv_errors.UNPROCESSABLE_ENTITY,

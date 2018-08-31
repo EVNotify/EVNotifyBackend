@@ -41,8 +41,12 @@ CREATE TABLE IF NOT EXISTS `sync` (
     `akey` VARCHAR(6) NOT NULL,
     `soc_display` FLOAT DEFAULT 0,
     `soc_bms` FLOAT DEFAULT 0,
+    `latitude` DECIMAL(10, 8) DEFAULT 0,
+    `longitude` DECIMAL(11, 8) DEFAULT 0,
+    `gps_speed` FLOAT DEFAULT 0,
     `last_soc` INT(13) DEFAULT 0,
     `last_notification` INT(13) DEFAULT 0,
+    `last_location` INT(13) DEFAULT 0,
     PRIMARY KEY (`user`),
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
 );
