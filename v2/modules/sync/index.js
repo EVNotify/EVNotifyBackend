@@ -35,6 +35,17 @@ const postSoC = (akey, socObj, callback) => {
 };
 
 /**
+ * Retrieves the last submitted state of charge values and timestamp from database
+ * @param {String} akey the AKey
+ * @param {Function} callback callback function
+ */
+const getSoC = (akey, callback) => {
+    db.query('SELECT soc_display, soc_bms, last_soc FROM sync WHERE akey=?', [
+        akey
+    ], (err, queryRes) => callback(err, ((!err && queryRes) ? queryRes[0] : null)));
+};
+
+/**
  * Updates the current location with current gps speed within database and adds statistic records for them
  * @param {String} akey the AKey
  * @param {Object} locationObj the location object containing latitude, longitude and speed
@@ -67,12 +78,12 @@ const postLocation = (akey, locationObj, callback) => {
 };
 
 /**
- * Retrieves the last submitted state of charge values and timestamp from database
+ * Retrieves last submitted location and timestamp from database
  * @param {String} akey the AKey
  * @param {Function} callback callback function
  */
-const getSoC = (akey, callback) => {
-    db.query('SELECT soc_display, soc_bms, last_soc FROM sync WHERE akey=?', [
+const getLocation = (akey, callback) => {
+    db.query('SELECT latitude, longitude, gps_speed, last_location FROM sync WHERE akey=?', [
         akey
     ], (err, queryRes) => callback(err, ((!err && queryRes) ? queryRes[0] : null)));
 };
@@ -131,6 +142,7 @@ module.exports = {
      * @param {Object} res the server response
      */
     getSoC: (req, res) => {
+        // validate required params
         if (!req.query.akey || !req.query.token) {
             return res.status(400).json({
                 error: srv_errors.INVALID_PARAMETERS
@@ -185,6 +197,46 @@ module.exports = {
                             res.json({
                                 synced: true
                             });
+                        } else {
+                            res.status(422).json({
+                                error: srv_errors.UNPROCESSABLE_ENTITY,
+                                debug: ((srv_config.DEBUG) ? err : null)
+                            });
+                        }
+                    });
+                } else {
+                    // invalid token
+                    res.status(401).json({
+                        error: srv_errors.INVALID_TOKEN
+                    });
+                }
+            } else {
+                res.status(422).json({
+                    error: srv_errors.UNPROCESSABLE_ENTITY,
+                    debug: ((srv_config.DEBUG) ? err : null)
+                });
+            }
+        });
+    },
+    /**
+     * getLocation request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
+    getLocation: (req, res) => {
+        // validate required params
+        if (!req.query.akey || !req.query.token) {
+            return res.status(400).json({
+                error: srv_errors.INVALID_PARAMETERS
+            });
+        }
+        // validate token
+        token.validateToken(req.query.akey, req.query.token, (err, valid) => {
+            if (!err) {
+                if (valid) {
+                    getLocation(req.query.akey, (err, locationObj) => {
+                        if (!err && locationObj != null) {
+                            res.json(locationObj);
                         } else {
                             res.status(422).json({
                                 error: srv_errors.UNPROCESSABLE_ENTITY,

@@ -111,6 +111,7 @@ app.put('/settings', settings.setSettings);
 app.post('/soc', sync.postSoC);
 app.get('/soc', sync.getSoC);
 app.post('/location', sync.postLocation);
+app.get('/location', sync.getLocation);
 // app.post('/extended', )
 app.put('/renewtoken', token.renewToken);
 app.get('/report', report.downloadReport);
