@@ -151,7 +151,7 @@ const startBot = () => {
  */
 const sendMessage = (userObj, abort) => {
     if (bot) {
-        bot.sendMessage(userID, ((abort) ?
+        bot.sendMessage(userObj.telegram, ((abort) ?
             translation.translateWithData('TELEGRAM_NOTIFICATION_ABORT_MESSAGE', userObj.lng, {}, true) : // TODO
             translation.translateWithData('TELEGRAM_NOTIFICATION_MESSAGE', userObj.lng, {}, true) // TODO
         ));
