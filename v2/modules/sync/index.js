@@ -68,7 +68,7 @@ const postLocation = (akey, locationObj, callback) => {
                         if (!err && dbRes) {
                             db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
                                 akey, 'gps_speed', locationObj.speed, now
-                            ], callback(err, (!err && dbRes)));
+                            ], (err, dbRes) => callback(err, (!err && dbRes)));
                         } else callback(err);
                     });
                 } else callback(err);
