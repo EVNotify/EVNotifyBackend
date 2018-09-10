@@ -28,7 +28,9 @@ const express = require('express'),
     moesifExpress = require('moesif-express'),
     moesif = ((srv_config.MOESIF_TOKEN) ? moesifExpress({
         applicationId: srv_config.MOESIF_TOKEN,
-        identifyUser: (req, res) => req.body.akey
+        identifyUser: req => req.body.akey,
+        getApiVersion: () => '2',
+        skip: req => (req.path === '/location' || req.path === '/debug') && req.method === 'POST'
     }) : false),
     db = require('./modules/db'),
     account = require('./modules/account'),
@@ -79,8 +81,6 @@ app.use((req, res, next) => {
     req.rollbar_person = {
         id: req.body.akey || null
     };
-    // attach api_version to be tracked by moesif
-    req.api_version = '2';
     next();
 });
 
