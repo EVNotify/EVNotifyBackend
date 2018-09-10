@@ -17,7 +17,7 @@ const express = require('express'),
         ca: fs.readFileSync(srv_config.CHAIN_PATH, 'utf-8'),
         key: fs.readFileSync(srv_config.PRIVATE_KEY_PATH, 'utf-8'),
         cert: fs.readFileSync(srv_config.CERTIFICATE_PATH, 'utf-8')
-    }) : false),
+    }, app) : false),
     Rollbar = require('rollbar'),
     rollbar = ((srv_config.ROLLBAR_TOKEN) ? new Rollbar({
         accessToken: srv_config.ROLLBAR_TOKEN,
