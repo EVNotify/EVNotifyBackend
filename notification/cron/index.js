@@ -17,9 +17,11 @@ let sendNotifications = () => {
     // retrieve users
     db.query(sql, (err, queryRes) => {
         if(!err && Array.isArray(queryRes)) {
+            const now = parseInt(new Date().getTime() / 1000);
+
             queryRes.forEach(userObj => {
-                // check if there was already a notification within the last seconds
-                if((userObj.lastNotification || 0) + 5 < parseInt(new Date().getTime() / 1000)) {
+                // check if there was already a notification within the last seconds and check if user has a valid soc not older than one day
+                if((userObj.lastNotification || 0) + 5 < now && userObj.soc && userObj.lastSoC && userObj.lastSoC >= now - 86400) {
                     // send notifications in background depending on type
                     if(userObj.email) mail.sendSummary(userObj.email, userObj.lng, userObj.curSoC, userObj.consumption, userObj.lastSoC);
                     // if(userObj.push) push.sendPush(userObj.akey, userObj.lng);
