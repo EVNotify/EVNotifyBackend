@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS `stats` (
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
 );
 
+-- sync table structure
 CREATE TABLE IF NOT EXISTS `sync` (
     `user` VARCHAR(6) NOT NULL,
     `akey` VARCHAR(6) NOT NULL,

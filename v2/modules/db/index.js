@@ -23,8 +23,10 @@ module.exports = {
      * @param {Function} callback callback function
      */
     query: (sql, params, callback) => {
-        if (typeof callback !== 'function') return srv_errors.INVALID_PARAMETERS;
-        if (typeof sql === 'string' && Array.isArray(params)) db.query(mysql.format(sql, params), (err, queryRes) => callback(err, queryRes));
-        else callback(srv_errors.INVALID_PARAMETERS);
+        if (typeof sql === 'string' && Array.isArray(params)) {
+            db.query(mysql.format(sql, params), (err, queryRes) => {
+                if (typeof callback === 'function') callback(err, queryRes);
+            });
+        } else if (typeof callback === 'function') callback(srv_errors.INVALID_PARAMETERS);
     }
 };
