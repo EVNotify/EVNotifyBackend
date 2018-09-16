@@ -59,7 +59,6 @@ const removeSubscribtion = (userID, callback) => {
  * @param {String} [akey] optional akey to retrieve soc for
  */
 const sendSoCMessage = (userID, akey) => {
-    console.log(akey);
     // retrieve the current state of charge
     db.query('SELECT accounts.akey, car, lng, soc_display, soc_bms, consumption, last_notification FROM accounts \
         INNER JOIN sync ON accounts.akey=sync.akey INNER JOIN settings ON settings.akey=accounts.akey \
@@ -70,7 +69,7 @@ const sendSoCMessage = (userID, akey) => {
             if (!err && userObj != null) {
                 const SOC_DISPLAY = (parseFloat(userObj.soc_display) || 0).toString() + '%',
                     SOC_BMS = (parseFloat(userObj.soc_bms) || 0).toString() + '%'; // use string for string replacement within translation
-                    
+
                 bot.sendMessage(userID, translation.translateWithData('TELEGRAM_SOC', userObj.lng, {
                     SOC: ((userObj.soc_display == null) ? SOC_BMS : ((
                             userObj.soc_bms == null) ?
@@ -150,10 +149,22 @@ const startBot = () => {
  * @param {Boolean} [abort] whether or not abort message should be sent out 
  */
 const sendMessage = (userObj, abort) => {
-    if (bot) {
+    if (bot && userObj != null) {
+        const SOC_DISPLAY = (parseFloat(userObj.soc_display) || 0).toString() + '%';
+        const SOC_BMS = (parseFloat(userObj.soc_bms) || 0).toString() + '%'; // use string for string replacement within translation
+
         bot.sendMessage(userObj.telegram, ((abort) ?
-            translation.translateWithData('TELEGRAM_NOTIFICATION_ABORT_MESSAGE', userObj.lng, {}, true) : // TODO
-            translation.translateWithData('TELEGRAM_NOTIFICATION_MESSAGE', userObj.lng, {}, true) // TODO
+            translation.translateWithData('TELEGRAM_NOTIFICATION_ABORT_MESSAGE', userObj.lng, {
+                SOC: ((userObj.soc_display == null) ? SOC_BMS : ((
+                        userObj.soc_bms == null) ?
+                    SOC_DISPLAY : SOC_DISPLAY))
+            }, true) : // TODO
+            translation.translateWithData('TELEGRAM_NOTIFICATION_MESSAGE', userObj.lng, {
+                SOC: ((userObj.soc_display == null) ? SOC_BMS : ((
+                        userObj.soc_bms == null) ?
+                    SOC_DISPLAY : SOC_DISPLAY)),
+                RANGE: '0km' // TODO
+            }, true) // TODO
         ));
     }
 }

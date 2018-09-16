@@ -31,26 +31,32 @@ const send = (req, res) => {
         if (!err && dbRes && (userObj = dbRes[0]) != null) {
             // validate token
             if (userObj.token === req.body.token) {
+                const now = parseInt(new Date() / 1000);
+
                 // valid, compare last_notification timestamp to determine if limit reached
-                if ((userObj.last_notification || 0) + 5 < parseInt(new Date() / 1000)) {
+                if ((userObj.last_notification || 0) + 60 < now) {
                     // route the notifications in background
                     if (userObj.email) mail.sendMail(userObj, req.body.abort);
                     if (userObj.telegram) telegram.sendMessage(userObj, req.body.abort);
                     res.json({
                         notified: true
                     });
-                    // TODO update last notification..
+                    // update last notification
+                    db.query('UPDATE sync SET last_notification=? WHERE akey=?', [
+                        now, req.body.akey
+                    ]);
                 } else {
+                    res.setHeader('Retry-After', 60);
                     // too many request
                     res.status(429).json({
-                        error: srv.errors.TOO_MANY_REQUESTS,
+                        error: srv_errors.TOO_MANY_REQUESTS,
                         debug: ((srv_config.DEBUG) ? err : null)
                     });
                 }
             } else {
                 // invalid
                 res.status(401).json({
-                    error: srv.errors.INVALID_TOKEN,
+                    error: srv_errors.INVALID_TOKEN,
                     debug: ((srv_config.DEBUG) ? err : null)
                 });
             }
