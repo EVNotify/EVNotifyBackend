@@ -45,6 +45,22 @@ const getSoC = (akey, callback) => {
     ], (err, queryRes) => callback(err, ((!err && queryRes) ? queryRes[0] : null)));
 };
 
+const postExtended = (akey, extendedObj, callback) => {
+    // TODO
+};
+
+/**
+ * Retrieves the last submitted extended sync values and timestamp from database
+ * @param {String} akey the AKey
+ * @param {Function} callback callback function
+ */
+const getExtended = (akey, callback) => {
+    db.query('SELECT soh, charging, rapid_charge_port, normal_charge_port, aux_battery_voltage, last_extended \
+    FROM sync WHERE akey=?', [
+        akey
+    ], (err, queryRes) => callback(err, ((!err && queryRes) ? queryRes[0] : null)));
+};
+
 /**
  * Updates the current location with current gps speed within database and adds statistic records for them
  * @param {String} akey the AKey
@@ -155,6 +171,67 @@ module.exports = {
                     getSoC(req.query.akey, (err, socObj) => {
                         if (!err && socObj != null) {
                             res.json(socObj);
+                        } else {
+                            res.status(422).json({
+                                error: srv_errors.UNPROCESSABLE_ENTITY,
+                                debug: ((srv_config.DEBUG) ? err : null)
+                            });
+                        }
+                    });
+                } else {
+                    // invalid token
+                    res.status(401).json({
+                        error: srv_errors.INVALID_TOKEN
+                    });
+                }
+            } else {
+                res.status(422).json({
+                    error: srv_errors.UNPROCESSABLE_ENTITY,
+                    debug: ((srv_config.DEBUG) ? err : null)
+                });
+            }
+        });
+    },
+    postExtended: (req, res) => {
+        // check required params
+        if (!req.body.akey || !req.body.token) {
+            return res.status(400).json({
+                error: srv_errors.INVALID_PARAMETERS
+            });
+        }
+        // validate token
+        token.validateToken(req.body.akey, req.body.token, (err, valid) => {
+            if (!err) {
+                if (valid) {
+                    // TODO
+                } else {
+                    // invalid token
+                    res.status(401).json({
+                        error: srv_errors.INVALID_TOKEN
+                    });
+                }
+            } else {
+                res.status(422).json({
+                    error: srv_errors.UNPROCESSABLE_ENTITY,
+                    debug: ((srv_config.DEBUG) ? err : null)
+                });
+            }
+        });
+    },
+    getExtended: (req, res) => {
+        // check required params
+        if (!req.query.akey || !req.query.token) {
+            return res.status(400).json({
+                error: srv_errors.INVALID_PARAMETERS
+            });
+        }
+        // validate token
+        token.validateToken(req.query.akey, req.query.token, (err, valid) => {
+            if (!err) {
+                if (valid) {
+                    getExtended(req.query.akey, (err, extendedObj) => {
+                        if (!err && extendedObj != null) {
+                            res.json(extendedObj);
                         } else {
                             res.status(422).json({
                                 error: srv_errors.UNPROCESSABLE_ENTITY,
