@@ -45,8 +45,48 @@ const getSoC = (akey, callback) => {
     ], (err, queryRes) => callback(err, ((!err && queryRes) ? queryRes[0] : null)));
 };
 
+/**
+ * Updates extended sync properties within database and adds statistic records
+ * @param {String} akey the AKey
+ * @param {Object} extendedObj the object containing the properties to sync
+ * @param {Function} callback callback function
+ */
 const postExtended = (akey, extendedObj, callback) => {
-    // TODO
+    const now = parseInt(new Date() / 1000);
+
+    db.query('UPDATE sync SET soh=?, charging=?, rapid_charge_port=?, normal_charge_port=?, aux_battery_voltage=?, last_extended=? WHERE akey=?', [
+        extendedObj.soh, extendedObj.charging, extendedObj.rapidChargePort, extendedObj.normalChargePort, extendedObj.auxBatteryVoltage, now, akey
+    ], (err, dbRes) => {
+        if (!err && dbRes) {
+            db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
+                akey, 'soh', extendedObj.soh, now
+            ], (err, dbRes) => {
+                if (!err && dbRes) {
+                    db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
+                        akey, 'charging', extendedObj.charging, now
+                    ], (err, dbRes) => {
+                        if (!err && dbRes) {
+                            db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
+                                akey, 'rapid_charge_port', extendedObj.rapidChargePort, now
+                            ], (err, dbRes) => {
+                                if (!err && dbRes) {
+                                    db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
+                                        akey, 'normal_charge_port', extendedObj.normalChargePort, now
+                                    ], (err, dbRes) => {
+                                        if (!err && dbRes) {
+                                            db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
+                                                akey, 'aux_battery_voltage', extendedObj.auxBatteryVoltage, now
+                                            ], (err, dbRes) => callback(err, (!err && dbRes)));
+                                        } else callback(err);
+                                    });
+                                } else callback(err);
+                            });
+                        } else callback(err);
+                    });
+                } else callback(err);
+            });
+        } else callback(err);
+    });
 };
 
 /**
@@ -203,7 +243,18 @@ module.exports = {
         token.validateToken(req.body.akey, req.body.token, (err, valid) => {
             if (!err) {
                 if (valid) {
-                    // TODO
+                    postExtended(req.body.akey, req.body, (err, synced) => {
+                        if (!err && synced) {
+                            res.json({
+                                synced
+                            });
+                        } else {
+                            res.status(422).json({
+                                error: srv_errors.UNPROCESSABLE_ENTITY,
+                                debug: ((srv_config.DEBUG) ? err : null)
+                            });
+                        }
+                    });
                 } else {
                     // invalid token
                     res.status(401).json({

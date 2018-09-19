@@ -110,7 +110,7 @@ app.get('/settings', settings.getSettings);
 app.put('/settings', settings.setSettings);
 app.post('/soc', sync.postSoC);
 app.get('/soc', sync.getSoC);
-// app.post('/extended', )
+app.post('/extended', sync.postExtended);
 app.get('/extended', sync.getExtended);
 app.post('/location', sync.postLocation);
 app.get('/location', sync.getLocation);
