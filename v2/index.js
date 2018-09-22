@@ -39,7 +39,8 @@ const express = require('express'),
     report = require('./modules/report'),
     settings = require('./modules/settings'),
     notifications = require('./modules/notification'),
-    telegram = require('./modules/notification/telegram');
+    telegram = require('./modules/notification/telegram'),
+    push = require('./modules/notification/push');
 
 // ensure that session secret is valid
 if (!srv_config.SESSION_SECRET || typeof srv_config.SESSION_SECRET !== 'string') throw new Error('No session secret given within config');
@@ -172,6 +173,9 @@ if (rollbar) app.use(rollbar.errorHandler());
 
 // start telegram bot
 telegram.startBot();
+
+// initialize push
+push.init();
 
 // ensure that port is valid
 if (typeof srv_config.PORT !== 'number' || srv_config.PORT < 1024 || srv_config.PORT > 49151) throw new Error('Port must be between 1024 and 49151');

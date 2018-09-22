@@ -4,3 +4,4 @@ node_modules/
 deploy.sh
 package-lock.json
 launch.json
+v2/firebase.json
