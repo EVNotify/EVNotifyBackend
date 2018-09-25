@@ -90,7 +90,7 @@ const postExtended = async (akey, extendedObj, callback) => {
             'INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)',
             [akey, 'dc_battery_current', extendedObj.dcBatteryCurrent, now]
         )
-        let dbRes = await promiseDbQuery(
+        await promiseDbQuery(
             'INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)',
             [akey, 'dc_battery_power', extendedObj.dcBatteryPower, now]
         )
