@@ -54,7 +54,7 @@ const getSoC = (akey, callback) => {
 const postExtended = (akey, extendedObj, callback) => {
     const now = parseInt(new Date() / 1000);
 
-    db.query('UPDATE sync SET soh=?, charging=?, rapid_charge_port=?, normal_charge_port=?, aux_battery_voltage=?, dc_battery_voltage, dc_battery_current, dc_battery_power, last_extended=? WHERE akey=?', [
+    db.query('UPDATE sync SET soh=?, charging=?, rapid_charge_port=?, normal_charge_port=?, aux_battery_voltage=?, dc_battery_voltage=?, dc_battery_current=?, dc_battery_power=?, last_extended=? WHERE akey=?', [
         extendedObj.soh, extendedObj.charging, extendedObj.rapidChargePort, extendedObj.normalChargePort, extendedObj.auxBatteryVoltage, extendedObj.dcBatteryVoltage, extendedObj.dcBatteryCurrent, extendedObj.dcBatteryPower, now, akey
     ], (err, dbRes) => {
         if (!err && dbRes) {
