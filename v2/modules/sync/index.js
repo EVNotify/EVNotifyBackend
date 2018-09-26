@@ -62,38 +62,22 @@ const postExtended = async (akey, extendedObj, callback) => {
             'UPDATE sync SET soh=?, charging=?, rapid_charge_port=?, normal_charge_port=?, aux_battery_voltage=?, dc_battery_voltage=?, dc_battery_current=?, dc_battery_power=?, last_extended=? WHERE akey=?',
             [extendedObj.soh, extendedObj.charging, extendedObj.rapidChargePort, extendedObj.normalChargePort, extendedObj.auxBatteryVoltage, extendedObj.dcBatteryVoltage, extendedObj.dcBatteryCurrent, extendedObj.dcBatteryPower, now, akey]
         )
-        await promiseDbQuery(
-            'INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)',
-            [akey, 'soh', extendedObj.soh, now]
-        )
-        await promiseDbQuery(
-            'INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)',
-            [akey, 'charging', extendedObj.charging, now]
-        )
-        await promiseDbQuery(
-            'INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)',
-            [akey, 'rapid_charge_port', extendedObj.rapidChargePort, now]
-        )
-        await promiseDbQuery(
-            'INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)',
-            [akey, 'normal_charge_port', extendedObj.normalChargePort, now]
-        )
-        await promiseDbQuery(
-            'INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)',
-            [akey, 'aux_battery_voltage', extendedObj.auxBatteryVoltage, now]
-        )
-        await promiseDbQuery(
-            'INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)',
-            [akey, 'dc_battery_voltage', extendedObj.dcBatteryVoltage, now]
-        )
-        await promiseDbQuery(
-            'INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)',
-            [akey, 'dc_battery_current', extendedObj.dcBatteryCurrent, now]
-        )
-        await promiseDbQuery(
-            'INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)',
-            [akey, 'dc_battery_power', extendedObj.dcBatteryPower, now]
-        )
+        let fields = [
+            { type: 'soh', value: 'soh' },
+            { type: 'charging', value: 'charging' },
+            { type: 'rapid_charge_port', value: 'rapidChargePort' },
+            { type: 'normal_charge_port', value: 'normalChargePort' },
+            { type: 'aux_battery_voltage', value: 'auxBatteryVoltage' },
+            { type: 'dc_battery_voltage', value: 'dcBatteryVoltage' },
+            { type: 'dc_battery_current', value: 'dcBatteryCurrent' },
+            { type: 'dc_battery_power', value: 'dcBatteryPower' },
+        ]
+        for (let field of fields) {
+            await promiseDbQuery(
+                'INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)',
+                [akey, field.type, extendedObj[field.value], now]
+            )
+        }
         callback(false, true)
     }
     catch (err) {
