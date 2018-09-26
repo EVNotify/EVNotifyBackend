@@ -82,3 +82,23 @@ CREATE TABLE IF NOT EXISTS `statistics` (
     KEY `type` (`type`) USING BTREE,
     KEY `timestamp` (`timestamp`) USING BTREE
 );
+
+-- login table structure for web interface
+CREATE TABLE IF NOT EXISTS `login` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `mail` VARCHAR(100) NOT NULL,
+    `pw_hash` VARCHAR(255) NOT NULL,
+    `last_login` INT(10) DEFAULT 0,
+    PRIMARY KEY (`id`)
+);
+
+-- devices table structure for web interface
+CREATE TABLE IF NOT EXISTS `devices` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `user` INT NOT NULL,
+    `akey` VARCHAR(6) NOT NULL UNIQUE,
+    `token` VARCHAR(20) NOT NULL UNIQUE,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`user`) REFERENCES `login`(`id`),
+    FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
+);

@@ -40,7 +40,8 @@ const express = require('express'),
     settings = require('./modules/settings'),
     notifications = require('./modules/notification'),
     telegram = require('./modules/notification/telegram'),
-    push = require('./modules/notification/push');
+    push = require('./modules/notification/push'),
+    webAccount = require('./modules/web/account');
 
 // ensure that session secret is valid
 if (!srv_config.SESSION_SECRET || typeof srv_config.SESSION_SECRET !== 'string') throw new Error('No session secret given within config');
@@ -138,6 +139,9 @@ app.post('/debug', (req, res) => {
         });
     }
 });
+// the web routes
+app.post('/web/register', webAccount.register);
+app.post('/web/login', webAccount.login);
 
 // requested route does not exist
 app.use((req, res) => res.status(404).json({

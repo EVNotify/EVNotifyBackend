@@ -54,5 +54,9 @@
     "INVALID_TOKEN": {
         "code": 1900,
         "message": "Provided token is invalid or no longer valid."
+    },
+    "MAIL_ALREADY_REGISTERED": {
+        "code": 2000,
+        "message": "Requested Mail already registered."
     }
 }
