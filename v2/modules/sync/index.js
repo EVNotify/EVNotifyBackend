@@ -170,9 +170,7 @@ module.exports = {
      */
     postSoC: (req, res) => {
         // check required params
-        if (!req.body.akey || !req.body.token || (typeof req.body.display === 'undefined' && typeof req.body.bms === 'undefined') ||
-            !(((typeof req.body.display !== 'undefined') ? typeof req.body.display === 'number' && !isNaN(req.body.display) : true)) ||
-            !(((typeof req.body.bms !== 'undefined') ? typeof req.body.bms === 'number' && !isNaN(req.body.bms) : true))) {
+        if (!req.body.akey || !req.body.token || (typeof req.body.display === 'undefined' && typeof req.body.bms === 'undefined')) {
             return res.status(400).json({
                 error: srv_errors.INVALID_PARAMETERS
             });
