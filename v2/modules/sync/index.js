@@ -78,7 +78,7 @@ const postExtended = async (akey, extendedObj, callback) => {
                 [akey, field.type, extendedObj[field.value], now]
             )
         }
-        callback(false, true)
+        callback(null, true)
     }
     catch (err) {
         callback(err)
