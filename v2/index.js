@@ -122,6 +122,8 @@ app.get('/report', report.downloadReport);
 app.post('/notification', notifications.send);
 app.get('/stations', stations.getStations);
 app.get('/station', stations.getStation);
+app.get('/stationphoto', stations.getStationPhoto);
+app.get('/stationcards', stations.getStationCards);
 app.post('/debug', (req, res) => {
     if (typeof req.body.data === 'string') {
         db.query('INSERT INTO debug (data, timestamp) VALUES (?, ?)', [

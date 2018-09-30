@@ -53,6 +53,44 @@ const getStation = (id, callback) => {
     });
 };
 
+/**
+ * Retrieves station photo for given photo id from API (and streams the image)
+ * @param {Number} id the photo id
+ * @param {Object} res the server request
+ */
+const getStationPhoto = (id, res) => {
+    request({
+        uri: srv_config.GE_API_URL + '/chargepoints/photo/' + srv_config.GE_API_KEY + '&id=' + id,
+        method: 'GET',
+        timeout: 10000,
+        followRedirect: true,
+        maxRedirects: 10,
+        headers: {
+            'content-type': 'image/jpeg'
+        }
+    }).pipe(res);
+};
+
+/**
+ * Retrieves station cards from API
+ * @param {Function} callback callback function
+ */
+const getStationCards = callback => {
+    request({
+        uri: srv_config.GE_API_URL + '/chargepoints/chargecardlist/' + srv_config.GE_API_KEY,
+        method: 'GET',
+        timeout: 10000,
+        followRedirect: true,
+        maxRedirects: 10
+    }, (err, resp, body) => {
+        try {
+            callback(err, ((!err && body)? JSON.parse(body).result : null));
+        } catch (e) {
+            callback(e);
+        }
+    });
+};
+
 module.exports = {
     /**
      * getStations request handler
@@ -108,5 +146,37 @@ module.exports = {
                 error: srv_errors.INVALID_PARAMETERS
             });
         }
+    },
+    /**
+     * getStationPhoto request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
+    getStationPhoto: (req, res) => {
+        // check params TODO: validate if number
+        if (req.query.id) {
+            getStationPhoto(req.query.id, res);
+        } else {
+            res.status(400).json({
+                error: srv_errors.INVALID_PARAMETERS
+            });
+        }
+    },
+    /**
+     * getStationCards request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
+    getStationCards: (req, res) => {
+        getStationCards((err, cards) => {
+            if (!err && cards) {
+                res.json(cards);
+            } else {
+                res.status(422).json({
+                    error: srv_errors.UNPROCESSABLE_ENTITY,
+                    debug: ((srv_config.DEBUG) ? err : null)
+                });
+            }
+        });
     }
 };
