@@ -6,10 +6,7 @@
 const srv_config = require('./../../srv_config.json'),
     srv_errors = require('./../../srv_errors.json'),
     db = require('./../db'),
-    token = require('./../token'),
-    util = require('util');
-
-const promiseDbQuery = util.promisify(db.query)
+    token = require('./../token');
 
 /**
  * Updates the current state of charge value within database and adds statistic record
@@ -24,15 +21,9 @@ const postSoC = (akey, socObj, callback) => {
         socObj.display, socObj.bms, now, akey
     ], (err, dbRes) => {
         if (!err && dbRes) {
-            db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                akey, 'soc_display', socObj.display, now
-            ], (err, dbRes) => {
-                if (!err && dbRes) {
-                    db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                        akey, 'soc_bms', socObj.bms, now
-                    ], (err, dbRes) => callback(err, (!err && dbRes)));
-                } else callback(err);
-            });
+            db.query('INSERT INTO statistics (akey, soc_display, soc_bms, timestamp) VALUES (?, ?, ?, ?)', [
+                akey, socObj.display, socObj.bms, now
+            ], (err, dbRes) => callback(err, (!err && dbRes)));
         } else callback(err);
     });
 };
@@ -57,32 +48,20 @@ const getSoC = (akey, callback) => {
 const postExtended = async (akey, extendedObj, callback) => {
     const now = parseInt(new Date() / 1000);
 
-    try {
-        await promiseDbQuery(
-            'UPDATE sync SET soh=?, charging=?, rapid_charge_port=?, normal_charge_port=?, aux_battery_voltage=?, dc_battery_voltage=?, dc_battery_current=?, dc_battery_power=?, last_extended=? WHERE akey=?',
-            [extendedObj.soh, extendedObj.charging, extendedObj.rapidChargePort, extendedObj.normalChargePort, extendedObj.auxBatteryVoltage, extendedObj.dcBatteryVoltage, extendedObj.dcBatteryCurrent, extendedObj.dcBatteryPower, now, akey]
-        )
-        let fields = [
-            { type: 'soh', value: 'soh' },
-            { type: 'charging', value: 'charging' },
-            { type: 'rapid_charge_port', value: 'rapidChargePort' },
-            { type: 'normal_charge_port', value: 'normalChargePort' },
-            { type: 'aux_battery_voltage', value: 'auxBatteryVoltage' },
-            { type: 'dc_battery_voltage', value: 'dcBatteryVoltage' },
-            { type: 'dc_battery_current', value: 'dcBatteryCurrent' },
-            { type: 'dc_battery_power', value: 'dcBatteryPower' },
-        ]
-        for (let field of fields) {
-            await promiseDbQuery(
-                'INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)',
-                [akey, field.type, extendedObj[field.value], now]
-            )
-        }
-        callback(null, true)
-    }
-    catch (err) {
-        callback(err)
-    }
+
+    db.query('UPDATE sync SET soh=?, charging=?, rapid_charge_port=?, normal_charge_port=?, aux_battery_voltage=?, dc_battery_voltage=?, dc_battery_current=?, dc_battery_power=?,\
+    last_extended=? WHERE akey=?', [
+        extendedObj.soh, extendedObj.charging, extendedObj.rapidChargePort, extendedObj.normalChargePort, extendedObj.auxBatteryVoltage, extendedObj.dcBatteryVoltage, extendedObj.dcBatteryCurrent,
+        extendedObj.dcBatteryPower, now, akey
+    ], err => {
+        if (!err) {
+            db.query('INSERT INTO statistics (soh, charging, rapid_charge_port, normal_charge_port, aux_battery_voltage, dc_battery_voltage, \
+            dc_battery_current, dc_battery_power, timestamp, akey) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                extendedObj.soh, extendedObj.charging, extendedObj.rapidChargePort, extendedObj.normalChargePort, extendedObj.auxBatteryVoltage, extendedObj.dcBatteryVoltage, extendedObj.dcBatteryCurrent,
+                extendedObj.dcBatteryPower, now, akey
+            ], (err, dbRes) => callback(err, (!err && dbRes)));
+        } else callback(err);
+    });
 };
 
 /**
@@ -108,23 +87,11 @@ const postLocation = (akey, locationObj, callback) => {
 
     db.query('UPDATE sync SET latitude=?, longitude=?, gps_speed=?, last_location=? WHERE akey=?', [
         locationObj.latitude, locationObj.longitude, locationObj.speed, now, akey
-    ], (err, dbRes) => {
-        if (!err && dbRes) {
-            db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                akey, 'latitude', locationObj.latitude, now
-            ], (err, dbRes) => {
-                if (!err && dbRes) {
-                    db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                        akey, 'longitude', locationObj.longitude, now
-                    ], (err, dbRes) => {
-                        if (!err && dbRes) {
-                            db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                                akey, 'gps_speed', locationObj.speed, now
-                            ], (err, dbRes) => callback(err, (!err && dbRes)));
-                        } else callback(err);
-                    });
-                } else callback(err);
-            });
+    ], err => {
+        if (!err) {
+            db.query('INSERT INTO statistics (latitude, longitude, gps_speed, timestamp, akey) VALUES (?, ?, ?, ?, ?)', [
+                locationObj.latitude, locationObj.longitude, locationObj.speed, now, akey
+            ], (err, dbRes) => callback(err, (!err && dbRes)));
         } else callback(err);
     });
 };
