@@ -6,7 +6,10 @@
 const srv_config = require('./../../srv_config.json'),
     srv_errors = require('./../../srv_errors.json'),
     db = require('./../db'),
-    token = require('./../token');
+    token = require('./../token'),
+    util = require('util');
+
+const promiseDbQuery = util.promisify(db.query)
 
 /**
  * Updates the current state of charge value within database and adds statistic record
@@ -51,60 +54,35 @@ const getSoC = (akey, callback) => {
  * @param {Object} extendedObj the object containing the properties to sync
  * @param {Function} callback callback function
  */
-const postExtended = (akey, extendedObj, callback) => {
+const postExtended = async (akey, extendedObj, callback) => {
     const now = parseInt(new Date() / 1000);
 
-    db.query('UPDATE sync SET soh=?, charging=?, rapid_charge_port=?, normal_charge_port=?, aux_battery_voltage=?, dc_battery_voltage=?, dc_battery_current=?, dc_battery_power=?, last_extended=? WHERE akey=?', [
-        extendedObj.soh, extendedObj.charging, extendedObj.rapidChargePort, extendedObj.normalChargePort, extendedObj.auxBatteryVoltage, extendedObj.dcBatteryVoltage, extendedObj.dcBatteryCurrent, extendedObj.dcBatteryPower, now, akey
-    ], (err, dbRes) => {
-        if (!err && dbRes) {
-            db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                akey, 'soh', extendedObj.soh, now
-            ], (err, dbRes) => {
-                if (!err && dbRes) {
-                    db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                        akey, 'charging', extendedObj.charging, now
-                    ], (err, dbRes) => {
-                        if (!err && dbRes) {
-                            db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                                akey, 'rapid_charge_port', extendedObj.rapidChargePort, now
-                            ], (err, dbRes) => {
-                                if (!err && dbRes) {
-                                    db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                                        akey, 'normal_charge_port', extendedObj.normalChargePort, now
-                                    ], (err, dbRes) => {
-                                        if (!err && dbRes) {
-                                            db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                                                akey, 'aux_battery_voltage', extendedObj.auxBatteryVoltage, now
-                                            ], (err, dbRes) => {
-                                                if (!err && dbRes) {
-                                                    db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                                                        akey, 'dc_battery_voltage', extendedObj.dcBatteryVoltage, now
-                                                    ], (err, dbRes) => {
-                                                        if (!err && dbRes) {
-                                                            db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                                                                akey, 'dc_battery_current', extendedObj.dcBatteryCurrent, now
-                                                            ], (err, dbRes) => {
-                                                                if (!err && dbRes) {
-                                                                    db.query('INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)', [
-                                                                        akey, 'dc_battery_power', extendedObj.dcBatteryPower, now
-                                                                    ], (err, dbRes) => callback(err, (!err && dbRes)));
-                                                                } else callback(err);
-                                                            });
-                                                        } else callback(err);
-                                                    });
-                                                } else callback(err);
-                                            });
-                                        } else callback(err);
-                                    });
-                                } else callback(err);
-                            });
-                        } else callback(err);
-                    });
-                } else callback(err);
-            });
-        } else callback(err);
-    });
+    try {
+        await promiseDbQuery(
+            'UPDATE sync SET soh=?, charging=?, rapid_charge_port=?, normal_charge_port=?, aux_battery_voltage=?, dc_battery_voltage=?, dc_battery_current=?, dc_battery_power=?, last_extended=? WHERE akey=?',
+            [extendedObj.soh, extendedObj.charging, extendedObj.rapidChargePort, extendedObj.normalChargePort, extendedObj.auxBatteryVoltage, extendedObj.dcBatteryVoltage, extendedObj.dcBatteryCurrent, extendedObj.dcBatteryPower, now, akey]
+        )
+        let fields = [
+            { type: 'soh', value: 'soh' },
+            { type: 'charging', value: 'charging' },
+            { type: 'rapid_charge_port', value: 'rapidChargePort' },
+            { type: 'normal_charge_port', value: 'normalChargePort' },
+            { type: 'aux_battery_voltage', value: 'auxBatteryVoltage' },
+            { type: 'dc_battery_voltage', value: 'dcBatteryVoltage' },
+            { type: 'dc_battery_current', value: 'dcBatteryCurrent' },
+            { type: 'dc_battery_power', value: 'dcBatteryPower' },
+        ]
+        for (let field of fields) {
+            await promiseDbQuery(
+                'INSERT INTO statistics (akey, type, value, timestamp) VALUES (?, ?, ?, ?)',
+                [akey, field.type, extendedObj[field.value], now]
+            )
+        }
+        callback(null, true)
+    }
+    catch (err) {
+        callback(err)
+    }
 };
 
 /**
