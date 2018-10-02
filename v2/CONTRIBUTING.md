@@ -38,12 +38,11 @@ This is required to ensure compatibility with v1.
 1. Open a terminal and clone this repository or clone your own forked copy (the latter is recommended, if you want to contribute with code later). You can do so with: `git clone https://github.com/GPlay97/EVNotifyBackend` (the URL needs to be adjusted, if you want to clone your forked version).
 2. Change in this directoy with `cd EVNotifyBackend/v2`.
 3. Type in `npm install` to automatically install all dependencies that are required for EVNotifyBackend.
-4. There is one package, that needs to be installed globally. It's required for automated tests. Install it with `npm install -g mocha`. (Tests are currently under construction)
-5. Almost done. You'll now have to create your database. On Linux you can execute `./createEnv.sh` to automatically do this. If you encounter some "access denied" error, take a look at the fresh generated _srv_config.json.file_ and adjust the credentials for the database. Try it again.
+4. Almost done. You'll now have to create your database. On Linux you can execute `./createEnv.sh` to automatically do this. If you encounter some "access denied" error, take a look at the fresh generated _srv_config.json_ file and adjust the credentials for the database. Try it again.
 If it's not working automatically or if you are not on a linux based machine, copy the _srv_config.template.json_ file to _srv_config.json_. Adjust the values for your needs. Open MySQL either on your terminal or on a graphical user inerface. Run `CREATE DATABASE evnotify;` (you can name the dabase like you want - but keep in mind to pass it into the config file).
 Now import the MySQL database structure with `mysql evnotify < modules/db/db_template.sql`. Or manually copy the content of the file and execute it within your graphical user interface for MySQL.
-6. That's it. Now it's time to see, if everything was setup correctly. Start the server with `node server.js`. If you want to debug it, you pass the `--inspect` parameter with. It should print something like `Server is running on port XXXX`.
-7. That's it. Congratulations! Your server is now up and running!
+5. That's it. Now it's time to see, if everything was setup correctly. Start the server with `node index.js`. If you want to debug it, you pass the `--inspect` parameter with. It should print something like `Server is running on port XXXX`.
+6. That's it. Congratulations! Your server is now up and running!
 
 #### Optional configuration to avoid restrictions
 As mentioned earlier, only the basic things, that don't need further setup, will work on initial setup. However, if you want to use all possibilites of EVNotify, such as notifications, there are some steps left. Why? Because in order to be able to send mails, you'll need to specify your mail provider credentials (this can be either the ones from your hosting provider or your personal mail), to send and retrieve messages from Telegram, you'll need to setup a Bot Token, and so on.
