@@ -42,6 +42,7 @@ const express = require('express'),
     telegram = require('./modules/notification/telegram'),
     push = require('./modules/notification/push'),
     stations = require('./modules/stations'),
+    logs = require('./modules/logs'),
     webAccount = require('./modules/web/account');
 
 // ensure that session secret is valid
@@ -124,6 +125,7 @@ app.get('/stations', stations.getStations);
 app.get('/station', stations.getStation);
 app.get('/stationphoto', stations.getStationPhoto);
 app.get('/stationcards', stations.getStationCards);
+app.get('/logs', logs.getLogs);
 app.post('/debug', (req, res) => {
     if (typeof req.body.data === 'string') {
         db.query('INSERT INTO debug (data, timestamp) VALUES (?, ?)', [
