@@ -7,8 +7,72 @@ const fs = require('fs'),
     excel = require('excel4node'),
     db = require('./../db'),
     tokenModule = require('./../token'),
-    translation = require('./../translation');
+    translation = require('./../translation'),
+    srv_errors = require("./../../srv_errors.json"),
+    srv_config = require("./../../srv_config.json");
+/**
+ * contains the different converters for the excel cells
+ */
+const converters = {
+    "date": v => new Date(v * 1000),
+    "number": v => parseFloat(v),
+}
 
+/**
+ * each entry of this array represents one worksheet configuration.
+ * 
+ * name is the translation key for the name of the worksheet
+ * condition is a list of sql columns. If at least one of these columns is not null in a mysql row, a new excel row is created
+ * sql_columns is a list of objects, where each object contains the name and type of a sql column that should be added to the excel sheet in the column with the name contained in excel_name
+ */
+const worksheets = [
+    {
+        "name":"SOC_HISTORY",
+        "condition": ["soc_display","soc_bms", ],
+        "sql_columns": [
+            {"name":"timestamp", "type":"date", "excel_name": "DATE_TIME"},
+            {"name":"soc_display", "type":"number", "excel_name": "SOC_DISPLAY"},
+            {"name":"soc_bms", "type":"number", "excel_name": "SOC_BMS"},
+        ],
+    },
+    {
+        "name":"LOCATION_HISTORY",
+        "condition": ["latitude","longitude", "gps_speed", ],
+        "sql_columns": [
+            {"name":"timestamp", "type":"date", "excel_name": "DATE_TIME"},
+            {"name":"latitude", "type":"number", "excel_name": "LATITUDE"},
+            {"name":"longitude", "type":"number", "excel_name": "LONGITUDE"},
+            {"name":"gps_speed", "type":"number", "excel_name": "SPEED"},
+        ],
+    },
+];
+
+/**
+ * This object can be used to create a worksheet in a workbook
+ * 
+ * @param workbook the workbook where the worksheed should be contained in
+ * @param lng the translation language for this worksheet
+ * @param configuration the configuration for this worksheet
+ */
+function Worksheet(workbook, lng, configuration) {
+    const worksheet = workbook.addWorksheet(translation.translate(configuration.name, lng, true));
+    var rowIndex = 2;
+    // add header rows
+    configuration.sql_columns.forEach((col, idX) => worksheet.cell(1, idX + 1).string(translation.translate(col.excel_name, lng, true)));
+
+    /**
+     * adds a new row to this worksheet, if the condition is met
+     * 
+     * @param {object} row the row that should be added
+     */
+    this.processRow = function(row) {
+        // check if at least one of the conditions is not null
+        if (!configuration.condition.reduce(((prev, cur) => prev || row[cur]!=null), false)) return;
+        // add row
+        configuration.sql_columns.forEach((val, i) => (row[val.name] != null) ? worksheet.cell(rowIndex, i+1)[val.type](converters[val.type](row[val.name])) : false);
+        rowIndex += 1;
+    }
+}
 /**
  * Creates report
  * @param {String} akey the akey
@@ -27,60 +91,13 @@ const createReport = (akey, token, callback) => {
                     const lng = settingsRes[0].lng || 'en';
 
                     // retrieve all data from statistics (soc)
-                    db.query('SELECT type, value, timestamp FROM statistics WHERE akey=? AND (type=? OR type=? OR type=? OR type=? OR type=?) ORDER BY timestamp ASC', [
-                        akey, 'soc_display', 'soc_bms', 'latitude', 'longitude', 'gps_speed'
+                    db.query('SELECT * FROM statistics WHERE akey=? ORDER BY timestamp ASC', [
+                        akey,
                     ], (err, dataRes) => {
                         if (!err && Array.isArray(dataRes)) {
                             let wb = new excel.Workbook(),
-                                ws = wb.addWorksheet(translation.translate('SOC_HISTORY', lng, true)),
-                                ws2 = wb.addWorksheet(translation.translate('LOCATION_HISTORY', lng, true)),
-                                curRow = 2,
-                                socDisplay = dataRes.filter(data => data.type === 'soc_display'),
-                                socBMS = dataRes.filter(data => data.type === 'soc_bms'),
-                                socData = [...new Set(socDisplay.concat(socBMS).map(data => data.timestamp))], // unique timestamps
-                                latitude = dataRes.filter(data => data.type === 'latitude'),
-                                longitude = dataRes.filter(data => data.type === 'longitude'),
-                                gpsSpeed = dataRes.filter(data => data.type === 'gps_speed'),
-                                locationData = [...new Set(latitude.concat(longitude).concat(gpsSpeed).map(data => data.timestamp))];
-
-                            // build the header for the soc history
-                            ['SOC_DISPLAY', 'SOC_BMS', 'DATE_TIME'].forEach((field, idX) => ws.cell(1, idX + 1).string(translation.translate(field, lng, true)));
-                            // build the rows for the soc history
-                            socData.forEach(timestamp => {
-                                let soc_display = (socBMS.filter(obj => obj.timestamp === timestamp)[0] || {}).value,
-                                    soc_bms = (socDisplay.filter(obj => obj.timestamp === timestamp)[0] || {}).value;
-
-                                // SOC_DISPLAY
-                                if (soc_display != null) ws.cell(curRow, 1).number(parseFloat(soc_bms)|| 0);
-                                else ws.cell(curRow, 1).string('?');
-                                // SOC_BMS
-                                if (soc_bms != null) ws.cell(curRow, 2).number(parseFloat(soc_display)|| 0);
-                                else ws.cell(curRow, 2).string('?');
-                                // DATE_TIME
-                                ws.cell(curRow, 3).date(new Date(timestamp * 1000));
-                                curRow++; // increase the current row
-                            });
-                            curRow = 2; // reset the current row for next worksheet
-                            // build the header for the location history
-                            ['LATITUDE', 'LONGITUDE', 'SPEED', 'DATE_TIME'].forEach((field, idX) => ws2.cell(1, idX + 1).string(translation.translate(field, lng, true)));
-                            locationData.forEach(timestamp => {
-                                let lat = (latitude.filter(obj => obj.timestamp === timestamp)[0] || {}).value,
-                                    long = (longitude.filter(obj => obj.timestamp === timestamp)[0] || {}).value,
-                                    speed = (gpsSpeed.filter(obj => obj.timestamp === timestamp)[0] || {}).value;
-
-                                // LATITUDE
-                                if (lat != null) ws2.cell(curRow, 1).number(parseFloat(lat)|| 0);
-                                else ws2.cell(curRow, 1).string('?');
-                                // LONGITUDE
-                                if (long != null) ws2.cell(curRow, 2).number(parseFloat(long)|| 0);
-                                else ws2.cell(curRow, 2).string('?');
-                                // SPEED
-                                if (speed != null) ws2.cell(curRow, 3).number(parseFloat(speed)|| 0);
-                                else ws2.cell(curRow, 3).string('?');
-                                // DATE_TIME
-                                ws2.cell(curRow, 4).date(new Date(timestamp * 1000)); // DATE_TIME
-                                curRow++; // increase the current row
-                            });
+                                wss = worksheets.map(e => new Worksheet(wb, lng, e));
+                            dataRes.forEach(e => wss.forEach(w => w.processRow(e)));
                             // TODO dynamic filename (tmp file which need to be unlinked and streamed to user..)
                             wb.write('Excel.xlsx');
                             callback(null, 'Excel.xlsx');
