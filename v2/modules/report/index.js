@@ -67,10 +67,8 @@ function Worksheet(workbook, lng, configuration) {
      */
     this.processRow = function(row) {
         // check if at least one of the conditions is not null
-        console.log(row, configuration.condition, configuration.condition.reduce(((prev, cur) => prev || row[cur]!=null), false));
         if (!configuration.condition.reduce(((prev, cur) => prev || row[cur]!=null), false)) return;
         // add row
-        console.log("adding row "+rowIndex);
         configuration.sql_columns.forEach((val, i) => (row[val.name] != null) ? worksheet.cell(rowIndex, i+1)[val.type](converters[val.type](row[val.name])) : false);
         rowIndex += 1;
     }
@@ -99,7 +97,6 @@ const createReport = (akey, token, callback) => {
                         if (!err && Array.isArray(dataRes)) {
                             let wb = new excel.Workbook(),
                                 wss = worksheets.map(e => new Worksheet(wb, lng, e));
-                            console.log(wss);
                             dataRes.forEach(e => wss.forEach(w => w.processRow(e)));
                             // TODO dynamic filename (tmp file which need to be unlinked and streamed to user..)
                             wb.write('Excel.xlsx');
