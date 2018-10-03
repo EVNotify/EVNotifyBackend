@@ -11,4 +11,4 @@ MYSQL_PASSWORD="$(node -pe "JSON.parse(\`$config\`).DB_PW")"
 
 # database setup
 mysql -u ${MYSQL_USER} ${MYSQL_PASSWORD:+-p${MYSQL_PASSWORD}} --execute="CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE}";
-mysql -u ${MYSQL_USER} ${MYSQL_DATABASE} ${MYSQL_PASSWORD:+-p${MYSQL_PASSWORD}} < db/db_template.sql
+mysql -u ${MYSQL_USER} ${MYSQL_DATABASE} ${MYSQL_PASSWORD:+-p${MYSQL_PASSWORD}} < modules/db/db_template.sql
