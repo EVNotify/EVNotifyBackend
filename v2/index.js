@@ -126,6 +126,7 @@ app.get('/station', stations.getStation);
 app.get('/stationphoto', stations.getStationPhoto);
 app.get('/stationcards', stations.getStationCards);
 app.get('/logs', logs.getLogs);
+app.get('/log', logs.getLog);
 app.post('/debug', (req, res) => {
     if (typeof req.body.data === 'string') {
         db.query('INSERT INTO debug (data, timestamp) VALUES (?, ?)', [

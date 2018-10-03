@@ -31,12 +31,21 @@ const createLog = async (akey, log) => {
  * @param {Boolean} charge selects charges or drives only
  * @return {Array} Array of logs
  */
-const getLogs = async (akey, charge) => {
-    try {
-        return query('SELECT * FROM logs WHERE akey=? AND charge=? ORDER BY start', [akey, charge]);
-    } catch (err) {
-        return err;
-    }
+const getLogs = async (akey, charge) => query('SELECT * FROM logs WHERE akey=? AND charge=? ORDER BY start DESC', [akey, charge]);
+
+/**
+ * Resolves log from given AKey for given log id
+ * @param {String} akey the AKey
+ * @param {Number} id the log id
+ * @returns {Object} Log object
+ */
+const getLog = async (akey, id) => {
+    let log = (await query('SELECT * FROM logs WHERE akey=? AND id=?', [akey, id]))[0];
+
+    if (log != null) {
+        log.stats = await query('SELECT * FROM statistics WHERE akey=? AND timestamp >= ? AND timestamp <= ? ORDER BY timestamp DESC', [akey, log.start, log.end]);
+        return log;
+    } throw new Error(srv_errors.INVALID_PARAMETERS.message);
 };
 
 module.exports = {
@@ -107,6 +116,44 @@ module.exports = {
                         error: srv_errors.INVALID_TOKEN
                     });
                 }
+            } else {
+                res.status(422).json({
+                    error: srv_errors.UNPROCESSABLE_ENTITY,
+                    debug: ((srv_config.DEBUG) ? err : null)
+                });
+            }
+        });
+    },
+    /**
+     * getLog request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
+    getLog: (req, res) => {
+        // check required params TODO: validate id number
+        if (!req.query.akey || !req.query.token || !req.query.id) {
+            return res.status(400).json({
+                error: srv_errors.INVALID_PARAMETERS
+            });
+        }
+        // validate token
+        token.validateToken(req.query.akey, req.query.token, (err, valid) => {
+            if (!err) {
+                if (valid) {
+                    // retrieve log details
+                    getLog(req.query.akey, req.query.id).then(log => res.json(log)).catch(err => {
+                        res.status(422).json({
+                            error: srv_errors.UNPROCESSABLE_ENTITY,
+                            debug: ((srv_config.DEBUG) ? err : null)
+                        });
+                    });
+                } else {
+                    // invalid token
+                    res.status(401).json({
+                        error: srv_errors.INVALID_TOKEN
+                    });
+                }
+
             } else {
                 res.status(422).json({
                     error: srv_errors.UNPROCESSABLE_ENTITY,
