@@ -53,7 +53,6 @@ const createLogs = async () => {
                 let end;
 
                 for (const [idX, stat] of stats.entries()) {
-                    if (!start) start = stat.timestamp;
                     let checked = false;
                     for (const [nextIdX, nextStat] of stats.entries()) {
                         if (!checked && nextIdX > idX) {
@@ -66,13 +65,12 @@ const createLogs = async () => {
                                     moreDataComing = doubleChecked = true;
                                 }
                             }
-                            // 
                             // check if next timestamp difference more than 4 hours - or charge type changed - and difference not more than one hour
                             if (nextStat.timestamp - stat.timestamp < 3600 && (nextStat.timestamp >= stat.timestamp + 14400 || parseInt(nextStat.charging) !== parseInt(stat.charging) || !moreDataComing)) {
                                 await query('INSERT INTO logs (akey, start, end, charge, title) VALUES (?, ?, ?, ?, ?)', [user, start, end, stat.charging, formatDate(start)]);
                                 start = end = 0;
-                            }
-                        }
+                            } else if (nextStat.timestamp - stat.timestamp > 3600) start = end;
+                        } else if (!start) start = nextStat.timestamp;
                     }
                 }
             } catch (err) {
