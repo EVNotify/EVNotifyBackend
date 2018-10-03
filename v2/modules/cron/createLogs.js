@@ -51,6 +51,7 @@ const createLogs = async () => {
                 let stats = await query('SELECT * FROM statistics WHERE akey=? AND timestamp > ? AND charging IS NOT NULL ORDER BY timestamp', [user, lastLog]);
                 let start;
                 let end;
+                let isDrive;
 
                 for (const [idX, stat] of stats.entries()) {
                     let checked = false;
@@ -58,6 +59,7 @@ const createLogs = async () => {
                         if (!checked && nextIdX > idX) {
                             checked = true;
                             end = nextStat.timestamp;
+                            if (!isDrive && !parseInt(stat.charging) && stat.gps_speed != null) isDrive = true;
                             let doubleChecked = false;
                             let moreDataComing = false;
                             for (const [doubleNextIdX, doubleNextStat] of stats.entries()) {
@@ -67,8 +69,10 @@ const createLogs = async () => {
                             }
                             // check if next timestamp difference more than 4 hours - or charge type changed - and difference not more than one hour
                             if (nextStat.timestamp - stat.timestamp < 3600 && (nextStat.timestamp >= stat.timestamp + 14400 || parseInt(nextStat.charging) !== parseInt(stat.charging) || !moreDataComing)) {
-                                await query('INSERT INTO logs (akey, start, end, charge, title) VALUES (?, ?, ?, ?, ?)', [user, start, end, stat.charging, formatDate(start)]);
-                                start = end = 0;
+                                if (parseInt(stat.charging) || isDrive) {
+                                    await query('INSERT INTO logs (akey, start, end, charge, title) VALUES (?, ?, ?, ?, ?)', [user, start, end, stat.charging, formatDate(start)]);
+                                    start = end = 0;
+                                }
                             } else if (nextStat.timestamp - stat.timestamp > 3600) start = end;
                         } else if (!start) start = nextStat.timestamp;
                     }
