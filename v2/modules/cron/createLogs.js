@@ -46,8 +46,7 @@ const createLogs = async () => {
 
                 /**
                  * TODO:
-                 * - timestamp <= now -4h to prevent to early logs
-                 * - only insert, if nextTimestamp difference not more that 1h
+                 * - prevent to early logs (check timestamp ?!)
                  */
                 let stats = await query('SELECT * FROM statistics WHERE akey=? AND timestamp > ? AND charging IS NOT NULL ORDER BY timestamp', [user, lastLog]);
                 let start;
@@ -62,13 +61,14 @@ const createLogs = async () => {
                             end = nextStat.timestamp;
                             let doubleChecked = false;
                             let moreDataComing = false;
-                            for (const [doubleNextIdX] of stats.entries()) {
+                            for (const [doubleNextIdX, doubleNextStat] of stats.entries()) {
                                 if (!doubleChecked && doubleNextIdX > nextIdX) {
                                     moreDataComing = doubleChecked = true;
                                 }
                             }
-                            // check if next timestamp difference more than 4 hours - or charge type changed
-                            if (nextStat.timestamp >= stat.timestamp + 2400 || parseInt(nextStat.charging) !== parseInt(stat.charging) || !moreDataComing) {
+                            // 
+                            // check if next timestamp difference more than 4 hours - or charge type changed - and difference not more than one hour
+                            if (nextStat.timestamp - stat.timestamp < 3600 && (nextStat.timestamp >= stat.timestamp + 14400 || parseInt(nextStat.charging) !== parseInt(stat.charging) || !moreDataComing)) {
                                 await query('INSERT INTO logs (akey, start, end, charge, title) VALUES (?, ?, ?, ?, ?)', [user, start, end, stat.charging, formatDate(start)]);
                                 start = end = 0;
                             }
