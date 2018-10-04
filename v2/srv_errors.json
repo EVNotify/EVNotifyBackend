@@ -3,6 +3,10 @@
         "code": 400,
         "message": "Bad request. Your request could not be processed. This has been automatically reported."
     },
+    "NOT_FOUND": {
+        "code": 404,
+        "message": "Requested source not found."
+    },
     "UNPROCESSABLE_ENTITY": {
         "code": 422,
         "message": "Your request could not be processed. This is either a client side error or a server error."

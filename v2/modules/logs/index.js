@@ -45,7 +45,39 @@ const getLog = async (akey, id) => {
     if (log != null) {
         log.stats = await query('SELECT * FROM statistics WHERE akey=? AND timestamp >= ? AND timestamp <= ? ORDER BY timestamp DESC', [akey, log.start, log.end]);
         return log;
-    } throw new Error(srv_errors.INVALID_PARAMETERS.message);
+    }
+    throw new Error(srv_errors.NOT_FOUND.message);
+};
+
+/**
+ * Updates log for given AKey and log id
+ * @param {String} akey the AKey
+ * @param {Object} log the new log object containing also the id of log
+ */
+const updateLog = async (akey, log) => {
+    let dbLog = (await query('SELECT id FROM logs WHERE akey=? AND id=?', [akey, log.id]))[0];
+
+    if (dbLog != null) {
+        return await query('UPDATE logs SET start=?, end=?, charge=?, title=? WHERE id=?', [
+            log.start, log.end, log.charge, log.title, log.id
+        ]);
+    }
+    throw new Error(srv_errors.NOT_FOUND.message);
+};
+
+/**
+ * Deletes the given log with its corresponding statistics
+ * @param {String} akey the AKey
+ * @param {Number} id the log id
+ */
+const deleteLog = async (akey, id) => {
+    let log = (await query('SELECT start, end FROM logs WHERE akey=? AND id=?', [akey, id]))[0];
+
+    if (log != null) {
+        await query('DELETE FROM logs WHERE id=?', [id]);
+        return await query('DELETE FROM statistics WHERE timestamp >= ? AND timestamp <= ? AND akey=?', [log.start, log.end, akey]);
+    }
+    throw new Error(srv_errors.NOT_FOUND.message);
 };
 
 module.exports = {
@@ -61,6 +93,7 @@ module.exports = {
                 error: srv_errors.INVALID_PARAMETERS
             });
         }
+        // validate token
         token.validateToken(req.body.akey, req.body.token, (err, valid) => {
             if (!err) {
                 if (valid) {
@@ -144,7 +177,7 @@ module.exports = {
                     getLog(req.query.akey, req.query.id).then(log => res.json(log)).catch(err => {
                         res.status(422).json({
                             error: srv_errors.UNPROCESSABLE_ENTITY,
-                            debug: ((srv_config.DEBUG) ? err : null)
+                            debug: ((srv_config.DEBUG) ? ((err && err.message) ? err.message : err) : null)
                         });
                     });
                 } else {
@@ -154,6 +187,88 @@ module.exports = {
                     });
                 }
 
+            } else {
+                res.status(422).json({
+                    error: srv_errors.UNPROCESSABLE_ENTITY,
+                    debug: ((srv_config.DEBUG) ? err : null)
+                });
+            }
+        });
+    },
+    /**
+     * updateLog request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
+    updateLog: (req, res) => {
+        // check required params TODO: validate id number, title, start and end (and also validate if start smaller than end and end not newer than now)
+        if (!req.body.akey || !req.body.token || typeof req.body.log !== 'object' || req.body.log == null || !req.body.log.id) {
+            return res.status(400).json({
+                error: srv_errors.INVALID_PARAMETERS
+            });
+        }
+        // validate token
+        token.validateToken(req.body.akey, req.body.token, (err, valid) => {
+            if (!err) {
+                if (valid) {
+                    // updates the given log
+                    updateLog(req.body.akey, req.body.log).then(() => {
+                        res.json({
+                            updated: true
+                        });
+                    }).catch(err => {
+                        res.status(422).json({
+                            error: srv_errors.UNPROCESSABLE_ENTITY,
+                            debug: ((srv_config.DEBUG) ? err : null)
+                        });
+                    });
+                } else {
+                    // invalid token
+                    res.status(401).json({
+                        error: srv_errors.INVALID_TOKEN
+                    });
+                }
+            } else {
+                res.status(422).json({
+                    error: srv_errors.UNPROCESSABLE_ENTITY,
+                    debug: ((srv_config.DEBUG) ? err : null)
+                });
+            }
+        });
+    },
+    /**
+     * deleteLog request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
+    deleteLog: (req, res) => {
+        // check required params TODO: validate id number
+        if (!req.body.akey || !req.body.token || !req.body.id) {
+            return res.status(400).json({
+                error: srv_errors.INVALID_PARAMETERS
+            });
+        }
+        // validate token
+        token.validateToken(req.body.akey, req.body.token, (err, valid) => {
+            if (!err) {
+                if (valid) {
+                    // delete the given log
+                    deleteLog(req.body.akey, req.body.id).then(() => {
+                        res.json({
+                            deleted: true
+                        });
+                    }).catch(err => {
+                        res.status(422).json({
+                            error: srv_errors.UNPROCESSABLE_ENTITY,
+                            debug: ((srv_config.DEBUG) ? err : null)
+                        });
+                    });
+                } else {
+                    // invalid token
+                    res.status(401).json({
+                        error: srv_errors.INVALID_TOKEN
+                    });
+                }
             } else {
                 res.status(422).json({
                     error: srv_errors.UNPROCESSABLE_ENTITY,
