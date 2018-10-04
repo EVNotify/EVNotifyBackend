@@ -31,56 +31,51 @@ const formatDate = (timestamp) => {
     return day + '.' + month + '.' + date.getFullYear() + ' ' + hours + ':' + minutes + ':' + seconds;
 };
 
+const UNIQUE_DELAY = 7200; // seconds for 2 hours
+const MIN_DRIVING_TIME = 300; // seconds for 5 minutes
+
 /**
  * Creates logs for users
  */
 const createLogs = async () => {
     try {
-
-        let users = await query('SELECT akey FROM accounts');
-        users = users.map(user => user.akey);
-
-        for (const user of users) {
-            try {
-                let lastLog = ((await query('SELECT end FROM logs WHERE akey=? ORDER BY end DESC LIMIT 1', [user]))[0] || {}).end || 0;
-
-                /**
-                 * TODO:
-                 * - prevent to early logs (check timestamp ?!)
-                 */
-                let stats = await query('SELECT * FROM statistics WHERE akey=? AND timestamp > ? AND charging IS NOT NULL ORDER BY timestamp', [user, lastLog]);
-                let start;
-                let end;
-                let isDrive;
-
-                for (const [idX, stat] of stats.entries()) {
-                    let checked = false;
-                    for (const [nextIdX, nextStat] of stats.entries()) {
-                        if (!checked && nextIdX > idX) {
-                            checked = true;
-                            end = nextStat.timestamp;
-                            if (!isDrive && !parseInt(stat.charging) && stat.gps_speed != null) isDrive = true;
-                            let doubleChecked = false;
-                            let moreDataComing = false;
-                            for (const [doubleNextIdX, doubleNextStat] of stats.entries()) {
-                                if (!doubleChecked && doubleNextIdX > nextIdX) {
-                                    moreDataComing = doubleChecked = true;
-                                }
-                            }
-                            // check if next timestamp difference more than 4 hours - or charge type changed - and difference not more than one hour
-                            if (nextStat.timestamp - stat.timestamp < 3600 && (nextStat.timestamp >= stat.timestamp + 14400 || parseInt(nextStat.charging) !== parseInt(stat.charging) || !moreDataComing)) {
-                                if (parseInt(stat.charging) || isDrive) {
-                                    await query('INSERT INTO logs (akey, start, end, charge, title) VALUES (?, ?, ?, ?, ?)', [user, start, end, stat.charging, formatDate(start)]);
-                                    start = end = 0;
-                                }
-                            } else if (nextStat.timestamp - stat.timestamp > 3600) start = end;
-                        } else if (!start) start = nextStat.timestamp;
-                    }
-                }
-            } catch (err) {
-                console.error(err);
+        // TODO there could be a lot of results. Maybe streaming the results is a good idea?
+        let lastLogs = await query('SELECT akey,timestamp,charging,gps_speed FROM (SELECT akey, MAX(end) end FROM logs GROUP BY akey) l RIGHT JOIN (SELECT * FROM statistics WHERE charging IS NOT NULL OR gps_speed > 1.3 ORDER BY timestamp) s USING (akey) WHERE s.timestamp>l.end OR l.end IS NULL');
+        var userStates = {};
+        var inserts = [];
+        for (const [idX, row] of lastLogs.entries()) {
+            var user = row.akey;
+            if (!userStates[user]) {
+                userStates[user] = { start: false, last: false, charging: false, driving: false, };
             }
+            var state = userStates[user];
+
+            state.charging = parseInt(state.charging) || 0;
+            row.charging = ((row.charging != null) ? parseInt(row.charging) : state.charging);
+            if (state.start && (row.charging != state.charging || row.timestamp > state.last + UNIQUE_DELAY)) {
+                if ((state.driving || state.charging) && state.last - state.start > MIN_DRIVING_TIME) {
+                    inserts.push([user, state.start, state.last, state.charging, formatDate(state.start)]);
+                }
+                state = userStates[user] = { start: false, last: false, charging: false, driving: false, };
+            }
+            if (!state.start) {
+                state.start = row.timestamp;
+                state.charging = ((row.charging != null) ? row.charging : 1);
+            }
+            state.last = row.timestamp;
+            state.driving |= row.gps_speed && row.gps_speed > 1.389;
         }
+        Object.keys(userStates).forEach(key => {
+            if (!userStates.hasOwnProperty(key)) return;
+            var state = userStates[key];
+            if (state.last > new Date().getTime() / 1000 - UNIQUE_DELAY) return;
+            if ((state.driving || state.charging) && state.last - state.start > MIN_DRIVING_TIME) {
+                inserts.push([key, state.start, state.last, state.charging, formatDate(state.start)]);
+            }
+        });
+        // TODO batch insert instead of many singles, but current mysql library does not seem to support them
+        var insertPromises = inserts.map(insert => query('INSERT INTO logs (akey, start, end, charge, title) VALUES (?,?,?,?,?)', insert));
+        await Promise.all(insertPromises);
     } catch (err) {
         console.error(err);
     }
