@@ -49,7 +49,9 @@ const createLogs = async () => {
             }
             var state = userStates[user];
             if (state.start && (row.charging != state.charging || row.timestamp > state.last + UNIQUE_DELAY)) {
-                inserts.push([user, state.start, state.last, state.charging, formatDate(state.start)]);
+                if (state.driving || state.charging) {
+                    inserts.push([user, state.start, state.last, state.charging, formatDate(state.start)]);
+                }
                 state = userStates[user] = { start: false, last: false, charging: false, driving: false, };
             }
             if (!state.start) {
