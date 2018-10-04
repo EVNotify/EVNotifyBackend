@@ -127,6 +127,7 @@ app.get('/stationphoto', stations.getStationPhoto);
 app.get('/stationcards', stations.getStationCards);
 app.get('/logs', logs.getLogs);
 app.get('/logdetail', logs.getLog);
+app.post('/logdetail', logs.createLog);
 app.put('/logdetail', logs.updateLog);
 app.delete('/logdetail', logs.deleteLog);
 app.post('/debug', (req, res) => {
