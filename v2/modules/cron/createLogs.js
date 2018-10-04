@@ -49,12 +49,10 @@ const createLogs = async () => {
             }
             var state = userStates[user];
             if (state.start && (row.charging != state.charging || row.timestamp > state.last + UNIQUE_DELAY)) {
-                console.log("end of entry", row);
                 inserts.push([user, state.start, state.last, state.charging, formatDate(state.start)]);
                 state = userStates[user] = { start: false, last: false, charging: false, driving: false, };
             }
             if (!state.start) {
-                console.log("new entry", row)
                 state.start = row.timestamp;
                 state.charging = row.charging;
             }
