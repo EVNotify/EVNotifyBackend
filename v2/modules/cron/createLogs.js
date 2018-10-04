@@ -32,6 +32,7 @@ const formatDate = (timestamp) => {
 };
 
 const UNIQUE_DELAY = 7200; // seconds for 2 hours
+const MIN_DRIVING_TIME = 300; // seconds for 5 minutes
 
 /**
  * Creates logs for users
@@ -39,7 +40,7 @@ const UNIQUE_DELAY = 7200; // seconds for 2 hours
 const createLogs = async () => {
     try {
         // TODO there could be a lot of results. Maybe streaming the results is a good idea?
-        let lastLogs = await query('SELECT akey,timestamp,charging,gps_speed FROM (SELECT akey, MAX(end) end FROM logs GROUP BY akey) l RIGHT JOIN (SELECT * FROM statistics WHERE charging IS NOT NULL ORDER BY timestamp) s USING (akey) WHERE s.timestamp>l.end OR l.end IS NULL');
+        let lastLogs = await query('SELECT akey,timestamp,charging,gps_speed FROM (SELECT akey, MAX(end) end FROM logs GROUP BY akey) l RIGHT JOIN (SELECT * FROM statistics WHERE charging IS NOT NULL OR gps_speed > 1.3 ORDER BY timestamp) s USING (akey) WHERE s.timestamp>l.end OR l.end IS NULL');
         var userStates = {};
         var inserts = [];
         for (const [idX, row] of lastLogs.entries()) {
@@ -48,15 +49,18 @@ const createLogs = async () => {
                 userStates[user] = { start: false, last: false, charging: false, driving: false, };
             }
             var state = userStates[user];
+
+            state.charging = parseInt(state.charging) || 0;
+            row.charging = ((row.charging != null) ? parseInt(row.charging) : state.charging);
             if (state.start && (row.charging != state.charging || row.timestamp > state.last + UNIQUE_DELAY)) {
-                if (state.driving || state.charging) {
+                if ((state.driving || state.charging) && state.last - state.start > MIN_DRIVING_TIME) {
                     inserts.push([user, state.start, state.last, state.charging, formatDate(state.start)]);
                 }
                 state = userStates[user] = { start: false, last: false, charging: false, driving: false, };
             }
             if (!state.start) {
                 state.start = row.timestamp;
-                state.charging = row.charging;
+                state.charging = ((row.charging != null) ? row.charging : 1);
             }
             state.last = row.timestamp;
             state.driving |= row.gps_speed && row.gps_speed > 1.389;
@@ -65,7 +69,9 @@ const createLogs = async () => {
             if (!userStates.hasOwnProperty(key)) return;
             var state = userStates[key];
             if (state.last > new Date().getTime() / 1000 - UNIQUE_DELAY) return;
-            inserts.push([key, state.start, state.last, state.charging, formatDate(state.start)]);
+            if ((state.driving || state.charging) && state.last - state.start > MIN_DRIVING_TIME) {
+                inserts.push([key, state.start, state.last, state.charging, formatDate(state.start)]);
+            }
         });
         // TODO batch insert instead of many singles, but current mysql library does not seem to support them
         var insertPromises = inserts.map(insert => query('INSERT INTO logs (akey, start, end, charge, title) VALUES (?,?,?,?,?)', insert));
