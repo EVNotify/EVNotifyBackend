@@ -179,7 +179,7 @@ module.exports = {
                 });
             } else {
                 res.status(422).json({
-                    error: srv_errors.UNPROCESSABLE_ENTITY,
+                    error: ((err === srv_errors.ALREADY_REGISTERED) ? srv_errors.ALREADY_REGISTERED : srv_errors.UNPROCESSABLE_ENTITY),
                     debug: ((srv_config.DEBUG) ? err : null)
                 });
             }
@@ -207,9 +207,11 @@ module.exports = {
                 });
             } else {
                 // user not exists or unprocessable
-                res.status(422).json({
+                res.status(((err === srv_errors.USER_NOT_EXISTING) ? 404 :
+                    ((err === srv_errors.INVALID_CREDENTIALS) ? 401 : 422))).json({
                     error: ((err === srv_errors.USER_NOT_EXISTING) ?
-                        srv_errors.USER_NOT_EXISTING : srv_errors.UNPROCESSABLE_ENTITY
+                        srv_errors.USER_NOT_EXISTING :
+                        ((err === srv_errors.INVALID_CREDENTIALS) ? srv_errors.INVALID_CREDENTIALS : srv_errors.UNPROCESSABLE_ENTITY)
                     ),
                     debug: ((srv_config.DEBUG) ? err : null)
                 });
@@ -240,8 +242,9 @@ module.exports = {
                     changed: true
                 });
             } else {
-                res.status(422).json({
-                    error: srv_errors.UNPROCESSABLE_ENTITY,
+                res.status(((err === srv_errors.INVALID_TOKEN || err === srv_errors.INVALID_CREDENTIALS) ? 401 : 422)).json({
+                    error: ((err === srv_errors.INVALID_TOKEN) ? srv_errors.INVALID_TOKEN : 
+                    ((err === srv_errors.INVALID_CREDENTIALS) ? srv_errors.INVALID_CREDENTIALS : srv_errors.UNPROCESSABLE_ENTITY)),
                     debug: ((srv_config.DEBUG) ? err : null)
                 });
             }
