@@ -31,7 +31,7 @@ const formatDate = (timestamp) => {
     return day + '.' + month + '.' + date.getFullYear() + ' ' + hours + ':' + minutes + ':' + seconds;
 };
 
-const UNIQUE_DELAY = 7200; // seconds for 2 hours
+const UNIQUE_DELAY = 600; // seconds for 10 minutes
 const MIN_DRIVING_TIME = 300; // seconds for 5 minutes
 
 /**
