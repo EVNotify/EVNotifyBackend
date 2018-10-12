@@ -85,8 +85,8 @@ const getExtended = (akey, callback) => {
 const postLocation = (akey, locationObj, callback) => {
     const now = parseInt(new Date() / 1000);
 
-    db.query('UPDATE sync SET latitude=?, longitude=?, gps_speed=?, last_location=? WHERE akey=?', [
-        locationObj.latitude, locationObj.longitude, locationObj.speed, now, akey
+    db.query('UPDATE sync SET latitude=?, longitude=?, gps_speed=?, accuracy=?, location_timestamp=?, last_location=? WHERE akey=?', [
+        locationObj.latitude, locationObj.longitude, locationObj.speed, locationObj.accuracy, locationObj.timestamp, now, akey
     ], err => {
         if (!err) {
             db.query('INSERT INTO statistics (latitude, longitude, gps_speed, timestamp, akey) VALUES (?, ?, ?, ?, ?)', [
@@ -102,7 +102,7 @@ const postLocation = (akey, locationObj, callback) => {
  * @param {Function} callback callback function
  */
 const getLocation = (akey, callback) => {
-    db.query('SELECT latitude, longitude, gps_speed, last_location FROM sync WHERE akey=?', [
+    db.query('SELECT latitude, longitude, gps_speed, accuracy, location_timestamp, last_location FROM sync WHERE akey=?', [
         akey
     ], (err, queryRes) => callback(err, ((!err && queryRes) ? queryRes[0] : null)));
 };

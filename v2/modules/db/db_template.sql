@@ -40,6 +40,8 @@ CREATE TABLE IF NOT EXISTS `sync` (
     `latitude` DECIMAL(10, 8) DEFAULT NULL,
     `longitude` DECIMAL(11, 8) DEFAULT NULL,
     `gps_speed` FLOAT DEFAULT 0,
+    `accuracy` INT(100) DEFAULT 0,
+    `location_timestamp` INT(13) DEFAULT 0,
     `last_soc` INT(13) DEFAULT 0,
     `last_extended` INT(13) DEFAULT 0,
     `last_notification` INT(13) DEFAULT 0,
