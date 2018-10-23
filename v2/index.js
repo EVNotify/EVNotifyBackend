@@ -132,7 +132,7 @@ app.put('/logdetail', logs.updateLog);
 app.delete('/logdetail', logs.deleteLog);
 app.post('/debug', (req, res) => {
     if (typeof req.body.data === 'string') {
-        db.query('INSERT INTO debug (data, akey, timestamp) VALUES (?, ?)', [
+        db.query('INSERT INTO debug (data, akey, timestamp) VALUES (?, ?, ?)', [
             req.body.data, req.body.akey, ((parseInt(req.body.timestamp)) ? req.body.timestamp : parseInt(new Date() / 1000))
         ], (err, dbRes) => {
             if (!err && dbRes) {
