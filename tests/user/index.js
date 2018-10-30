@@ -83,7 +83,7 @@ describe('register request', function() {
      */
     it('register with missing parameters', function(done) {
         chai.request(RESTURL).post('register').end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(422);
             res.should.be.json;
@@ -102,7 +102,7 @@ describe('register request', function() {
      */
     it('register new account', function(done) {
         chai.request(RESTURL).post('register').set('content-type', 'application/json').send({akey: registeredAkey, password: 'TEST'}).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;
@@ -121,7 +121,7 @@ describe('register request', function() {
      */
     it('register new account', function(done) {
         chai.request(RESTURL).post('register').set('content-type', 'application/json').send({akey: registeredAkey, password: 123456}).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;
@@ -161,7 +161,7 @@ describe('register request', function() {
      */
     it('register already registered account', function(done) {
         chai.request(RESTURL).post('register').set('content-type', 'application/json').send({akey: registeredAkey, password: 'SYSTEMTEST'}).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;
@@ -185,7 +185,7 @@ describe('login request', function() {
      */
     it('login with missing parameters', function(done) {
         chai.request(RESTURL).post('login').end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(422);
             res.should.be.json;
@@ -204,7 +204,7 @@ describe('login request', function() {
      */
     it('login with non-existing account', function(done) {
         chai.request(RESTURL).post('login').set('content-type', 'application/json').send({akey: unRegisteredAkey, password: 'SYSTEMTEST'}).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;
@@ -223,7 +223,7 @@ describe('login request', function() {
      */
     it('login with invalid credentials', function(done) {
         chai.request(RESTURL).post('login').set('content-type', 'application/json').send({akey: registeredAkey, password: 'INVALID'}).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;
@@ -267,7 +267,7 @@ describe('password change request', function() {
      */
     it('password change with missing parameters', function(done) {
         chai.request(RESTURL).post('changePW').end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(422);
             res.should.be.json;
@@ -288,7 +288,7 @@ describe('password change request', function() {
         chai.request(RESTURL).post('changePW').set('content-type', 'application/json').send({
             akey: unRegisteredAkey, token: 'SOMETOKEN', password: 'SYSTEMTEST', newpassword: 'SYSTEMTEST2'
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;
@@ -309,7 +309,7 @@ describe('password change request', function() {
         chai.request(RESTURL).post('changePW').set('content-type', 'application/json').send({
             akey: registeredAkey, token: 'INVALID', password: 'SYSTEMTEST', newpassword: 'SYSTEMTEST2'
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;
@@ -330,7 +330,7 @@ describe('password change request', function() {
         chai.request(RESTURL).post('changePW').set('content-type', 'application/json').send({
             akey: registeredAkey, token: registeredToken, password: 'INVALID', newpassword: 'SYSTEMTEST2'
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;
@@ -351,7 +351,7 @@ describe('password change request', function() {
         chai.request(RESTURL).post('changePW').set('content-type', 'application/json').send({
             akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST', newpassword: 'new'
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;
@@ -391,7 +391,7 @@ describe('password change request', function() {
      */
     it('login with old credentials', function(done) {
         chai.request(RESTURL).post('login').set('content-type', 'application/json').send({akey: registeredAkey, password: 'SYSTEMTEST'}).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;
@@ -435,7 +435,7 @@ describe('getSettings request', function() {
      */
     it('getSettings with missing parameters', function(done) {
         chai.request(RESTURL).post('settings').end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(422);
             res.should.be.json;
@@ -456,7 +456,7 @@ describe('getSettings request', function() {
         chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
             akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST', option: 'GET'
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;
@@ -477,7 +477,7 @@ describe('getSettings request', function() {
         chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
             akey: registeredAkey, token: 'INVALID', password: 'SYSTEMTEST2', option: 'GET'
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(401);
             res.should.be.json;
@@ -498,7 +498,7 @@ describe('getSettings request', function() {
         chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
             akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'INVALID'
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(422);
             res.should.be.json;
@@ -554,7 +554,7 @@ describe('setSettings request', function() {
      */
     it('setSettings with missing parameters', function(done) {
         chai.request(RESTURL).post('settings').end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(422);
             res.should.be.json;
@@ -575,7 +575,7 @@ describe('setSettings request', function() {
         chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
             akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'SET'
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(422);
             res.should.be.json;
@@ -596,7 +596,7 @@ describe('setSettings request', function() {
         chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
             akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST', option: 'SET', optionObj: optionObj
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;
@@ -617,7 +617,7 @@ describe('setSettings request', function() {
         chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
             akey: registeredAkey, token: 'INVALID', password: 'SYSTEMTEST2', option: 'SET', optionObj: optionObj
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(401);
             res.should.be.json;
@@ -638,7 +638,7 @@ describe('setSettings request', function() {
         chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
             akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'INVALID', optionObj: optionObj
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(422);
             res.should.be.json;
@@ -715,7 +715,7 @@ describe('renewToken request', function() {
      */
     it('renewToken with missing parameters', function(done) {
         chai.request(RESTURL).post('renewtoken').end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(422);
             res.should.be.json;
@@ -736,7 +736,7 @@ describe('renewToken request', function() {
         chai.request(RESTURL).post('renewtoken').set('content-type', 'application/json').send({
             akey: registeredAkey, password: 'SYSTEMTEST'
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;
@@ -780,7 +780,7 @@ describe('renewToken request', function() {
         chai.request(RESTURL).post('settings').set('content-type', 'application/json').send({
             akey: registeredAkey, token: registeredToken, password: 'SYSTEMTEST2', option: 'GET'
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(401);
             res.should.be.json;
@@ -826,7 +826,7 @@ describe('sync request', function() {
      */
     it('sync with missing parameters', function(done) {
         chai.request(RESTURL).post('sync').end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(422);
             res.should.be.json;
@@ -847,7 +847,7 @@ describe('sync request', function() {
         chai.request(RESTURL).post('sync').set('content-type', 'application/json').send({
             akey: registeredAkey, token: newRegisteredToken, type: 'INVALID'
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(422);
             res.should.be.json;
@@ -868,7 +868,7 @@ describe('sync request', function() {
         chai.request(RESTURL).post('sync').set('content-type', 'application/json').send({
             akey: registeredAkey, token: newRegisteredToken, type: 'INVALID'
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(422);
             res.should.be.json;
@@ -889,7 +889,7 @@ describe('sync request', function() {
         chai.request(RESTURL).post('sync').set('content-type', 'application/json').send({
             akey: registeredAkey, token: newRegisteredToken, type: 'PUSH', syncObj: syncObj
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;
@@ -994,7 +994,7 @@ describe('sync request', function() {
         chai.request(RESTURL).post('sync').set('content-type', 'application/json').send({
             akey: registeredAkey, token: newRegisteredToken, type: 'PULL'
         }).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(409);
             res.should.be.json;

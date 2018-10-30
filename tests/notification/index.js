@@ -73,7 +73,7 @@ describe('test notification handling', function() {
      */
     it('send notification with missing parameters', function(done) {
         chai.request(RESTURL).post('notification').end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(422);
             res.should.be.json;
@@ -92,7 +92,7 @@ describe('test notification handling', function() {
      */
     it('send notification with invalid account', function(done) {
         chai.request(RESTURL).post('notification').set('content-type', 'application/json').send({akey: 'INVALID', token: registeredToken}).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(401);
             res.should.be.json;
@@ -111,7 +111,7 @@ describe('test notification handling', function() {
      */
     it('send notification with invalid token', function(done) {
         chai.request(RESTURL).post('notification').set('content-type', 'application/json').send({akey: registeredAkey, token: 'INVALID'}).end(function(err, res) {
-            should.exist(err);
+            should.not.exist(err);
             should.exist(res);
             res.should.have.status(401);
             res.should.be.json;
