@@ -4,7 +4,7 @@
   "description": "backend for evnotify",
   "main": "server.js",
   "dependencies": {
-    "bcrypt": "^.0.0",
+    "bcrypt": "3.0.0",
     "body-parser": "1.17.2",
     "chai": "4.2.0",
     "chai-http": "4.2.0",
