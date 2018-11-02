@@ -89,8 +89,8 @@ const postLocation = (akey, locationObj, callback) => {
         locationObj.latitude, locationObj.longitude, locationObj.speed, locationObj.accuracy, locationObj.timestamp, now, akey
     ], err => {
         if (!err) {
-            db.query('INSERT INTO statistics (latitude, longitude, gps_speed, timestamp, akey) VALUES (?, ?, ?, ?, ?)', [
-                locationObj.latitude, locationObj.longitude, locationObj.speed, now, akey
+            db.query('INSERT INTO statistics (latitude, longitude, gps_speed, accuracy, location_timestamp, timestamp, akey) VALUES (?, ?, ?, ?, ?, ?, ?)', [
+                locationObj.latitude, locationObj.longitude, locationObj.speed, locationObj.accuracy, locationObj.timestamp, now, akey
             ], (err, dbRes) => callback(err, (!err && dbRes)));
         } else callback(err);
     });

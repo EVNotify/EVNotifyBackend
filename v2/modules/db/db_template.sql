@@ -67,6 +67,8 @@ CREATE TABLE IF NOT EXISTS `statistics` (
     `latitude` DECIMAL(10, 8) DEFAULT NULL,
     `longitude` DECIMAL(11, 8) DEFAULT NULL,
     `gps_speed` FLOAT DEFAULT NULL,
+    `accuracy` INT(100) DEFAULT NULL,
+    `location_timestamp` INT(13) DEFAULT NULL,
     `timestamp` INT(13) DEFAULT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
