@@ -14,7 +14,7 @@
     "express-session": "1.15.6",
     "firebase-admin": "6.1.0",
     "mocha": "5.2.0",
-    "moesif-express": "2.6.5",
+    "moesif-express": "2.6.6",
     "mysql": "2.16.0",
     "node-telegram-bot-api": "0.30.0",
     "nodemailer": "4.6.8",
