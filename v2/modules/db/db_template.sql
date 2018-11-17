@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `sync` (
     `longitude` DECIMAL(11, 8) DEFAULT NULL,
     `gps_speed` FLOAT DEFAULT 0,
     `accuracy` INT(100) DEFAULT 0,
-    `location_timestamp` INT(13) DEFAULT 0,
+    `location_timestamp` INT(20) DEFAULT 0,
     `last_soc` INT(13) DEFAULT 0,
     `last_extended` INT(13) DEFAULT 0,
     `last_notification` INT(13) DEFAULT 0,
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `statistics` (
     `longitude` DECIMAL(11, 8) DEFAULT NULL,
     `gps_speed` FLOAT DEFAULT NULL,
     `accuracy` INT(100) DEFAULT NULL,
-    `location_timestamp` INT(13) DEFAULT NULL,
+    `location_timestamp` INT(20) DEFAULT NULL,
     `timestamp` INT(13) DEFAULT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)

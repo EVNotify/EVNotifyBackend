@@ -45,6 +45,10 @@ const getLog = async (akey, id) => {
 
     if (log != null) {
         log.stats = await query('SELECT * FROM statistics WHERE akey=? AND timestamp >= ? AND timestamp <= ? ORDER BY timestamp DESC', [akey, log.start, log.end]);
+        // sort manually, based on location timestamp to prevent wrong order on location submission through server delay
+        log.stats = log.stats.sort((a, b) => {
+            return (b.location_timestamp || b.timestamp * 1000) - (a.location_timestamp || a.timestamp * 1000);
+        });
         return log;
     }
     throw new Error(srv_errors.NOT_FOUND.message);
