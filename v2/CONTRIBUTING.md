@@ -18,6 +18,7 @@ It is recommended to use Linux - but other environments will also work.
 So, what do you need - beside a computer / server with some OS running on it?
 - A text-editor (just saying ;))
 - Current version of NodeJS and NPM
+- MySQL
 - Git
 
 #### Restrictions
