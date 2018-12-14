@@ -21,8 +21,8 @@ const register = (mail, password, callback) => {
     db.query('SELECT mail FROM login', [], (err, userRes) => {
         if (!err && Array.isArray(userRes)) {
             if (userRes.some(user => {
-                return encryption.decrypt(user.mail) === mail;
-            })) {
+                    return encryption.decrypt(user.mail) === mail;
+                })) {
                 // already registered
                 return callback(srv_errors.MAIL_ALREADY_REGISTERED);
             }
@@ -55,12 +55,12 @@ const login = (mail, password, callback) => {
             let userObj = {};
 
             if (!userRes.some(user => {
-                if (encryption.decrypt(user.mail) === mail) {
-                    userObj = user;
-                    return true;
-                }
-                return false;
-            })) {
+                    if (encryption.decrypt(user.mail) === mail) {
+                        userObj = user;
+                        return true;
+                    }
+                    return false;
+                })) {
                 // not found
                 return callback(srv_errors.USER_NOT_EXISTING);
             }
@@ -93,7 +93,7 @@ module.exports = {
                     });
                 } else {
                     res.status(422).json({
-                        error: srv_errors.UNPROCESSABLE_ENTITY,
+                        error: ((err === srv_errors.MAIL_ALREADY_REGISTERED) ? srv_errors.MAIL_ALREADY_REGISTERED : srv_errors.UNPROCESSABLE_ENTITY),
                         debug: ((srv_config.DEBUG) ? err : null)
                     });
                 }
@@ -119,7 +119,11 @@ module.exports = {
                     });
                 } else {
                     res.status(422).json({
-                        error: srv_errors.UNPROCESSABLE_ENTITY,
+                        error: ((err === srv_errors.USER_NOT_EXISTING) ?
+                            srv_errors.USER_NOT_EXISTING : ((err === srv_errors.INVALID_CREDENTIALS) ?
+                                srv_errors.INVALID_CREDENTIALS : srv_errors.UNPROCESSABLE_ENTITY
+                            )
+                        ),
                         debug: ((srv_config.DEBUG) ? err : null)
                     });
                 }
