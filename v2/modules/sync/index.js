@@ -45,7 +45,7 @@ const getSoC = (akey, callback) => {
  * @param {Object} extendedObj the object containing the properties to sync
  * @param {Function} callback callback function
  */
-const postExtended = async (akey, extendedObj, callback) => {
+const postExtended = (akey, extendedObj, callback) => {
     const now = parseInt(new Date() / 1000);
 
 

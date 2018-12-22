@@ -9,6 +9,7 @@ const srv_config = require('./../../../srv_config.json'),
         polling: true
     }) : false),
     db = require('./../../db'),
+    helper = require('./../../helper'),
     translation = require('./../../translation');
 
 /**
@@ -74,7 +75,7 @@ const sendSoCMessage = (userID, akey) => {
                     SOC: ((userObj.soc_display == null) ? SOC_BMS : ((
                             userObj.soc_bms == null) ?
                         SOC_DISPLAY : SOC_DISPLAY)),
-                    RANGE: '0km' // TODO
+                    RANGE: helper.calculateRange(userObj.car, userObj.soc_display || userObj.soc_bms, userObj.consumption) + 'km'
                 }, true));
             } else bot.sendMessage(userID, translation.translate('TELEGRAM_SOC_ERROR', ((userObj) ? userObj.lng : 'en'), true));
         });
@@ -158,13 +159,13 @@ const sendMessage = (userObj, abort) => {
                 SOC: ((userObj.soc_display == null) ? SOC_BMS : ((
                         userObj.soc_bms == null) ?
                     SOC_DISPLAY : SOC_DISPLAY))
-            }, true) : // TODO
+            }, true) :
             translation.translateWithData('TELEGRAM_NOTIFICATION_MESSAGE', userObj.lng, {
                 SOC: ((userObj.soc_display == null) ? SOC_BMS : ((
                         userObj.soc_bms == null) ?
                     SOC_DISPLAY : SOC_DISPLAY)),
-                RANGE: '0km' // TODO
-            }, true) // TODO
+                RANGE: helper.calculateRange(userObj.car, userObj.soc_display || userObj.soc_bms, userObj.consumption) + 'km'
+            }, true)
         ));
     }
 }
