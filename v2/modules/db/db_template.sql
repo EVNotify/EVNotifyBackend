@@ -37,6 +37,9 @@ CREATE TABLE IF NOT EXISTS `sync` (
     `dc_battery_voltage` FLOAT DEFAULT 0,
     `dc_battery_current` FLOAT DEFAULT 0,
     `dc_battery_power` FLOAT DEFAULT 0,
+    `battery_min_temperature` FLOAT DEFAULT 0,
+    `battery_max_temperature` FLOAT DEFAULT 0,
+    `battery_inlet_temperature` FLOAT DEFAULT 0,
     `latitude` DECIMAL(10, 8) DEFAULT NULL,
     `longitude` DECIMAL(11, 8) DEFAULT NULL,
     `gps_speed` FLOAT DEFAULT 0,
@@ -64,6 +67,9 @@ CREATE TABLE IF NOT EXISTS `statistics` (
     `dc_battery_voltage` FLOAT DEFAULT NULL,
     `dc_battery_current` FLOAT DEFAULT NULL,
     `dc_battery_power` FLOAT DEFAULT NULL,
+    `battery_min_temperature` FLOAT DEFAULT 0,
+    `battery_max_temperature` FLOAT DEFAULT 0,
+    `battery_inlet_temperature` FLOAT DEFAULT 0,
     `latitude` DECIMAL(10, 8) DEFAULT NULL,
     `longitude` DECIMAL(11, 8) DEFAULT NULL,
     `gps_speed` FLOAT DEFAULT NULL,
@@ -71,6 +77,14 @@ CREATE TABLE IF NOT EXISTS `statistics` (
     `location_timestamp` INT(20) DEFAULT NULL,
     `timestamp` INT(13) DEFAULT NULL,
     PRIMARY KEY (`id`),
+    FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
+);
+
+-- qr table structure
+CREATE TABLE IF NOT EXISTS `qr` (
+    `code` VARCHAR(12) NOT NULL UNIQUE,
+    `akey` VARCHAR(6) NOT NULL,
+    PRIMARY KEY (`code`),
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
 );
 
