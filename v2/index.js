@@ -43,6 +43,7 @@ const express = require('express'),
     push = require('./modules/notification/push'),
     stations = require('./modules/stations'),
     logs = require('./modules/logs'),
+    qr = require('./modules/qr'),
     webAccount = require('./modules/web/account');
 
 // ensure that session secret is valid
@@ -130,6 +131,10 @@ app.get('/logdetail', logs.getLog);
 app.post('/logdetail', logs.createLog);
 app.put('/logdetail', logs.updateLog);
 app.delete('/logdetail', logs.deleteLog);
+app.put('/qr', qr.createQR);
+app.post('/sendqr', qr.sendQR);
+app.delete('/qr', qr.deleteQR);
+app.get('/qr', qr.qrStatus);
 app.post('/debug', (req, res) => {
     if (typeof req.body.data === 'string') {
         db.query('INSERT INTO debug (data, akey, timestamp) VALUES (?, ?, ?)', [

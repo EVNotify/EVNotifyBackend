@@ -72,16 +72,19 @@ const sendMail = (userObj, abort) => {
  * @param {String} html the text / html to send
  * @param {Function} callback callback function
  */
-const simpleSend = (mail, subject, html, callback) => {
+const simpleSend = (mail, subject, html, attachments, callback) => {
     if (!transporter || !validateMail(mail) || typeof subject !== 'string' || typeof html !== 'string') {
         if (typeof callback === 'function') callback(srv_errors.INVALID_PARAMETERS);
         return;
     }
+    attachments = Array.isArray(attachments) ? attachments : [];
+
     transporter.sendMail({
         from: srv_config.MAIL_ADDRESS,
         to: mail,
         subject,
-        html
+        html,
+        attachments
     }, (err, sent) => {
         if (err) console.error(err);
         if (typeof callback === 'function') callback(err, sent);
