@@ -3,6 +3,10 @@
         "code": 400,
         "message": "Bad request. Your request could not be processed. This has been automatically reported."
     },
+    "ACCESS_DENIED": {
+        "code": 401,
+        "message": "Access denied."
+    },
     "NOT_FOUND": {
         "code": 404,
         "message": "Requested source not found."
