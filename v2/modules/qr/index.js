@@ -7,11 +7,17 @@ const crypto = require('crypto');
 const fs = require('fs');
 const qrcode = require('qrcode');
 const db = require('./../db');
+const helper = require('./../helper');
 const token = require('./../token');
 const mail = require('./../notification/mail');
 const srv_config = require('./../../srv_config.json');
 const srv_errors = require('./../../srv_errors.json');
 
+/**
+ * Creates QR code for given akey - checks if already created to prevent new qr code generation
+ * @param {String} akey the akey of the account
+ * @param {Function} callback callback function
+ */
 const createQR = (akey, callback) => {
     // check first if qr code already created for account
     getQR(akey, (err, code) => {
@@ -26,12 +32,28 @@ const createQR = (akey, callback) => {
     });
 };
 
+/**
+ * Deletes QR code from given account
+ * @param {String} akey the akey of the account
+ * @param {Function} callback callback function
+ */
 const deleteQR = (akey, callback) => db.query('DELETE FROM qr WHERE akey=?', [akey], (err, dbRes) => callback(err, (!err && dbRes)));
 
+/**
+ * Retrieves generated qr code of the given akey
+ * @param {String} akey the akey of the account
+ * @param {Function} callback callback function
+ */
 const getQR = (akey, callback) => {
     db.query('SELECT code FROM qr WHERE akey=?', [akey], (err, dbRes) => callback(err, ((!err && dbRes && dbRes[0]) ? dbRes[0].code : null)));
 };
 
+/**
+ * Resolves qr code from given akey and sends the qr code image to given mail
+ * @param {String} akey the akey of the account
+ * @param {String} email the mail to send the qr code to
+ * @param {Function} callback callback function
+ */
 const sendQR = (akey, email, callback) => {
     // resolve code from akey
     getQR(akey, (err, code) => {
@@ -61,8 +83,13 @@ const sendQR = (akey, email, callback) => {
     });
 };
 
+/**
+ * Resolves information from given qr code to retrieve data such as charging information
+ * @param {String} code the qr code to retrieve information from
+ * @param {Function} callback callback function
+ */
 const qrStatus = (code, callback) => {
-    db.query('SELECT soc_display, soc_bms, last_soc, charging, dc_battery_power FROM sync INNER JOIN qr ON qr.akey=sync.akey WHERE code=?', [
+    db.query('SELECT car, soc_display, soc_bms, last_soc, charging, dc_battery_power, slow_charge_port, normal_charge_port, rapid_charge_port FROM sync INNER JOIN qr ON qr.akey=sync.akey INNER JOIN settings ON settings.akey=qr.akey WHERE code=?', [
         code
     ], (err, dbRes) => {
         callback(err, ((!err && dbRes && dbRes[0]) ? dbRes[0] : null));
@@ -70,6 +97,11 @@ const qrStatus = (code, callback) => {
 };
 
 module.exports = {
+    /**
+     * createQR request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
     createQR: (req, res) => {
         if (!req.body.akey || !req.body.token) {
             return res.status(400).json({
@@ -104,6 +136,11 @@ module.exports = {
             }
         });
     },
+    /**
+     * deleteQR request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
     deleteQR: (req, res) => {
         if (!req.body.akey || !req.body.token) {
             return res.status(400).json({
@@ -140,6 +177,11 @@ module.exports = {
             }
         });
     },
+    /**
+     * sendQR request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
     sendQR: (req, res) => {
         if (!req.body.akey || !req.body.token || !mail.validateMail(req.body.email)) {
             return res.status(400).json({
@@ -176,6 +218,11 @@ module.exports = {
             }
         });
     },
+    /**
+     * qrStatus request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
     qrStatus: (req, res) => {
         if (!req.query.code) {
             return res.status(400).json({
@@ -190,7 +237,16 @@ module.exports = {
                         error: srv_errors.ACCESS_DENIED,
                         debug: ((srv_config.DEBUG) ? codeObj : null)
                     });
-                } else res.json(codeObj);
+                } else {
+                    // calculate estimated time
+                    codeObj.estimatedTime = helper.calculateTime(
+                        codeObj.car,
+                        (codeObj.soc_bms || codeObj.soc_display),
+                        codeObj.charging,
+                        ((codeObj.slow_charge_port) ? 'slow_charge_port' : ((codeObj.normal_charge_port) ? 'normal_charge_port' : ((codeObj.rapid_charge_port) ? 'rapid_charge_port' : null))) 
+                    );
+                    res.json(codeObj);
+                }
             } else {
                 res.status(((err) ? 422 : 404)).json({
                     error: ((err) ? srv_errors.UNPROCESSABLE_ENTITY : srv_errors.NOT_FOUND),
