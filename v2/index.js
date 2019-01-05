@@ -135,6 +135,7 @@ app.put('/qr', qr.createQR);
 app.post('/sendqr', qr.sendQR);
 app.delete('/qr', qr.deleteQR);
 app.get('/qr', qr.qrStatus);
+app.post('/qrnotify', qr.qrNotify);
 app.post('/debug', (req, res) => {
     if (typeof req.body.data === 'string') {
         db.query('INSERT INTO debug (data, akey, timestamp) VALUES (?, ?, ?)', [

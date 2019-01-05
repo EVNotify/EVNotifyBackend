@@ -21,5 +21,7 @@
     "TELEGRAM_UNSUBSCRIBTION_SUCCESSFULL": "Ich werde Dich nicht weiter benachrichtigen. Falls Du es Dir doch anders überlegst, kannst Du jederzeit wieder /subscribe eingeben.",
     "TELEGRAM_UNSUBSCRIBTION_FAILED": "Merkwürdig. Da ist etwas schiefgelaufen beim Versuch, Dich aus der Benachrichtigungsliste zu entfernen. Versuche es zu einem späteren Zeitpunkt bitte mit /unsubscribe erneut.",
     "TELEGRAM_NOTIFICATION_MESSAGE": "Hallo! Ich wollte Dir nur kurz Bescheid geben, dass Dein Elektroauto den gewünschten Ladezustand von {SOC} erreicht hat! Damit wirst Du ungefähr {RANGE} weit fahren können.",
-    "TELEGRAM_NOTIFICATION_ABORT_MESSAGE": "Hallo! Es scheint so, als sei der Ladevorgang bei {SOC} abgebrochen worden oder es gab einen Fehler bei der Kommunikation mit dem Auto. Am besten mal nachschauen!"
+    "TELEGRAM_NOTIFICATION_ABORT_MESSAGE": "Hallo! Es scheint so, als sei der Ladevorgang bei {SOC} abgebrochen worden oder es gab einen Fehler bei der Kommunikation mit dem Auto. Am besten mal nachschauen!",
+    "MAIL_SUBJECT_QR": "QRNotify: Jemand möchte laden",
+    "MAIL_TEXT_QR": "Dein QR Code von QRNotify, welcher in EVNotify generiert wurde, wurde soeben eingescannt. Jemand möchte laden. Wenn möglich, kannst Du die Ladesäule frei machen."
 }

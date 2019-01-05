@@ -66,6 +66,23 @@ const sendMail = (userObj, abort) => {
 };
 
 /**
+ * Sends mail for given user to inform about scanned qr code from QRNotify
+ * @param {Object} userObj the user object containing information such as email
+ */
+const sendQRMail = userObj => {
+    // first check if mail service is available and if userObj is given
+    if (!transporter || userObj == null) return;
+    const mail = encryption.decrypt(userObj.email); // decrypted mail
+
+    // send out mail
+    simpleSend(
+        mail,
+        translation.translate('MAIL_SUBJECT_QR', userObj.lng, true),
+        translation.translate('MAIL_TEXT_QR', userObj.lng, true)
+    );
+};
+
+/**
  * Sends a mail with given subject and text / html to specified mail address
  * @param {String} mail the mail address to send mail to
  * @param {String} subject subject of the mail
@@ -94,5 +111,6 @@ const simpleSend = (mail, subject, html, attachments, callback) => {
 module.exports = {
     validateMail,
     sendMail,
+    sendQRMail,
     simpleSend
 };

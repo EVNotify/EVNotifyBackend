@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS `sync` (
     `last_extended` INT(13) DEFAULT 0,
     `last_notification` INT(13) DEFAULT 0,
     `last_location` INT(13) DEFAULT 0,
+    `last_qr` INT(13) DEFAULT 0,
     PRIMARY KEY (`user`),
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
 );

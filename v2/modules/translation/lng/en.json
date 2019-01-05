@@ -21,5 +21,7 @@
     "TELEGRAM_UNSUBSCRIBTION_SUCCESSFULL": "I won't notify you again. In case you change your mind, you can enter /subscribe again at any time.",
     "TELEGRAM_UNSUBSCRIBTION_FAILED": "Strange, something went wrong with your request to remove you from the notification list. Please try again at a later time with /unsubscribe.",
     "TELEGRAM_NOTIFICATION_MESSAGE": "Hello! I just wanted to notify you that your electric vehicle now has reached the desired charging status of {SOC}%! With that, you can drive about {RANGE}.",
-    "TELEGRAM_NOTIFICATION_ABORT_MESSAGE": "Hello! It seems as if the charging process had been interrupted or there was an error within the communication with the car. Better have a look!"
+    "TELEGRAM_NOTIFICATION_ABORT_MESSAGE": "Hello! It seems as if the charging process had been interrupted or there was an error within the communication with the car. Better have a look!",
+    "MAIL_SUBJECT_QR": "QRNotify: Someone wants to charge",
+    "MAIL_TEXT_QR": "Your QR code of QRNotify generated in EVNotify has just been scanned. Someone wants to charge. If possible, you can clear the charging station."
 }

@@ -254,5 +254,51 @@ module.exports = {
                 });
             }
         });
+    },
+    /**
+     * qrNotify request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
+    qrNotify: (req, res) => {
+        if (!req.body.code) {
+            return res.status(400).json({
+                error: srv_errors.INVALID_PARAMETERS
+            });
+        }
+        db.query('SELECT sync.akey, last_qr, email, telegram, push FROM sync INNER JOIN qr ON qr.akey=sync.akey INNER JOIN settings ON settings.akey=qr.akey WHERE code=?', [
+            req.body.code
+        ], (err, dbRes) => {
+            let dbObj;
+
+            if (!err && dbRes && (dbObj = dbRes[0])) {
+                const now = parseInt(new Date() / 1000);
+
+                // valid, compare last_qr timestamp to determine if limit reached
+                if ((dbObj.last_qr || 0) + 600 < now) {
+                    // send out notifications based on activated types in background
+                    if (dbObj.email) mail.sendQRMail(dbObj);
+                    res.json({
+                        notified: true
+                    });
+                    // update last_qr
+                    db.query('UPDATE sync SET last_qr=? WHERE akey=?', [
+                        now, dbObj.akey
+                    ]);
+                } else {
+                    res.setHeader('Retry-After', 600);
+                    // too many request
+                    res.status(429).json({
+                        error: srv_errors.TOO_MANY_REQUESTS,
+                        debug: ((srv_config.DEBUG) ? err : null)
+                    });
+                }
+            } else {
+                res.status(((err) ? 422 : 404)).json({
+                    error: ((err) ? srv_errors.UNPROCESSABLE_ENTITY : srv_errors.NOT_FOUND),
+                    debug: ((srv_config.DEBUG) ? err : null)
+                });
+            }
+        });
     }
 };
