@@ -6,6 +6,7 @@
 const srv_config = require('./../../srv_config.json'),
     srv_errors = require('./../../srv_errors.json'),
     db = require('./../db'),
+    webhook = require('./../webhook'),
     mail = require('./mail'),
     telegram = require('./telegram'),
     push = require('./push');
@@ -47,6 +48,12 @@ const send = (req, res) => {
                     db.query('UPDATE sync SET last_notification=? WHERE akey=?', [
                         now, req.body.akey
                     ]);
+                    // trigger webhook
+                    webhook.emit(req.body.akey, 'notification', {
+                        soc_display: userObj.soc_display,
+                        soc_bms: userObj.soc_bms,
+                        abort: req.body.abort
+                    });
                 } else {
                     res.setHeader('Retry-After', 60);
                     // too many request

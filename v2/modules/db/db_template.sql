@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS `accounts` (
 CREATE TABLE IF NOT EXISTS `settings` (
     `user` VARCHAR(6) NOT NULL,
     `akey` VARCHAR(6) NOT NULL,
+    `webhook` VARCHAR(100) DEFAULT NULL,
     `email` VARCHAR(1000) DEFAULT NULL,
     `telegram` INT(100) DEFAULT 0,
     `summary` TINYINT(1) DEFAULT 0,
