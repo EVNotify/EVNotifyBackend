@@ -1,10 +1,10 @@
-[![Waffle.io - Columns and their card count](https://badge.waffle.io/GPlay97/EVNotifyBackend.png?columns=all)](https://waffle.io/GPlay97/EVNotifyBackend?utm_source=badge)
+[![Waffle.io - Columns and their card count](https://badge.waffle.io/EVNotify/EVNotifyBackend.png?columns=all)](https://waffle.io/EVNotify/EVNotifyBackend?utm_source=badge)
 # EVNotifyBackend
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/GPlay97/EVNotifyBackend.svg)](https://greenkeeper.io/)
-[![Build Status](https://travis-ci.org/GPlay97/EVNotifyBackend.svg?branch=greenkeeper%2Finitial)](https://travis-ci.org/GPlay97/EVNotifyBackend)
+[![Greenkeeper badge](https://badges.greenkeeper.io/EVNotify/EVNotifyBackend.svg)](https://greenkeeper.io/)
+[![Build Status](https://travis-ci.org/EVNotify/EVNotifyBackend.svg?branch=greenkeeper%2Finitial)](https://travis-ci.org/EVNotify/EVNotifyBackend)
 
-Backend for EVNotify (https://github.com/GPlay97/EVNotify)
+Backend for EVNotify (https://github.com/EVNotify/EVNotify)
 
 ### Contributing
 Feel free to contribute and report issues or suggestions.
