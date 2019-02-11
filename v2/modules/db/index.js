@@ -26,9 +26,8 @@ module.exports = {
         if (typeof params === 'function') callback = params;
         if (!Array.isArray(params)) params = [];
         if (typeof sql === 'string') {
-            db.query(mysql.format(sql, params), (err, queryRes) => {
-                if (typeof callback === 'function') callback(err, queryRes);
-            });
+            return db.query(mysql.format(sql, params), callback);
         } else if (typeof callback === 'function') callback(srv_errors.INVALID_PARAMETERS);
-    }
+    },
+    close: db.end,
 };
