@@ -33,5 +33,5 @@ module.exports = {
             }
         } else if (typeof callback === 'function') callback(srv_errors.INVALID_PARAMETERS);
     },
-    close: db.end,
+    close: callback => db.end(callback),
 };

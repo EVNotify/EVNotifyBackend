@@ -52,18 +52,12 @@ const createLogs = () => {
         queryStream.on('error', function (err) {
             encounteredError = err;
         })
-        queryStream.on('fields', function (fields) {})
         queryStream.on('result', function (row) {
             firstResult = firstResult || new Date().getTime();
             rows++;
-            // Pausing the connnection is useful if your processing involves I/O
-            // connection.pause();
-            // processRow(row, function() {
-            //     connection.resume();
-            // });
             var user = row.akey;
             if (!userStates[user]) {
-                userStates[user] = {start: false, last: false, charging: false, driving: false, };
+                userStates[user] = { start: false, last: false, charging: false, driving: false, };
             }
             var state = userStates[user];
 
@@ -73,7 +67,7 @@ const createLogs = () => {
                 if ((state.driving || state.charging) && state.last - state.start > MIN_DRIVING_TIME) {
                     inserts.push([user, state.start, state.last, state.charging, formatDate(state.start)]);
                 }
-                state = userStates[user] = {start: false, last: false, charging: false, driving: false, };
+                state = userStates[user] = { start: false, last: false, charging: false, driving: false, };
             }
             if (!state.start) {
                 state.start = row.timestamp;
@@ -83,43 +77,41 @@ const createLogs = () => {
             state.driving |= row.gps_speed && row.gps_speed > 1.389;
         });
         queryStream.on('end', function () {
-            if (!encounteredError) {
-                var endBegin = new Date().getTime();
-                var now = endBegin / 1000;
-                Object.keys(userStates).forEach(key => {
-                    if (!userStates.hasOwnProperty(key)) return;
-                    var state = userStates[key];
-                    if (state.last > now - UNIQUE_DELAY) return;
-                    if ((state.driving || state.charging) && state.last - state.start > MIN_DRIVING_TIME) {
-                        inserts.push([key, state.start, state.last, state.charging, formatDate(state.start)]);
-                    }
-                });
-                function createResult(queryResult) {
-                    return {
-                        nWrite: inserts.length,
-                        nRead: rows,
-                        ttfr: firstResult ? firstResult - start : endBegin - start, // time to first row
-                        tfr: firstResult ? endBegin - firstResult : -1, // time for reading
-                        tfi: new Date().getTime() - endBegin, // time for insert
-                        time: new Date().getTime() - start, // time from beginning
-                        queryResult
-                    };
-                }
-                if (inserts.length) {
-                    pquery('INSERT INTO logs (akey, start, end, charge, title) VALUES ?', [inserts])
-                            .then(createResult).then(res).catch(rej);
-                } else {
-                    res(createResult());
-                }
-            } else {
+            if (encounteredError) {
                 rej(encounteredError);
+            }
+            var endBegin = new Date().getTime();
+            var now = endBegin / 1000;
+            Object.keys(userStates).forEach(key => {
+                if (!userStates.hasOwnProperty(key)) return;
+                var state = userStates[key];
+                if (state.last > now - UNIQUE_DELAY) return;
+                if ((state.driving || state.charging) && state.last - state.start > MIN_DRIVING_TIME) {
+                    inserts.push([key, state.start, state.last, state.charging, formatDate(state.start)]);
+                }
+            });
+            function createResult(queryResult) {
+                return {
+                    nWrite: inserts.length,
+                    nRead: rows,
+                    ttfr: firstResult ? firstResult - start : endBegin - start, // time to first row
+                    tfr: firstResult ? endBegin - firstResult : -1, // time for reading
+                    tfi: new Date().getTime() - endBegin, // time for insert
+                    time: new Date().getTime() - start, // time from beginning
+                    queryResult
+                };
+            }
+            if (inserts.length) {
+                pquery('INSERT INTO logs (akey, start, end, charge, title) VALUES ?', [inserts])
+                        .then(createResult).then(res).catch(rej);
+            } else {
+                res(createResult());
             }
         });
     });
 };
 if (require.main === module) {
-    createLogs().then(console.log).catch(console.log).finally(() => setTimeout(db.close, 2000));
-    // setTimeout(db.close, 10) // for some reason we get an exception when we close the pool immediately
+    createLogs().then(console.log).catch(console.log).finally(() => db.close());
 } else {
     exports.createLogs = createLogs;
 }

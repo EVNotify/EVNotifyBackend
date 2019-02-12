@@ -16,5 +16,5 @@ describe('createLogs', () => {
 
     // TODO: more tests...
 
-    after(() => setTimeout(db.close, 10)); // for some reason we get an exception when we close the pool immediately
+    after(db.close);
 });
