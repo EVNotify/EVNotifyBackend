@@ -94,17 +94,23 @@ const createLogs = () => {
                         inserts.push([key, state.start, state.last, state.charging, formatDate(state.start)]);
                     }
                 });
-                // TODO batch insert instead of many singles, but current mysql library does not seem to support them
-                var insertPromises = inserts.map(insert => pquery('INSERT INTO logs (akey, start, end, charge, title) VALUES (?,?,?,?,?)', insert));
-
-                Promise.all(insertPromises).then(v => res({
-                    nWrite: v.length,
-                    nRead: rows,
-                    ttfr: firstResult ? firstResult - start : endBegin - start, // time to first row
-                    tfr: firstResult ? endBegin - firstResult : -1, // time for reading
-                    tfi: new Date().getTime() - endBegin, // time for insert
-                    time: new Date().getTime() - start, // time from beginning
-                })).catch(rej);
+                function createResult(queryResult) {
+                    return {
+                        nWrite: inserts.length,
+                        nRead: rows,
+                        ttfr: firstResult ? firstResult - start : endBegin - start, // time to first row
+                        tfr: firstResult ? endBegin - firstResult : -1, // time for reading
+                        tfi: new Date().getTime() - endBegin, // time for insert
+                        time: new Date().getTime() - start, // time from beginning
+                        queryResult
+                    };
+                }
+                if (inserts.length) {
+                    pquery('INSERT INTO logs (akey, start, end, charge, title) VALUES ?', [inserts])
+                            .then(createResult).then(res).catch(rej);
+                } else {
+                    res(createResult());
+                }
             } else {
                 rej(encounteredError);
             }
