@@ -34,12 +34,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GPlay97/EVNotifyBackend.git"
+    "url": "git+https://github.com/EVNotify/EVNotifyBackend.git"
   },
   "author": "GPlay97",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/GPlay97/EVNotifyBackend/issues"
+    "url": "https://github.com/EVNotify/EVNotifyBackend/issues"
   },
-  "homepage": "https://github.com/GPlay97/EVNotifyBackend#readme"
+  "homepage": "https://github.com/EVNotify/EVNotifyBackend#readme"
 }
