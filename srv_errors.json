@@ -1,0 +1,70 @@
+{
+    "BAD_REQUEST": {
+        "code": 400,
+        "message": "Bad request. Your request could not be processed. This has been automatically reported."
+    },
+    "ACCESS_DENIED": {
+        "code": 401,
+        "message": "Access denied."
+    },
+    "NOT_FOUND": {
+        "code": 404,
+        "message": "Requested source not found."
+    },
+    "UNPROCESSABLE_ENTITY": {
+        "code": 422,
+        "message": "Your request could not be processed. This is either a client side error or a server error."
+    },
+    "TOO_MANY_REQUESTS": {
+        "code": 429,
+        "message": "Too many requests were sent. Please slow down and retry within a minute."
+    },
+    "INTERNAL_SERVER_ERROR": {
+        "code": 500,
+        "message": "Internal server error occured. It has been automatically reported."
+    },
+    "UNKNOWN_ROUTE": {
+        "code": 1000,
+        "message": "Requested route does not exist. Unable to handle request."
+    },
+    "INVALID_PARAMETERS": {
+        "code": 1100,
+        "message": "Missing or invalid parameters."
+    },
+    "DB_QUERY": {
+        "code": 1200,
+        "message": "Error on database query."
+    },
+    "MALFORMED_AKEY": {
+        "code": 1300,
+        "message": "AKey format is not valid. Must be a string with 6 characters."
+    },
+    "MALFORMED_PASSWORD": {
+        "code": 1400,
+        "message": "Password must be a string with at least 6 characters and less than 72 characters."
+    },
+    "ALREADY_REGISTERED": {
+        "code": 1500,
+        "message": "Requested AKey already registered."
+    },
+    "HASH_FAILED": {
+        "code": 1600,
+        "message": "Generation of password hash failed."
+    },
+    "USER_NOT_EXISTING": {
+        "code": 1700,
+        "message": "Requested user does not exist."
+    },
+    "INVALID_CREDENTIALS": {
+        "code": 1800,
+        "message": "Entered credentials are invalid."
+    },
+    "INVALID_TOKEN": {
+        "code": 1900,
+        "message": "Provided token is invalid or no longer valid."
+    },
+    "MAIL_ALREADY_REGISTERED": {
+        "code": 2000,
+        "message": "Requested Mail already registered."
+    }
+}
