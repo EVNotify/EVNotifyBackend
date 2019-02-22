@@ -7,8 +7,7 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const srv_config = require('./../../srv_config.json');
 const srv_errors = require('./../../srv_errors.json');
-const isHTTPS = !srv_config.DEBUG && srv_config.CHAIN_PATH && srv_config.PRIVATE_KEY_PATH && srv_config.CERTIFICATE_PATH;
-const RESTURL = ((isHTTPS) ? 'https' : 'http')+ '://127.0.0.1:' + srv_config.PORT;
+const RESTURL = srv_config.TEST_URL || ('http://127.0.0.1:' + srv_config.PORT);
 const should = chai.should();
 
 // init chai
