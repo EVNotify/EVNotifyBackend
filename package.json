@@ -4,7 +4,7 @@
   "description": "backend for evnotify",
   "main": "server.js",
   "dependencies": {
-    "bcrypt": "3.0.3",
+    "bcrypt": "3.0.4",
     "body-parser": "1.18.3",
     "chai": "4.2.0",
     "chai-http": "4.2.1",
@@ -18,7 +18,7 @@
     "mysql": "2.16.0",
     "node-telegram-bot-api": "0.30.0",
     "nodemailer": "5.1.1",
-    "npm": "6.5.0",
+    "npm": "6.8.0",
     "password-hash": "1.2.2",
     "qrcode": "^1.3.2",
     "request": "2.88.0",
@@ -34,12 +34,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GPlay97/EVNotifyBackend.git"
+    "url": "git+https://github.com/EVNotify/EVNotifyBackend.git"
   },
   "author": "GPlay97",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/GPlay97/EVNotifyBackend/issues"
+    "url": "https://github.com/EVNotify/EVNotifyBackend/issues"
   },
-  "homepage": "https://github.com/GPlay97/EVNotifyBackend#readme"
+  "homepage": "https://github.com/EVNotify/EVNotifyBackend#readme"
 }

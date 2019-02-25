@@ -4,7 +4,7 @@ node_js:
   - "8"
 before_script:
   - npm run createEnv
-  - node server.js &
+  - node index.js &
   - sleep 30
 services:
   - mysql
