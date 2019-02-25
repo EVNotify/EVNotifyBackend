@@ -11,7 +11,7 @@ describe('createLogs', () => {
                 nWrite: 0,
                 nRead: 0
             })
-        }).then(console.log);
+        });
     });
 
     // TODO: more tests...
