@@ -13,6 +13,8 @@
     "PUSH_SOC_ABORT": "Charge interrupted at {SOC}",
     "TELEGRAM_SOC": "The last submitted state of charge is {SOC}. With that, you can drive about {RANGE}.",
     "TELEGRAM_SOC_ERROR": "There was an error retrieving the current state of charge.",
+    "TELEGRAM_LOCATION": "Here is the last submitted location:",
+    "TELEGRAM_LOCATION_ERROR": "Your location could not be retrieved. Ensure that you have location sync enabled and linked your account.",
     "TELEGRAM_START_TEXT": "Hello! I'm the EVNotify Bot and I will notify you about your charging status, if you like. Just enter /subscribe to begin. If you need help, you can always enter /help.",
     "TELEGRAM_HELP_TEXT": "I can notify you about the charging status of your electric vehicle. To do so, simply enter /subscribe. If you don't want to be notified anymore just enter /unsubscribe.",
     "TELEGRAM_TOKEN_ENTER": "I can almost notify you now. First, I still need your token. You can find this in the app under Settings (User - Credentials). Don't ever share this with third parties!",

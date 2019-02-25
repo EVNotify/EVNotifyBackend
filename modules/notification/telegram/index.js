@@ -82,6 +82,26 @@ const sendSoCMessage = (userID, akey) => {
 };
 
 /**
+ * Sends the current location
+ * @param {Number} userID the telegram user id
+ */
+const sendLocation = userID => {
+    // retrieve the current location
+    db.query('SELECT accounts.akey, latitude, longitude FROM accounts INNER JOIN sync ON accounts.akey=sync.akey \
+        INNER JOIN settings ON settings.akey=accounts.akey WHERE settings.telegram=?', [userID], (err, userRes) => {
+            const userObj = ((!err && userRes) ? userRes[0] : null);
+
+            if (!err && userObj && parseInt(userObj.latitude) && parseInt(userObj.longitude)) {
+                bot.sendMessage(userID, translation.translate('TELEGRAM_LOCATION', userObj.lng, true))
+                    .then(() => {
+                        bot.sendLocation(userID, userObj.latitude, userObj.longitude);
+                    })
+                    .catch(() => bot.sendMessage(userID, translation.translate('TELEGRAM_LOCATION_ERROR', ((userObj) ? userObj.lng : 'en'), true)));
+            } else bot.sendMessage(userID, translation.translate('TELEGRAM_LOCATION_ERROR', ((userObj) ? userObj.lng : 'en'), true));
+    });
+};
+
+/**
  * Starts the telegram bot - apply listener and handling for incoming messages
  */
 const startBot = () => {
@@ -141,6 +161,11 @@ const startBot = () => {
         bot.onText(/state of charge/i, msg => sendSoCMessage(msg.chat.id));
         bot.onText(/reichweite/i, msg => sendSoCMessage(msg.chat.id));
         bot.onText(/range/i, msg => sendSoCMessage(msg.chat.id));
+        // location listener
+        bot.onText(/where/i, msg => sendLocation(msg.chat.id));
+        bot.onText(/wo/i, msg => sendLocation(msg.chat.id));
+        bot.onText(/location/i, msg => sendLocation(msg.chat.id));
+        bot.onText(/standort/i, msg => sendLocation(msg.chat.id));
     }
 };
 
