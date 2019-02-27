@@ -130,6 +130,15 @@ const sendExtended = userID => {
 };
 
 /**
+ * Shorthand to retrieve soc and extended data
+ * @param {Number} userID the telegram user id
+ */
+const sendCombined = userID => {
+    sendSoCMessage(userID);
+    sendExtended(userID);
+};
+
+/**
  * Starts the telegram bot - apply listener and handling for incoming messages
  */
 const startBot = () => {
@@ -197,6 +206,9 @@ const startBot = () => {
         // extended data listener
         bot.onText(/extended/i, msg => sendExtended(msg.chat.id));
         bot.onText(/erweitert/i, msg => sendExtended(msg.chat.id));
+        // all data listener
+        bot.onText(/all/i, msg => sendCombined(msg.chat.id));
+        bot.onText(/alle/i, msg => sendCombined(msg.chat.id));
     }
 };
 
