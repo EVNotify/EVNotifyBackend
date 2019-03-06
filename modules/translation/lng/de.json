@@ -4,7 +4,7 @@
     "SOC_BMS": "Ladezustand (BMS)",
     "DATE_TIME": "Datum/Uhrzeit",
     "YES": "Ja",
-    "NO": "No",
+    "NO": "Nein",
     "MAIL_SUBJECT": "EVNotify - Ladezustand mit {SOC} erreicht",
     "MAIL_SUBJECT_ABORT": "EVNotify - ABBRUCH bei {SOC}",
     "MAIL_SOC_TEXT": "Der gewünschte Ladezustand von {SOC} wurde soeben erreicht. Damit wirst Du ungefähr {RANGE} weit fahren können.",
