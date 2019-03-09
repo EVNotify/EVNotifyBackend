@@ -82,6 +82,63 @@ const sendSoCMessage = (userID, akey) => {
 };
 
 /**
+ * Sends the current location
+ * @param {Number} userID the telegram user id
+ */
+const sendLocation = userID => {
+    // retrieve the current location
+    db.query('SELECT accounts.akey, lng, latitude, longitude FROM accounts INNER JOIN sync ON accounts.akey=sync.akey \
+        INNER JOIN settings ON settings.akey=accounts.akey WHERE settings.telegram=?', [userID], (err, userRes) => {
+        const userObj = ((!err && userRes) ? userRes[0] : null);
+
+        if (!err && userObj && parseInt(userObj.latitude) && parseInt(userObj.longitude)) {
+            bot.sendMessage(userID, translation.translate('TELEGRAM_LOCATION', userObj.lng, true))
+                .then(() => {
+                    bot.sendLocation(userID, userObj.latitude, userObj.longitude);
+                })
+                .catch(() => bot.sendMessage(userID, translation.translate('TELEGRAM_LOCATION_ERROR', ((userObj) ? userObj.lng : 'en'), true)));
+        } else bot.sendMessage(userID, translation.translate('TELEGRAM_LOCATION_ERROR', ((userObj) ? userObj.lng : 'en'), true));
+    });
+};
+
+/**
+ * Sends extended data
+ * @param {Number} userID the telegram user id
+ */
+const sendExtended = userID => {
+    // retrieve extended data
+    db.query('SELECT accounts.akey, lng, soh, charging, aux_battery_voltage, dc_battery_voltage, dc_battery_current, dc_battery_power, \
+        battery_min_temperature, battery_max_temperature, battery_inlet_temperature FROM accounts \
+        INNER JOIN sync ON accounts.akey=sync.akey INNER JOIN settings ON settings.akey=accounts.akey \
+        WHERE settings.telegram=?', [userID], (err, userRes) => {
+        const userObj = ((!err && userRes) ? userRes[0] : null);
+
+        if (!err && userObj != null) {
+            bot.sendMessage(userID, translation.translateWithData('TELEGRAM_EXTENDED', userObj.lng, {
+                SOH: userObj.soh,
+                CHARGING: translation.translate(((userObj.charging) ? 'YES' : 'NO'), userObj.lng, true),
+                AUX_BATTERY_VOLTAGE: userObj.aux_battery_voltage,
+                DC_BATTERY_VOLTAGE: userObj.dc_battery_voltage,
+                DC_BATTERY_CURRENT: userObj.dc_battery_current,
+                DC_BATTERY_POWER: userObj.dc_battery_power,
+                BATTERY_MIN_TEMPERATURE: userObj.battery_min_temperature,
+                BATTERY_MAX_TEMPERATURE: userObj.battery_max_temperature,
+                BATTERY_INLET_TEMPERATURE: userObj.battery_inlet_temperature
+            }, true));
+        } else bot.sendMessage(userID, translation.translate('TELEGRAM_EXTENDED_ERROR', ((userObj) ? userObj.lng : 'en'), true));
+    });
+};
+
+/**
+ * Shorthand to retrieve soc and extended data
+ * @param {Number} userID the telegram user id
+ */
+const sendCombined = userID => {
+    sendSoCMessage(userID);
+    sendExtended(userID);
+};
+
+/**
  * Starts the telegram bot - apply listener and handling for incoming messages
  */
 const startBot = () => {
@@ -141,6 +198,17 @@ const startBot = () => {
         bot.onText(/state of charge/i, msg => sendSoCMessage(msg.chat.id));
         bot.onText(/reichweite/i, msg => sendSoCMessage(msg.chat.id));
         bot.onText(/range/i, msg => sendSoCMessage(msg.chat.id));
+        // location listener
+        bot.onText(/where/i, msg => sendLocation(msg.chat.id));
+        bot.onText(/wo/i, msg => sendLocation(msg.chat.id));
+        bot.onText(/location/i, msg => sendLocation(msg.chat.id));
+        bot.onText(/standort/i, msg => sendLocation(msg.chat.id));
+        // extended data listener
+        bot.onText(/extended/i, msg => sendExtended(msg.chat.id));
+        bot.onText(/erweitert/i, msg => sendExtended(msg.chat.id));
+        // all data listener
+        bot.onText(/all/i, msg => sendCombined(msg.chat.id));
+        bot.onText(/alle/i, msg => sendCombined(msg.chat.id));
     }
 };
 
