@@ -1,8 +1,9 @@
 const chai = require('chai');
-const should = chai.should();
 
 const db = require('../../modules/db');
 const uut = require('../../modules/cron/createLogs');
+
+chai.should();
 
 describe('createLogs', () => {
     it('does not create new logs on empty table', () => {
