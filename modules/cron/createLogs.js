@@ -111,7 +111,7 @@ const createLogs = () => {
     });
 };
 if (require.main === module) {
-    createLogs().then(console.log).catch(console.log).finally(() => db.close());
+    createLogs().then(console.log).catch(console.log).then(() => db.close());
 } else {
     exports.createLogs = createLogs;
 }
