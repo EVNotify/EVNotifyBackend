@@ -131,6 +131,7 @@ app.get('/logdetail', logs.getLog);
 app.post('/logdetail', logs.createLog);
 app.put('/logdetail', logs.updateLog);
 app.delete('/logdetail', logs.deleteLog);
+app.get('/logexport', logs.exportLog);
 app.put('/qr', qr.createQR);
 app.post('/sendqr', qr.sendQR);
 app.delete('/qr', qr.deleteQR);
