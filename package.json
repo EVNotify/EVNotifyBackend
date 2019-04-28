@@ -9,7 +9,7 @@
     "chai": "4.2.0",
     "chai-http": "4.2.1",
     "cors": "2.8.5",
-    "excel4node": "1.7.0",
+    "excel4node": "1.7.1",
     "express": "4.16.4",
     "express-session": "1.15.6",
     "firebase-admin": "6.5.0",
