@@ -1,4 +1,3 @@
-[![Waffle.io - Columns and their card count](https://badge.waffle.io/EVNotify/EVNotifyBackend.png?columns=all)](https://waffle.io/EVNotify/EVNotifyBackend?utm_source=badge)
 # EVNotifyBackend
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/EVNotify/EVNotifyBackend.svg)](https://greenkeeper.io/)
@@ -17,4 +16,5 @@ The App of EVNotify as well as the Backend has an integrated mechanism to track 
 For API Analytics and error tracking a tool called Moesif is used.
 
 [Powered By Moesif API Analytics](https://www.moesif.com) 
+
 [![Moesif API Analytics](https://cdn.moesif.com/images/moesif_badge.png)](https://www.moesif.com)
