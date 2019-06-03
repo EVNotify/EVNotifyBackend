@@ -44,6 +44,7 @@ const express = require('express'),
     stations = require('./modules/stations'),
     logs = require('./modules/logs'),
     qr = require('./modules/qr'),
+    abrpIntegration = require('./modules/integrations/abrp'),
     webAccount = require('./modules/web/account');
 
 // ensure that session secret is valid
@@ -160,6 +161,8 @@ app.post('/debug', (req, res) => {
 // the web routes
 app.post('/web/register', webAccount.register);
 app.post('/web/login', webAccount.login);
+// integrations routes
+app.get('/integrations/abrp/auth/:akey/:token', abrpIntegration.auth);
 
 // requested route does not exist
 app.use((req, res) => res.status(404).json({
