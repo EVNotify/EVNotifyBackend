@@ -6,6 +6,7 @@
 const srv_config = require('./../../srv_config.json'),
     srv_errors = require('./../../srv_errors.json'),
     db = require('./../db'),
+    abrp = require('./../integrations/abrp'),
     token = require('./../token');
 
 /**
@@ -21,6 +22,7 @@ const postSoC = (akey, socObj, callback) => {
         socObj.display, socObj.bms, now, akey
     ], (err, dbRes) => {
         if (!err && dbRes) {
+            abrp.submitData(akey);
             db.query('INSERT INTO statistics (akey, soc_display, soc_bms, timestamp) VALUES (?, ?, ?, ?)', [
                 akey, socObj.display, socObj.bms, now
             ], (err, dbRes) => callback(err, (!err && dbRes)));
