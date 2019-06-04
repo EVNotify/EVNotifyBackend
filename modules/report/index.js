@@ -4,6 +4,7 @@
  * @description Module for report
  */
 const fs = require('fs'),
+    crypto = require('crypto'),
     excel = require('excel4node'),
     db = require('./../db'),
     tokenModule = require('./../token'),
@@ -25,27 +26,54 @@ const converters = {
  * condition is a list of sql columns. If at least one of these columns is not null in a mysql row, a new excel row is created
  * sql_columns is a list of objects, where each object contains the name and type of a sql column that should be added to the excel sheet in the column with the name contained in excel_name
  */
-const worksheets = [
-    {
-        "name":"SOC_HISTORY",
-        "condition": ["soc_display","soc_bms", ],
-        "sql_columns": [
-            {"name":"timestamp", "type":"date", "excel_name": "DATE_TIME"},
-            {"name":"soc_display", "type":"number", "excel_name": "SOC_DISPLAY"},
-            {"name":"soc_bms", "type":"number", "excel_name": "SOC_BMS"},
-        ],
-    },
-    {
-        "name":"LOCATION_HISTORY",
-        "condition": ["latitude","longitude", "gps_speed", ],
-        "sql_columns": [
-            {"name":"timestamp", "type":"date", "excel_name": "DATE_TIME"},
-            {"name":"latitude", "type":"number", "excel_name": "LATITUDE"},
-            {"name":"longitude", "type":"number", "excel_name": "LONGITUDE"},
-            {"name":"gps_speed", "type":"number", "excel_name": "SPEED"},
-        ],
-    },
-];
+const worksheets = {
+    log: [{
+            "name": "SOC_HISTORY",
+            "condition": ["soc_display", "soc_bms", ],
+            "sql_columns": [{
+                    "name": "timestamp",
+                    "type": "date",
+                    "excel_name": "DATE_TIME"
+                },
+                {
+                    "name": "soc_display",
+                    "type": "number",
+                    "excel_name": "SOC_DISPLAY"
+                },
+                {
+                    "name": "soc_bms",
+                    "type": "number",
+                    "excel_name": "SOC_BMS"
+                },
+            ],
+        },
+        {
+            "name": "LOCATION_HISTORY",
+            "condition": ["latitude", "longitude", "gps_speed", ],
+            "sql_columns": [{
+                    "name": "timestamp",
+                    "type": "date",
+                    "excel_name": "DATE_TIME"
+                },
+                {
+                    "name": "latitude",
+                    "type": "number",
+                    "excel_name": "LATITUDE"
+                },
+                {
+                    "name": "longitude",
+                    "type": "number",
+                    "excel_name": "LONGITUDE"
+                },
+                {
+                    "name": "gps_speed",
+                    "type": "number",
+                    "excel_name": "SPEED"
+                },
+            ],
+        }
+    ]
+};
 
 /**
  * This object can be used to create a worksheet in a workbook
@@ -65,11 +93,11 @@ function Worksheet(workbook, lng, configuration) {
      * 
      * @param {object} row the row that should be added
      */
-    this.processRow = function(row) {
+    this.processRow = function (row) {
         // check if at least one of the conditions is not null
-        if (!configuration.condition.reduce(((prev, cur) => prev || row[cur]!=null), false)) return;
+        if (!configuration.condition.reduce(((prev, cur) => prev || row[cur] != null), false)) return;
         // add row
-        configuration.sql_columns.forEach((val, i) => (row[val.name] != null) ? worksheet.cell(rowIndex, i+1)[val.type](converters[val.type](row[val.name])) : false);
+        configuration.sql_columns.forEach((val, i) => (row[val.name] != null) ? worksheet.cell(rowIndex, i + 1)[val.type](converters[val.type](row[val.name])) : false);
         rowIndex += 1;
     }
 }
@@ -96,7 +124,7 @@ const createReport = (akey, token, callback) => {
                     ], (err, dataRes) => {
                         if (!err && Array.isArray(dataRes)) {
                             let wb = new excel.Workbook(),
-                                wss = worksheets.map(e => new Worksheet(wb, lng, e));
+                                wss = worksheets.log.map(e => new Worksheet(wb, lng, e));
                             dataRes.forEach(e => wss.forEach(w => w.processRow(e)));
                             // TODO dynamic filename (tmp file which need to be unlinked and streamed to user..)
                             wb.write('Excel.xlsx');
@@ -106,6 +134,30 @@ const createReport = (akey, token, callback) => {
                 } else callback(err);
             });
         } else callback(err);
+    });
+};
+
+const logExportReport = (data) => {
+    return new Promise((resolve, reject) => {
+        const randomFile = 'tmp_logexportreport_' + crypto.randomBytes(20).toString('hex') + '.xlsx';
+        try {
+            // TODO lng..
+            const wb = new excel.Workbook({
+                dateFormat: 'm/d/yy hh:mm:ss',
+            });
+            const wss = worksheets.log.map((e) => new Worksheet(wb, 'en', e));
+            data.forEach((d) => wss.forEach((w) => w.processRow(d)));
+            wb.write(randomFile, (err) => {
+                if (err) return reject(err);
+                resolve(randomFile)
+            });
+        } catch (err) {
+            console.error(err);
+            fs.unlink(randomFile, (err) => {
+                if (err) console.warn('Random tmp file could not be removed', randomFile);
+            });
+            reject(err);
+        }
     });
 };
 
@@ -135,5 +187,6 @@ module.exports = {
                 });
             }
         });
-    }
+    },
+    logExportReport
 };
