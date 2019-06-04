@@ -15,7 +15,7 @@ const srv_config = require('./../../srv_config.json'),
  * @param {Function} callback callback function
  */
 const getSettings = (akey, callback) => {
-    db.query('SELECT email, telegram, push, soc, consumption, car, device, lng, summary FROM settings WHERE akey=?', [
+    db.query('SELECT email, telegram, abrp, push, soc, consumption, car, device, lng, summary FROM settings WHERE akey=?', [
         akey
     ], (err, dbRes) => {
         if (!err && dbRes && dbRes[0] && dbRes[0].email) dbRes[0].email = encryption.decrypt(dbRes[0].email);
