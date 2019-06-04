@@ -5,7 +5,8 @@ const db = require('../../db');
 const token = require('../../token');
 
 const cars = {
-    IONIQ_BEV: 'hyundai:ioniq:17:28:other'
+    IONIQ_BEV: 'hyundai:ioniq:17:28:other',
+    KONA_EV: 'hyundai:kona:19:64:other'
 };
 
 const auth = (req, res, next) => {
