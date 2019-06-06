@@ -6,7 +6,8 @@ const token = require('../../token');
 
 const cars = {
     IONIQ_BEV: 'hyundai:ioniq:17:28:other',
-    KONA_EV: 'hyundai:kona:19:64:other'
+    KONA_EV: 'hyundai:kona:19:64:other',
+    ZOE_Q210: 'renault:zoe:q210:22:other'
 };
 
 const auth = (req, res, next) => {
