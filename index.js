@@ -44,6 +44,7 @@ const express = require('express'),
     stations = require('./modules/stations'),
     logs = require('./modules/logs'),
     qr = require('./modules/qr'),
+    abrpIntegration = require('./modules/integrations/abrp'),
     webAccount = require('./modules/web/account');
 
 // ensure that session secret is valid
@@ -131,6 +132,7 @@ app.get('/logdetail', logs.getLog);
 app.post('/logdetail', logs.createLog);
 app.put('/logdetail', logs.updateLog);
 app.delete('/logdetail', logs.deleteLog);
+app.get('/logexport', logs.exportLog);
 app.put('/qr', qr.createQR);
 app.post('/sendqr', qr.sendQR);
 app.delete('/qr', qr.deleteQR);
@@ -159,6 +161,8 @@ app.post('/debug', (req, res) => {
 // the web routes
 app.post('/web/register', webAccount.register);
 app.post('/web/login', webAccount.login);
+// integrations routes
+app.get('/integrations/abrp/auth/:akey/:token', abrpIntegration.auth);
 
 // requested route does not exist
 app.use((req, res) => res.status(404).json({
