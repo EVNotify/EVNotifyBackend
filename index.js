@@ -30,7 +30,11 @@ const express = require('express'),
         applicationId: srv_config.MOESIF_TOKEN,
         identifyUser: req => req.body.akey,
         getApiVersion: () => '2',
-        skip: req => req.path === '/location' || req.path === '/debug' || req.path === '/soc' || req.path === '/extended'
+        skip: req => {
+            const path = req.path.toLowerCase();
+            
+            return path === '/location' || path === '/debug' || path === '/soc' || path === '/extended'
+        }
     }) : false),
     db = require('./modules/db'),
     account = require('./modules/account'),
