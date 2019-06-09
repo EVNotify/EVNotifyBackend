@@ -3,6 +3,8 @@
  * @author GPlay97
  * @description Cron file to create logs for user in background
  */
+const http = require('http');
+const srv_config = require('./../../srv_config.json');
 const db = require('./../db');
 const util = require('util');
 const query = db.query;
@@ -110,8 +112,15 @@ const createLogs = () => {
         });
     });
 };
+
+http.createServer().listen(srv_config.CRON_LOG_PORT);
+
 if (require.main === module) {
-    createLogs().then(console.log).catch(console.log).then(() => db.close());
+    createLogs().then(console.log).catch(console.log).then(() => {
+        db.close(() => {
+            process.exit();
+        });
+    });
 } else {
     exports.createLogs = createLogs;
 }
