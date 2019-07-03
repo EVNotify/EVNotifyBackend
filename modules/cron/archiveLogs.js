@@ -27,8 +27,11 @@ const archiveLogs = () => {
                         query('SELECT * FROM statistics WHERE akey=? AND timestamp >= ? AND timestamp <= ?', [log.akey, log.start, log.end], (err, stats) => {
                             if (!err && Array.isArray(stats)) {
                                 if (!stats.length) {
-                                    if (++processed === logsRes.length) return resolve();
-                                    processLog(logsRes[processed]);
+                                    query('UPDATE logs SET archived=1 WHERE id=?', [log.id], (err) => {
+                                       if (err) return reject(err);
+                                       if (++processed === logsRes.length) return resolve();
+                                       processLog(logsRes[processed]);
+                                   });
                                 } else {
                                     query(`INSERT INTO ${table} (${Object.keys(stats[0]).join(',')}) VALUES ?`, [stats.map((stat) => Object.values(stat))], (err) => {
                                         if (err) return reject(err);
