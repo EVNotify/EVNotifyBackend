@@ -7,7 +7,8 @@ const srv_config = require('./../../srv_config.json'),
     srv_errors = require('./../../srv_errors.json'),
     db = require('./../db'),
     token = require('./../token'),
-    encryption = require('./../encryption');
+    encryption = require('./../encryption'),
+    mail = require('./../notification/mail');
 
 /**
  * Retrieves settings from database for given akey
@@ -15,7 +16,7 @@ const srv_config = require('./../../srv_config.json'),
  * @param {Function} callback callback function
  */
 const getSettings = (akey, callback) => {
-    db.query('SELECT email, telegram, abrp, push, soc, consumption, car, device, lng, summary FROM settings WHERE akey=?', [
+    db.query('SELECT verified as emailVerified, mail as email, telegram, abrp, push, soc, consumption, car, device, lng, summary FROM settings LEFT JOIN notificationMail ON notificationMail.akey=settings.akey WHERE settings.akey=?', [
         akey
     ], (err, dbRes) => {
         if (!err && dbRes && dbRes[0] && dbRes[0].email) dbRes[0].email = encryption.decrypt(dbRes[0].email);
@@ -30,8 +31,7 @@ const getSettings = (akey, callback) => {
  * @param {Function} callback callback function
  */
 const setSettings = (akey, settings, callback) => {
-    db.query('UPDATE settings SET email=?, telegram=?, push=?, soc=?, consumption=?, car=?, device=?, lng=?, summary=? WHERE akey=?', [
-        ((settings.email) ? encryption.encrypt(settings.email) : ''),
+    db.query('UPDATE settings SET telegram=?, push=?, soc=?, consumption=?, car=?, device=?, lng=?, summary=? WHERE akey=?', [
         settings.telegram,
         settings.push,
         settings.soc,
@@ -41,7 +41,13 @@ const setSettings = (akey, settings, callback) => {
         settings.lng,
         settings.summary,
         akey
-    ], (err, dbRes) => callback(err, ((!err && dbRes && dbRes[0]) ? dbRes[0] : null)));
+    ], (err, dbRes) => {
+        if (err) callback(err);
+        mail.setMail({ akey: akey, lng: settings.lng }, settings.email, (err, res) => {
+            if (err && (typeof err !== "error" || err.message !== 'current mail')) return callback(err);
+            callback(false);
+        });
+    });
 };
 
 module.exports = {

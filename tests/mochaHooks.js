@@ -1,0 +1,1 @@
+after(require('../modules/db').close);
