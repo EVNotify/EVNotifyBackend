@@ -99,7 +99,7 @@ describe('mail', () => {
         it('fails if new mail is same as current mail', () => {
             sandbox.stub(uut, 'simpleSend').callsFake((mail, subject, html, attachments, callback) => callback(false));
             return doQuery('INSERT INTO notificationMail(akey, mail, verified, identifier) VALUES(123456,?, TRUE, UNHEX("1234567890abcdef1234567890abcdef"))', [encryption.encrypt('test@example.com')])
-                .then(() => promisedSetMail({ akey: '123456', lng: 'en' }, 'test@example.com').should.eventually.be.rejectedWith(Error, /current mail/));
+                .then(() => promisedSetMail({ akey: '123456', lng: 'en' }, 'test@example.com').should.eventually.be.rejected.and.equal(srv_errors.CURRENT_MAIL));
         });
 
         it('new mail added successfully', () => {
@@ -142,7 +142,7 @@ describe('mail', () => {
 
         it('fails if sending of mail failed', () => {
             sandbox.stub(uut, 'simpleSend').callsFake((mail, subject, html, attachments, callback) => callback(new Error('some error...')));
-            return promisedSetMail({ akey: '123456', lng: 'en' }, 'test@example.com').should.eventually.be.rejected.and.equal(srv_errors.INVALID_PARAMETERS);
+            return promisedSetMail({ akey: '123456', lng: 'en' }, 'test@example.com').should.eventually.be.rejectedWith(Error, /some error.../);
         });
 
         it('fails if mail currently locked', () => {
@@ -173,11 +173,11 @@ describe('mail', () => {
         })
 
         it('verification of verified mail fails', () => {
-            return promisedMailVerification('fedcba0987654321fedcba0987654321').should.eventually.be.rejectedWith(Error, /already verified/);
+            return promisedMailVerification('fedcba0987654321fedcba0987654321').should.eventually.be.rejected.and.equal(srv_errors.CONFLICT);
         })
 
         it('verification of unknown mail fails', () => {
-            return promisedMailVerification('eeeeee0987654321fedcba0987654321').should.eventually.be.rejectedWith(Error, /unknown identifier/);
+            return promisedMailVerification('eeeeee0987654321fedcba0987654321').should.eventually.be.rejected.and.equal(srv_errors.NOT_FOUND);
         })
     })
 
