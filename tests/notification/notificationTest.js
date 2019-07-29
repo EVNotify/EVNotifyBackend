@@ -1,4 +1,4 @@
-const chai = require('chai');
+require('chai');
 const sinon = require('sinon');
 const sandbox = sinon.createSandbox();
 
@@ -17,7 +17,7 @@ const clearAll = () => {
 var encryptedTestMail = encryption.encrypt('test@example.com')
 
 var reqA = { body: { akey: '123456', token: '3', abort: false } };
-var reqB = { body: { akey: '234567', token: '6', abort: false } };
+// var reqB = { body: { akey: '234567', token: '6', abort: false } };
 var req, res;
 
 describe('test notification sending', () => {

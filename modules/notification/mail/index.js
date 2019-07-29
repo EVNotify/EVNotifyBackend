@@ -130,7 +130,7 @@ const setMail = (userObj, mail, callback) => {
         .then(() => getRandomBytes(16))
         .then(id => new Promise((res, rej) => {
             module.exports.simpleSend(mail, translation.translate('MAIL_SUBJECT_VERIFY', userObj.lng, true),
-                translation.translateWithData('MAIL_TEXT_VERIFY', userObj.lng, { BASE_URL: srv_config.BASE_URL, ID: id.toString('hex') }, true), null, (err, sent) => {
+                translation.translateWithData('MAIL_TEXT_VERIFY', userObj.lng, { BASE_URL: srv_config.BASE_URL, ID: id.toString('hex') }, true), null, (err) => {
                     if (err) {
                         if (err.responseCode === 550) return rej(srv_errors.INVALID_MAIL)
                         return rej(err);

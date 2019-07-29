@@ -41,9 +41,9 @@ const setSettings = (akey, settings, callback) => {
         settings.lng,
         settings.summary,
         akey
-    ], (err, dbRes) => {
+    ], (err) => {
         if (err) callback(err);
-        mail.setMail({ akey: akey, lng: settings.lng }, settings.email, (err, res) => {
+        mail.setMail({ akey: akey, lng: settings.lng }, settings.email, (err) => {
             if (err && err.code !== 1102) return callback(err);
             callback(false);
         });
