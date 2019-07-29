@@ -26,12 +26,18 @@ module.exports = {
         if (typeof params === 'function') callback = params;
         if (!Array.isArray(params)) params = [];
         if (typeof sql === 'string') {
-            if (params.length>0 && Array.isArray(params[0])) {
+            if (params.length > 0 && Array.isArray(params[0])) {
                 return db.query(sql, params, callback);
-            }else {
+            } else {
                 return db.query(mysql.format(sql, params), callback);
             }
         } else if (typeof callback === 'function') callback(srv_errors.INVALID_PARAMETERS);
+    },
+    /**
+     * Gets a database connection from the pool. Requested connections have to be released manually!
+     */
+    getConnection: (callback) => {
+        db.getConnection(callback);
     },
     close: callback => db.end(callback),
 };

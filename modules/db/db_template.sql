@@ -1,3 +1,10 @@
+CREATE TABLE IF NOT EXISTS `system` (
+    `key` VARCHAR(20) NOT NULL PRIMARY KEY,
+    `value` VARCHAR(20) NOT NULL
+);
+
+INSERT INTO `system` VALUES("version", 1) ON DUPLICATE KEY UPDATE `value`=VALUES(`value`);
+
 -- accounts table structure
 CREATE TABLE IF NOT EXISTS `accounts` (
     `akey` VARCHAR(6) NOT NULL PRIMARY KEY,
