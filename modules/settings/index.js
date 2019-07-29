@@ -44,7 +44,7 @@ const setSettings = (akey, settings, callback) => {
     ], (err, dbRes) => {
         if (err) callback(err);
         mail.setMail({ akey: akey, lng: settings.lng }, settings.email, (err, res) => {
-            if (err && (typeof err !== "error" || err.message !== 'current mail')) return callback(err);
+            if (err && err.code !== 1102) return callback(err);
             callback(false);
         });
     });
@@ -117,10 +117,19 @@ module.exports = {
                                 settings: req.body.settings
                             });
                         } else {
-                            res.status(422).json({
-                                error: srv_errors.UNPROCESSABLE_ENTITY,
-                                debug: ((srv_config.DEBUG) ? err : null)
-                            });
+                            if (err.code && err.message && typeof err.code === "number") {
+                                if (!err.status) {
+                                    err.status = err.code < 600 ? err.code : 400;
+                                }
+                                var debug = ((srv_config.DEBUG) ? err.debug : null)
+                                delete err.debug;
+                                return res.status(err.status).json({ error: err, debug });
+                            } else {
+                                res.status(500).json({
+                                    error: srv_errors.INTERNAL_SERVER_ERROR,
+                                    debug: ((srv_config.DEBUG) ? err : null)
+                                });
+                            }
                         }
                     });
                 } else {
@@ -135,6 +144,28 @@ module.exports = {
                     debug: ((srv_config.DEBUG) ? err : null)
                 });
             }
+        });
+    },
+
+    verifyMail: (req, res) => {
+        if (!req.params.id) {
+            return res.status(400).json({
+                error: srv_errors.INVALID_PARAMETERS
+            });
+        }
+        mail.verifyMail(req.params.id, (err) => {
+            if (err) {
+                if (err.code && err.message) {
+                    var debug = ((srv_config.DEBUG) ? err.debug : null)
+                    err.debug = null;
+                    return res.status(err.code).json({ error: err, debug });
+                }
+                return res.status(500).json({
+                    error: srv_errors.INTERNAL_SERVER_ERROR,
+                    debug: ((srv_config.DEBUG) ? err : null)
+                });
+            }
+            res.status(204).send();
         });
     }
 };

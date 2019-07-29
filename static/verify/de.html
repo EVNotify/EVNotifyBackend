@@ -1,0 +1,17 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="request.js" defer=""></script>
+</head>
+
+<body>
+    <form method="post" action="." onsubmit="return doRequest()">
+        <input type="submit" value="Verifizieren">
+    </form>
+    <div id="success" style="display:none">Verifikation erfolgreich.</div>
+    <div id="error404" style="display:none">Unbekannte E-Mail-Adresse.</div>
+    <div id="error409" style="display:none">E-Mail-Adresse ist bereits verifiziert.</div>
+    <div id="error" style="display:none">Unbekannter Fehler:</div>
+</body>
+
+</html>

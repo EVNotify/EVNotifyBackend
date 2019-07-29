@@ -31,5 +31,5 @@
     "MAIL_SUBJECT_QR": "QRNotify: Someone wants to charge",
     "MAIL_TEXT_QR": "Your QR code of QRNotify generated in EVNotify has just been scanned. Someone wants to charge. If possible, you can clear the charging station.",
     "MAIL_SUBJECT_VERIFY": "Please verify your email address for EVNotify",
-    "MAIL_TEXT_VERIFY": "Hello,<br>In order to receive notifications from EVNotify, we need you to verify your email address. <a href=\"{BASE_URL}/verify/{ID}\">Klick here</a> or open the following link to complete this process: {BASE_URL}/verify/{ID}"
+    "MAIL_TEXT_VERIFY": "Hello,<br>In order to receive notifications from EVNotify, we need you to verify your email address. <a href=\"{BASE_URL}/verify/{ID}/en.html\">Klick here</a> or open the following link to complete this process: {BASE_URL}/verify/{ID}/en.html"
 }

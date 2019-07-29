@@ -29,5 +29,7 @@
     "TELEGRAM_NOTIFICATION_MESSAGE": "Hallo! Ich wollte Dir nur kurz Bescheid geben, dass Dein Elektroauto den gewünschten Ladezustand von {SOC} erreicht hat! Damit wirst Du ungefähr {RANGE} weit fahren können.",
     "TELEGRAM_NOTIFICATION_ABORT_MESSAGE": "Hallo! Es scheint so, als sei der Ladevorgang bei {SOC} abgebrochen worden oder es gab einen Fehler bei der Kommunikation mit dem Auto. Am besten mal nachschauen!",
     "MAIL_SUBJECT_QR": "QRNotify: Jemand möchte laden",
-    "MAIL_TEXT_QR": "Dein QR Code von QRNotify, welcher in EVNotify generiert wurde, wurde soeben eingescannt. Jemand möchte laden. Wenn möglich, kannst Du die Ladesäule frei machen."
+    "MAIL_TEXT_QR": "Dein QR Code von QRNotify, welcher in EVNotify generiert wurde, wurde soeben eingescannt. Jemand möchte laden. Wenn möglich, kannst Du die Ladesäule frei machen.",
+    "MAIL_SUBJECT_VERIFY": "Verifizierung der E-Mail-Adresse für EVNotify",
+    "MAIL_TEXT_VERIFY": "Hallo,<br>Um Benachrichtigungen von EVNotify zu erhalten, muss zuerst die E-Mail-Adresse verifiziert werden. <a href=\"{BASE_URL}/verify/{ID}/de.html\">Klicke hier</a> oder öffne den folgenden Link um diesen Prozess abzuschließen: {BASE_URL}/verify/{ID}/de.html"
 }

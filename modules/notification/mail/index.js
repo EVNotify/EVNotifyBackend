@@ -123,7 +123,8 @@ const setMail = (userObj, mail, callback) => {
     }
     doQuery('SELECT mail FROM notificationMail WHERE akey=? AND verified=TRUE', [akey])
         .then(result => {
-            if (result.length > 0 && encryption.decrypt(result[0].mail) === mail) throw new Error('current mail');//TODO
+            if (result.length > 0 && encryption.decrypt(result[0].mail) === mail) return Promise.reject(srv_errors.CURRENT_MAIL);
+            return true;
         })
         .then(() => module.exports.checkMailUnlocked(mail))
         .then(() => getRandomBytes(16))
@@ -131,8 +132,8 @@ const setMail = (userObj, mail, callback) => {
             module.exports.simpleSend(mail, translation.translate('MAIL_SUBJECT_VERIFY', userObj.lng, true),
                 translation.translateWithData('MAIL_TEXT_VERIFY', userObj.lng, { BASE_URL: srv_config.BASE_URL, ID: id.toString('hex') }, true), null, (err, sent) => {
                     if (err) {
-                        console.log("mailSendFail")
-                        return rej(srv_errors.INVALID_PARAMETERS);
+                        if (err.responseCode === 550) return rej(srv_errors.INVALID_MAIL)
+                        return rej(err);
                     }
                     return res(id);
                 });
@@ -144,8 +145,9 @@ const setMail = (userObj, mail, callback) => {
 
 const verifyMail = (identifier, callback) => {
     doQuery('UPDATE notificationMail SET verified=TRUE WHERE identifier=UNHEX(?)', [identifier]).then(queryResult => {
-        if (queryResult.affectedRows !== 1) throw new Error('unknown identifier'); //TODO
-        if (queryResult.changedRows !== 1) throw new Error('already verified'); //TODO
+        if (queryResult.affectedRows !== 1) return Promise.reject(srv_errors.NOT_FOUND);
+        if (queryResult.changedRows !== 1) return Promise.reject(srv_errors.CONFLICT);
+        return true;
     }).then(() => callback(false)).catch(callback);
 }
 

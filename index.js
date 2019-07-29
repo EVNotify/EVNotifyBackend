@@ -14,10 +14,10 @@ const express = require('express'),
     https = require('https'),
     httpsServer = ((!srv_config.DEBUG && srv_config.CHAIN_PATH &&
         srv_config.PRIVATE_KEY_PATH && srv_config.CERTIFICATE_PATH) ? https.createServer({
-        ca: fs.readFileSync(srv_config.CHAIN_PATH, 'utf-8'),
-        key: fs.readFileSync(srv_config.PRIVATE_KEY_PATH, 'utf-8'),
-        cert: fs.readFileSync(srv_config.CERTIFICATE_PATH, 'utf-8')
-    }, app) : false),
+            ca: fs.readFileSync(srv_config.CHAIN_PATH, 'utf-8'),
+            key: fs.readFileSync(srv_config.PRIVATE_KEY_PATH, 'utf-8'),
+            cert: fs.readFileSync(srv_config.CERTIFICATE_PATH, 'utf-8')
+        }, app) : false),
     Rollbar = require('rollbar'),
     rollbar = ((srv_config.ROLLBAR_TOKEN) ? new Rollbar({
         accessToken: srv_config.ROLLBAR_TOKEN,
@@ -32,7 +32,7 @@ const express = require('express'),
         getApiVersion: () => '2',
         skip: req => {
             const path = req.path.toLowerCase();
-            
+
             return path === '/location' || path === '/debug' || path === '/soc' || path === '/extended'
         }
     }) : false),
@@ -105,7 +105,7 @@ app.use((req, res, next) => {
 
 // set default headers
 app.use((req, res, next) => {
-    res.contentType('application/json');
+    //res.contentType('application/json');
     res.setHeader('Access-Control-Allow-Origin', ((!req.get('origin') || req.get('origin') === 'null') ? '*' : req.get('origin')));
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     next();
@@ -118,6 +118,8 @@ app.post('/login', account.login);
 app.post('/changepw', account.changePW);
 app.get('/settings', settings.getSettings);
 app.put('/settings', settings.setSettings);
+app.use('/verify/:id', express.static('static/verify'))
+app.post('/verify/:id', settings.verifyMail);
 app.post('/soc', sync.postSoC);
 app.get('/soc', sync.getSoC);
 app.post('/extended', sync.postExtended);
@@ -148,7 +150,7 @@ app.post('/debug', (req, res) => {
             req.body.data, req.body.akey, ((parseInt(req.body.timestamp)) ? req.body.timestamp : parseInt(new Date() / 1000))
         ], (err, dbRes) => {
             if (!err && dbRes) {
-                res.json({status: true});
+                res.json({ status: true });
             } else {
                 res.status(422).json({
                     error: srv_errors.UNPROCESSABLE_ENTITY,
