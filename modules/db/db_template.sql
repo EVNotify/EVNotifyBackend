@@ -1,3 +1,10 @@
+CREATE TABLE IF NOT EXISTS `system` (
+    `key` VARCHAR(20) NOT NULL PRIMARY KEY,
+    `value` VARCHAR(20) NOT NULL
+);
+
+INSERT INTO `system` VALUES("version", 1) ON DUPLICATE KEY UPDATE `value`=VALUES(`value`);
+
 -- accounts table structure
 CREATE TABLE IF NOT EXISTS `accounts` (
     `akey` VARCHAR(6) NOT NULL PRIMARY KEY,
@@ -11,7 +18,6 @@ CREATE TABLE IF NOT EXISTS `settings` (
     `user` VARCHAR(6) NOT NULL,
     `akey` VARCHAR(6) NOT NULL,
     `webhook` VARCHAR(100) DEFAULT NULL,
-    `email` VARCHAR(1000) DEFAULT NULL,
     `telegram` INT(100) DEFAULT 0,
     `abrp` VARCHAR(36) DEFAULT NULL,
     `summary` TINYINT(1) DEFAULT 0,
@@ -23,6 +29,23 @@ CREATE TABLE IF NOT EXISTS `settings` (
     `device` VARCHAR(100) DEFAULT NULL,
     PRIMARY KEY (`user`),
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
+);
+
+CREATE TABLE IF NOT EXISTS `notificationMail` (
+    `akey` VARCHAR(6) NOT NULL,
+    `mail` VARCHAR(1000) NOT NULL,
+    `verified` BOOLEAN NOT NULL DEFAULT FALSE,
+    `identifier` BINARY(16) NOT NULL,
+    PRIMARY KEY (`akey`),
+    UNIQUE KEY (`identifier`),
+    FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
+);
+
+CREATE TABLE IF NOT EXISTS `mailLock` (
+    `hash` BINARY(32) NOT NULL,
+    `time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `weight` INTEGER NOT NULL DEFAULT 1,
+    PRIMARY KEY (`hash`)
 );
 
 -- sync table structure

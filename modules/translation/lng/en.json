@@ -29,5 +29,7 @@
     "TELEGRAM_NOTIFICATION_MESSAGE": "Hello! I just wanted to notify you that your electric vehicle now has reached the desired charging status of {SOC}%! With that, you can drive about {RANGE}.",
     "TELEGRAM_NOTIFICATION_ABORT_MESSAGE": "Hello! It seems as if the charging process had been interrupted or there was an error within the communication with the car. Better have a look!",
     "MAIL_SUBJECT_QR": "QRNotify: Someone wants to charge",
-    "MAIL_TEXT_QR": "Your QR code of QRNotify generated in EVNotify has just been scanned. Someone wants to charge. If possible, you can clear the charging station."
+    "MAIL_TEXT_QR": "Your QR code of QRNotify generated in EVNotify has just been scanned. Someone wants to charge. If possible, you can clear the charging station.",
+    "MAIL_SUBJECT_VERIFY": "Please verify your email address for EVNotify",
+    "MAIL_TEXT_VERIFY": "Hello,<br>In order to receive notifications from EVNotify, we need you to verify your email address. <a href=\"{BASE_URL}/verify/{ID}/en.html\">Klick here</a> or open the following link to complete this process: {BASE_URL}/verify/{ID}/en.html"
 }

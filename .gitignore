@@ -5,3 +5,4 @@ deploy.sh
 package-lock.json
 launch.json
 firebase.json
+pnpm-lock.yaml

@@ -1,5 +1,6 @@
 {
     "BAD_REQUEST": {
+        "status": 400,
         "code": 400,
         "message": "Bad request. Your request could not be processed. This has been automatically reported."
     },
@@ -10,6 +11,10 @@
     "NOT_FOUND": {
         "code": 404,
         "message": "Requested source not found."
+    },
+    "CONFLICT": {
+        "code": 409,
+        "message": "Request conflicts with the current state"
     },
     "UNPROCESSABLE_ENTITY": {
         "code": 422,
@@ -24,34 +29,52 @@
         "message": "Internal server error occured. It has been automatically reported."
     },
     "UNKNOWN_ROUTE": {
+        "status": 404,
         "code": 1000,
         "message": "Requested route does not exist. Unable to handle request."
     },
     "INVALID_PARAMETERS": {
+        "status": 422,
         "code": 1100,
         "message": "Missing or invalid parameters."
     },
+    "INVALID_MAIL": {
+        "status": 422,
+        "code": 1101,
+        "message": "Missing or invalid target mail address."
+    },
+    "CURRENT_MAIL": {
+        "status": 409,
+        "code": 1102,
+        "message": "The target mail address is already the current mail address for this user."
+    },
     "DB_QUERY": {
+        "status": 500,
         "code": 1200,
         "message": "Error on database query."
     },
     "MALFORMED_AKEY": {
+        "status": 422,
         "code": 1300,
         "message": "AKey format is not valid. Must be a string with 6 characters."
     },
     "MALFORMED_PASSWORD": {
+        "status": 422,
         "code": 1400,
         "message": "Password must be a string with at least 6 characters and less than 72 characters."
     },
     "ALREADY_REGISTERED": {
+        "status": 409,
         "code": 1500,
         "message": "Requested AKey already registered."
     },
     "HASH_FAILED": {
+        "status": 500,
         "code": 1600,
         "message": "Generation of password hash failed."
     },
     "USER_NOT_EXISTING": {
+        "status": 404,
         "code": 1700,
         "message": "Requested user does not exist."
     },
@@ -64,6 +87,7 @@
         "message": "Provided token is invalid or no longer valid."
     },
     "MAIL_ALREADY_REGISTERED": {
+        "status": 409,
         "code": 2000,
         "message": "Requested Mail already registered."
     },

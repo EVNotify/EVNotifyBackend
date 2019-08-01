@@ -25,10 +25,14 @@
     "rollbar": "2.10.0",
     "stringinject": "2.1.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "chai-as-promised": "^7.1.1",
+    "chai-datetime": "^1.5.0",
+    "sinon": "^7.3.2"
+  },
   "scripts": {
     "pretest": "npm run createEnv",
-    "test": "mocha tests/*",
+    "test": "mocha tests --recursive",
     "start": "node server.js",
     "createEnv": "/bin/bash createEnv.sh"
   },
