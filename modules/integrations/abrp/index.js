@@ -46,16 +46,25 @@ const getToken = (code, callback) => {
     });
 };
 
+const sendData = (accessToken, abrpData) => {
+    // send data
+    request.get(`${srv_config.ABRP_API_URL}/send?token=${accessToken}&api_key=${srv_config.ABRP_CLIENT_SECRET}&tlm=${JSON.stringify(abrpData)}`, {
+        json: true
+    }, (err) => {
+        if (err) console.error(err);
+    });
+};
+
 const submitData = (akey) => {
     // get car and abrp and sync data from user
-    db.query('SELECT car, abrp, soc_display, soc_bms, gps_speed, latitude, longitude, charging, dc_battery_power, soh, \
+    db.query('SELECT car, abrp, abrp_token, soc_display, soc_bms, gps_speed, latitude, longitude, charging, dc_battery_power, soh, \
         battery_min_temperature, dc_battery_voltage, dc_battery_current FROM sync INNER JOIN settings ON settings.akey=sync.akey WHERE settings.akey=?', [
         akey
     ], (err, dbRes) => {
         let data;
 
         if (!err && dbRes && (data = dbRes[0])) {
-            if (data.abrp && cars[data.car] && (data.soc_display || data.soc_bms) && data.latitude && data.longitude) {
+            if (data.abrp && cars[data.car] && (data.soc_display || data.soc_bms)) {
                 const abrpData = {
                     utc: new Date() / 1000,
                     soc: data.soc_display || data.soc_bms,
@@ -71,17 +80,16 @@ const submitData = (akey) => {
                     current: data.dc_battery_current
                 };
 
-                // get token for user
-                getToken(data.abrp, (err, accessToken) => {
-                    if (!err && accessToken) {
-                        // send data
-                        request.get(`${srv_config.ABRP_API_URL}/send?token=${accessToken}&api_key=${srv_config.ABRP_CLIENT_SECRET}&tlm=${JSON.stringify(abrpData)}`, {
-                            json: true
-                        }, (err) => {
-                            if (err) console.error(err);
-                        });
-                    }
-                });
+                if (!data.abrp_token) {
+                    getToken(data.abrp, (err, accessToken) => {
+                        if (!err && accessToken) {
+                            sendData(accessToken, abrpData);
+                            db.query('UPDATE settings SET abrp_token=? WHERE akey=?', [accessToken, akey]);
+                        }
+                    });
+                } else {
+                    sendData(data.abrp_token, abrpData);
+                }
             }
         }
     });

@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS `settings` (
     `email` VARCHAR(1000) DEFAULT NULL,
     `telegram` INT(100) DEFAULT 0,
     `abrp` VARCHAR(36) DEFAULT NULL,
+    `abrp_token` VARCHAR(36) DEFAULT NULL,
     `summary` TINYINT(1) DEFAULT 0,
     `soc` INT(3) DEFAULT 70,
     `lng` VARCHAR(20) DEFAULT 'en',
