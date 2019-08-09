@@ -55,9 +55,18 @@ const sendData = (accessToken, abrpData) => {
     });
 };
 
+const adjustSOC = (akey, accessToken) => {
+    request.get(`${srv_config.ABRP_API_URL}/get_next_charge?token=${accessToken}&api_key=${srv_config.ABRP_CLIENT_SECRET}`, {
+        json: true
+    }, (err, resp, body) => {
+        if (err) console.error(err);
+        if (body && body.result && body.result.next_charge) db.query('UPDATE settings SET soc=? WHERE akey=?', [body.result.next_charge, akey]);
+    });
+};
+
 const submitData = (akey) => {
     // get car and abrp and sync data from user
-    db.query('SELECT car, abrp, abrp_token, soc_display, soc_bms, gps_speed, latitude, longitude, charging, dc_battery_power, soh, \
+    db.query('SELECT car, abrp, abrp_token, auto_soc, soc_display, soc_bms, gps_speed, latitude, longitude, charging, dc_battery_power, soh, \
         battery_min_temperature, dc_battery_voltage, dc_battery_current FROM sync INNER JOIN settings ON settings.akey=sync.akey WHERE settings.akey=?', [
         akey
     ], (err, dbRes) => {
@@ -84,11 +93,13 @@ const submitData = (akey) => {
                     getToken(data.abrp, (err, accessToken) => {
                         if (!err && accessToken) {
                             sendData(accessToken, abrpData);
+                            if (data.auto_soc) adjustSOC(akey, accessToken);
                             db.query('UPDATE settings SET abrp_token=? WHERE akey=?', [accessToken, akey]);
                         }
                     });
                 } else {
                     sendData(data.abrp_token, abrpData);
+                    if (data.auto_soc) adjustSOC(akey, accessToken);
                 }
             }
         }
