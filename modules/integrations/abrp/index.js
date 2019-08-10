@@ -99,7 +99,7 @@ const submitData = (akey) => {
                     });
                 } else {
                     sendData(data.abrp_token, abrpData);
-                    if (data.auto_soc) adjustSOC(akey, accessToken);
+                    if (data.auto_soc) adjustSOC(akey, data.abrp_token);
                 }
             }
         }
