@@ -18,6 +18,7 @@ const express = require('express'),
         key: fs.readFileSync(srv_config.PRIVATE_KEY_PATH, 'utf-8'),
         cert: fs.readFileSync(srv_config.CERTIFICATE_PATH, 'utf-8')
     }, app) : false),
+    rookout = require('rookout'),
     Rollbar = require('rollbar'),
     rollbar = ((srv_config.ROLLBAR_TOKEN) ? new Rollbar({
         accessToken: srv_config.ROLLBAR_TOKEN,
@@ -96,6 +97,8 @@ app.use((req, res, next) => {
 
 // moesif middleware
 if (moesif) app.use(moesif);
+
+if (srv_config.ROOKOUT_TOKEN) rookout.start({token: srv_config.ROOKOUT_TOKEN});
 
 // last activity track
 app.use((req, res, next) => {
