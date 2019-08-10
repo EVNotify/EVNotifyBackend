@@ -85,6 +85,7 @@ const submitData = (akey) => {
                     power: data.dc_battery_power,
                     soh: data.soh,
                     batt_temp: data.battery_min_temperature,
+                    ext_temp: data.external_temperature,
                     voltage: data.dc_battery_voltage,
                     current: data.dc_battery_current
                 };
