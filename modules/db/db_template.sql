@@ -125,6 +125,24 @@ CREATE TABLE IF NOT EXISTS `logs` (
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
 );
 
+-- robots table structure
+CREATE TABLE IF NOT EXISTS `robots` (
+    `id` VARCHAR(36) NOT NULL,
+    `quote` VARCHAR(255) DEFAULT NULL,
+    `order` INT DEFAULT 0,
+    PRIMARY KEY(`id`)
+);
+
+-- robots_transactions table structure
+CREATE TABLE IF NOT EXISTS `robots_transactions` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `akey` VARCHAR(6) NOT NULL,
+    `robot` VARCHAR(36) NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`),
+    FOREIGN KEY (`robot`) REFERENCES `robots`(`id`)
+);
+
 -- login table structure for web interface
 CREATE TABLE IF NOT EXISTS `login` (
     `id` INT NOT NULL AUTO_INCREMENT,

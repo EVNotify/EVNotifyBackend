@@ -49,6 +49,7 @@ const express = require('express'),
     stations = require('./modules/stations'),
     logs = require('./modules/logs'),
     qr = require('./modules/qr'),
+    robots = require('./modules/robots'),
     abrpIntegration = require('./modules/integrations/abrp'),
     webAccount = require('./modules/web/account');
 
@@ -146,6 +147,8 @@ app.post('/sendqr', qr.sendQR);
 app.delete('/qr', qr.deleteQR);
 app.get('/qr', qr.qrStatus);
 app.post('/qrnotify', qr.qrNotify);
+app.get('/robots', robots.getRobots);
+app.post('/robot', robots.buyRobot);
 app.post('/debug', (req, res) => {
     if (typeof req.body.data === 'string') {
         db.query('INSERT INTO debug (data, akey, timestamp) VALUES (?, ?, ?)', [
