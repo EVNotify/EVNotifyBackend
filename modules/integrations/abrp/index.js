@@ -72,10 +72,11 @@ const submitData = (akey) => {
     ], (err, dbRes) => {
         let data;
         const now = parseInt(new Date() / 1000);
-        const socUpToDate = now < data.last_soc + 30;
-        const locationUpToDate = now < data.last_location + 30;
 
         if (!err && dbRes && (data = dbRes[0])) {
+            const socUpToDate = now < data.last_soc + 30;
+            const locationUpToDate = now < data.last_location + 30;
+            
             if (data.abrp && cars[data.car] && (data.soc_display || data.soc_bms) && socUpToDate) {
                 const abrpData = {
                     utc: new Date() / 1000,
