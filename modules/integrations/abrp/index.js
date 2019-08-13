@@ -66,20 +66,23 @@ const adjustSOC = (akey, accessToken) => {
 
 const submitData = (akey) => {
     // get car and abrp and sync data from user
-    db.query('SELECT car, abrp, abrp_token, auto_soc, soc_display, soc_bms, gps_speed, latitude, longitude, charging, dc_battery_power, soh, \
+    db.query('SELECT last_soc, last_location, car, abrp, abrp_token, auto_soc, soc_display, soc_bms, gps_speed, latitude, longitude, charging, dc_battery_power, soh, \
         battery_min_temperature, dc_battery_voltage, dc_battery_current FROM sync INNER JOIN settings ON settings.akey=sync.akey WHERE settings.akey=?', [
         akey
     ], (err, dbRes) => {
         let data;
+        const now = parseInt(new Date() / 1000);
+        const socUpToDate = now < data.last_soc + 30;
+        const locationUpToDate = now < data.last_location + 30;
 
         if (!err && dbRes && (data = dbRes[0])) {
-            if (data.abrp && cars[data.car] && (data.soc_display || data.soc_bms)) {
+            if (data.abrp && cars[data.car] && (data.soc_display || data.soc_bms) && socUpToDate) {
                 const abrpData = {
                     utc: new Date() / 1000,
                     soc: data.soc_display || data.soc_bms,
-                    speed: data.gps_speed,
-                    lat: data.latitude,
-                    lon: data.longitude,
+                    speed: locationUpToDate ? data.gps_speed * 3.6 || null : null,
+                    lat: locationUpToDate ? data.latitude : null,
+                    lon: locationUpToDate ? data.longitude : null,
                     is_charging: data.charging,
                     car_model: cars[data.car],
                     power: data.dc_battery_power,
