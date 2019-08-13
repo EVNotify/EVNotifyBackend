@@ -46,42 +46,66 @@ const getToken = (code, callback) => {
     });
 };
 
+const sendData = (accessToken, abrpData) => {
+    // send data
+    request.get(`${srv_config.ABRP_API_URL}/send?token=${accessToken}&api_key=${srv_config.ABRP_CLIENT_SECRET}&tlm=${JSON.stringify(abrpData)}`, {
+        json: true
+    }, (err) => {
+        if (err) console.error(err);
+    });
+};
+
+const adjustSOC = (akey, accessToken) => {
+    request.get(`${srv_config.ABRP_API_URL}/get_next_charge?token=${accessToken}&api_key=${srv_config.ABRP_CLIENT_SECRET}`, {
+        json: true
+    }, (err, resp, body) => {
+        if (err) console.error(err);
+        if (body && body.result && body.result.next_charge) db.query('UPDATE settings SET soc=? WHERE akey=?', [body.result.next_charge, akey]);
+    });
+};
+
 const submitData = (akey) => {
     // get car and abrp and sync data from user
-    db.query('SELECT car, abrp, soc_display, soc_bms, gps_speed, latitude, longitude, charging, dc_battery_power, soh, \
+    db.query('SELECT last_soc, last_location, car, abrp, abrp_token, auto_soc, soc_display, soc_bms, gps_speed, latitude, longitude, charging, dc_battery_power, soh, \
         battery_min_temperature, dc_battery_voltage, dc_battery_current FROM sync INNER JOIN settings ON settings.akey=sync.akey WHERE settings.akey=?', [
         akey
     ], (err, dbRes) => {
         let data;
+        const now = parseInt(new Date() / 1000);
 
         if (!err && dbRes && (data = dbRes[0])) {
-            if (data.abrp && cars[data.car] && (data.soc_display || data.soc_bms) && data.latitude && data.longitude) {
+            const socUpToDate = now < data.last_soc + 30;
+            const locationUpToDate = now < data.last_location + 30;
+            
+            if (data.abrp && cars[data.car] && (data.soc_display || data.soc_bms) && socUpToDate) {
                 const abrpData = {
                     utc: new Date() / 1000,
                     soc: data.soc_display || data.soc_bms,
-                    speed: data.gps_speed,
-                    lat: data.latitude,
-                    lon: data.longitude,
+                    speed: locationUpToDate ? data.gps_speed * 3.6 || null : null,
+                    lat: locationUpToDate ? data.latitude : null,
+                    lon: locationUpToDate ? data.longitude : null,
                     is_charging: data.charging,
                     car_model: cars[data.car],
                     power: data.dc_battery_power,
                     soh: data.soh,
                     batt_temp: data.battery_min_temperature,
+                    ext_temp: data.external_temperature,
                     voltage: data.dc_battery_voltage,
                     current: data.dc_battery_current
                 };
 
-                // get token for user
-                getToken(data.abrp, (err, accessToken) => {
-                    if (!err && accessToken) {
-                        // send data
-                        request.get(`${srv_config.ABRP_API_URL}/send?token=${accessToken}&api_key=${srv_config.ABRP_CLIENT_SECRET}&tlm=${JSON.stringify(abrpData)}`, {
-                            json: true
-                        }, (err) => {
-                            if (err) console.error(err);
-                        });
-                    }
-                });
+                if (!data.abrp_token) {
+                    getToken(data.abrp, (err, accessToken) => {
+                        if (!err && accessToken) {
+                            sendData(accessToken, abrpData);
+                            if (data.auto_soc) adjustSOC(akey, accessToken);
+                            db.query('UPDATE settings SET abrp_token=? WHERE akey=?', [accessToken, akey]);
+                        }
+                    });
+                } else {
+                    sendData(data.abrp_token, abrpData);
+                    if (data.auto_soc) adjustSOC(akey, data.abrp_token);
+                }
             }
         }
     });

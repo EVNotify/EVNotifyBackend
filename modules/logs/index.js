@@ -58,6 +58,10 @@ const getLog = async (akey, id) => {
     throw new Error(srv_errors.NOT_FOUND.message);
 };
 
+const getLatestLog = async (akey) => {
+    return (await query('SELECT * FROM logs WHERE akey=? ORDER BY start DESC LIMIT 1', [akey]))[0];
+};
+
 /**
  * Updates log for given AKey and log id
  * @param {String} akey the AKey
@@ -219,6 +223,44 @@ module.exports = {
                 if (valid) {
                     // retrieve log details
                     getLog(req.query.akey, req.query.id).then(log => res.json(log)).catch(err => {
+                        res.status(422).json({
+                            error: srv_errors.UNPROCESSABLE_ENTITY,
+                            debug: ((srv_config.DEBUG) ? ((err && err.message) ? err.message : err) : null)
+                        });
+                    });
+                } else {
+                    // invalid token
+                    res.status(401).json({
+                        error: srv_errors.INVALID_TOKEN
+                    });
+                }
+
+            } else {
+                res.status(422).json({
+                    error: srv_errors.UNPROCESSABLE_ENTITY,
+                    debug: ((srv_config.DEBUG) ? err : null)
+                });
+            }
+        });
+    },
+    /**
+     * getLatestLog request handler
+     * @param {Object} req the server request
+     * @param {Object} res the server response
+     */
+    getLatestLog: (req, res) => {
+        // check required params
+        if (!req.query.akey || !req.query.token) {
+            return res.status(400).json({
+                error: srv_errors.INVALID_PARAMETERS
+            });
+        }
+        // validate token
+        token.validateToken(req.query.akey, req.query.token, (err, valid) => {
+            if (!err) {
+                if (valid) {
+                    // retrieve latest log
+                    getLatestLog(req.query.akey).then(log => res.json(log)).catch(err => {
                         res.status(422).json({
                             error: srv_errors.UNPROCESSABLE_ENTITY,
                             debug: ((srv_config.DEBUG) ? ((err && err.message) ? err.message : err) : null)
