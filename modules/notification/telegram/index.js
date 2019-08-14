@@ -115,15 +115,15 @@ const sendExtended = userID => {
 
         if (!err && userObj != null) {
             bot.sendMessage(userID, translation.translateWithData('TELEGRAM_EXTENDED', userObj.lng, {
-                SOH: userObj.soh,
+                SOH: String(userObj.soh),
                 CHARGING: translation.translate(((userObj.charging) ? 'YES' : 'NO'), userObj.lng, true),
-                AUX_BATTERY_VOLTAGE: userObj.aux_battery_voltage,
-                DC_BATTERY_VOLTAGE: userObj.dc_battery_voltage,
-                DC_BATTERY_CURRENT: userObj.dc_battery_current,
-                DC_BATTERY_POWER: userObj.dc_battery_power,
-                BATTERY_MIN_TEMPERATURE: userObj.battery_min_temperature,
-                BATTERY_MAX_TEMPERATURE: userObj.battery_max_temperature,
-                BATTERY_INLET_TEMPERATURE: userObj.battery_inlet_temperature
+                AUX_BATTERY_VOLTAGE: String(userObj.aux_battery_voltage),
+                DC_BATTERY_VOLTAGE: String(userObj.dc_battery_voltage),
+                DC_BATTERY_CURRENT: String(userObj.dc_battery_current),
+                DC_BATTERY_POWER: String(userObj.dc_battery_power),
+                BATTERY_MIN_TEMPERATURE: String(userObj.battery_min_temperature),
+                BATTERY_MAX_TEMPERATURE: String(userObj.battery_max_temperature),
+                BATTERY_INLET_TEMPERATURE: String(userObj.battery_inlet_temperature)
             }, true));
         } else bot.sendMessage(userID, translation.translate('TELEGRAM_EXTENDED_ERROR', ((userObj) ? userObj.lng : 'en'), true));
     });
