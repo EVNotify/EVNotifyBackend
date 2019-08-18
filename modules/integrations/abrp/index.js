@@ -67,7 +67,7 @@ const adjustSOC = (akey, accessToken) => {
 const submitData = (akey) => {
     // get car and abrp and sync data from user
     db.query('SELECT last_soc, last_location, car, abrp, abrp_token, auto_soc, soc_display, soc_bms, gps_speed, latitude, longitude, charging, dc_battery_power, soh, \
-        battery_min_temperature, dc_battery_voltage, dc_battery_current FROM sync INNER JOIN settings ON settings.akey=sync.akey WHERE settings.akey=?', [
+        battery_min_temperature, external_temperature, dc_battery_voltage, dc_battery_current FROM sync INNER JOIN settings ON settings.akey=sync.akey WHERE settings.akey=?', [
         akey
     ], (err, dbRes) => {
         let data;
