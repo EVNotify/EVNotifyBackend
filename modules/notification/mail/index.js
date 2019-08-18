@@ -54,7 +54,7 @@ const sendMail = (userObj, abort) => {
                 userObj.soc_display == null) ? '<b>' + SOC_BMS + '</b> (BMS)' : ((
                     userObj.soc_bms == null) ?
                 '<b>' + SOC_DISPLAY + '</b> (Display)' : '<b>' + SOC_DISPLAY + '</b> (Display) / ' + SOC_BMS + ' (BMS)')),
-            RANGE: helper.calculateRange(userObj.car, userObj.soc_display || userObj.soc_bms, userObj.consumption) + 'km'
+            RANGE: helper.calculateRange(userObj.car, userObj.soc_display || userObj.soc_bms, userObj.consumption, userObj.capacity) + 'km'
         };
 
     // send out mail

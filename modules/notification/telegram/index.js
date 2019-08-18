@@ -61,7 +61,7 @@ const removeSubscribtion = (userID, callback) => {
  */
 const sendSoCMessage = (userID, akey) => {
     // retrieve the current state of charge
-    db.query('SELECT accounts.akey, car, lng, soc_display, soc_bms, consumption, last_notification FROM accounts \
+    db.query('SELECT accounts.akey, car, lng, soc_display, soc_bms, consumption, capacity, last_notification FROM accounts \
         INNER JOIN sync ON accounts.akey=sync.akey INNER JOIN settings ON settings.akey=accounts.akey \
         WHERE settings.telegram=? ' + ((akey) ? 'AND accounts.akey=?' : ''),
         ((akey) ? [userID, akey] : [userID]), (err, userRes) => {
@@ -232,7 +232,7 @@ const sendMessage = (userObj, abort) => {
                 SOC: ((userObj.soc_display == null) ? SOC_BMS : ((
                         userObj.soc_bms == null) ?
                     SOC_DISPLAY : SOC_DISPLAY)),
-                RANGE: helper.calculateRange(userObj.car, userObj.soc_display || userObj.soc_bms, userObj.consumption) + 'km'
+                RANGE: helper.calculateRange(userObj.car, userObj.soc_display || userObj.soc_bms, userObj.consumption, userObj.capacity) + 'km'
             }, true)
         ));
     }
