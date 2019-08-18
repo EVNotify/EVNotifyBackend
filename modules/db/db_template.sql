@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `settings` (
     `push` TINYINT(1) DEFAULT 0,
     `car` VARCHAR(100) DEFAULT NULL,
     `consumption` FLOAT(99, 2) DEFAULT 13,
-    `capacity` INT(3) DEFAULT 70,
+    `capacity` FLOAT(99, 2) DEFAULT NULL,
     `device` VARCHAR(100) DEFAULT NULL,
     PRIMARY KEY (`user`),
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
