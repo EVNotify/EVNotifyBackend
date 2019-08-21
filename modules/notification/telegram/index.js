@@ -222,19 +222,14 @@ const sendMessage = (userObj, abort) => {
         const SOC_DISPLAY = (parseFloat(userObj.soc_display) || 0).toString() + '%';
         const SOC_BMS = (parseFloat(userObj.soc_bms) || 0).toString() + '%'; // use string for string replacement within translation
 
-        bot.sendMessage(userObj.telegram, ((abort) ?
-            translation.translateWithData('TELEGRAM_NOTIFICATION_ABORT_MESSAGE', userObj.lng, {
-                SOC: ((userObj.soc_display == null) ? SOC_BMS : ((
-                        userObj.soc_bms == null) ?
-                    SOC_DISPLAY : SOC_DISPLAY))
-            }, true) :
-            translation.translateWithData('TELEGRAM_NOTIFICATION_MESSAGE', userObj.lng, {
+        bot.sendMessage(userObj.telegram,
+            translation.translateWithData(abort ? 'TELEGRAM_NOTIFICATION_ABORT_MESSAGE' : 'TELEGRAM_NOTIFICATION_MESSAGE', userObj.lng, {
                 SOC: ((userObj.soc_display == null) ? SOC_BMS : ((
                         userObj.soc_bms == null) ?
                     SOC_DISPLAY : SOC_DISPLAY)),
                 RANGE: helper.calculateRange(userObj.car, userObj.soc_display || userObj.soc_bms, userObj.consumption, userObj.capacity) + 'km'
             }, true)
-        ));
+        );
     }
 }
 
