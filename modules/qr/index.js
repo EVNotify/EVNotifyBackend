@@ -89,7 +89,7 @@ const sendQR = (akey, email, callback) => {
  * @param {Function} callback callback function
  */
 const qrStatus = (code, callback) => {
-    db.query('SELECT car, soc_display, soc_bms, last_soc, charging, dc_battery_power, slow_charge_port, normal_charge_port, rapid_charge_port FROM sync INNER JOIN qr ON qr.akey=sync.akey INNER JOIN settings ON settings.akey=qr.akey WHERE code=?', [
+    db.query('SELECT car, soc_display, soc_bms, last_soc, capacity, charging, dc_battery_power, slow_charge_port, normal_charge_port, rapid_charge_port FROM sync INNER JOIN qr ON qr.akey=sync.akey INNER JOIN settings ON settings.akey=qr.akey WHERE code=?', [
         code
     ], (err, dbRes) => {
         callback(err, ((!err && dbRes && dbRes[0]) ? dbRes[0] : null));
@@ -243,7 +243,9 @@ module.exports = {
                         codeObj.car,
                         (codeObj.soc_bms || codeObj.soc_display),
                         codeObj.charging,
-                        ((codeObj.slow_charge_port) ? 'slow_charge_port' : ((codeObj.normal_charge_port) ? 'normal_charge_port' : ((codeObj.rapid_charge_port) ? 'rapid_charge_port' : null))) 
+                        ((codeObj.slow_charge_port) ? 'slow_charge_port' : ((codeObj.normal_charge_port) ? 'normal_charge_port' : ((codeObj.rapid_charge_port) ? 'rapid_charge_port' : null))),
+                        codeObj.dc_battery_power,
+                        codeObj.capacity
                     );
                     res.json(codeObj);
                 }
