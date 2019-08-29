@@ -13,7 +13,7 @@
     "excel4node": "1.7.0",
     "express": "4.17.1",
     "express-session": "1.16.2",
-    "firebase-admin": "6.5.0",
+    "firebase-admin": "8.4.0",
     "mocha": "6.0.0",
     "moesif-express": "2.9.7",
     "mysql": "2.17.0",
