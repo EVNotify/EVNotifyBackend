@@ -52,15 +52,15 @@ const postExtended = (akey, extendedObj, callback) => {
 
 
     db.query('UPDATE sync SET soh=?, charging=?, rapid_charge_port=?, normal_charge_port=?, slow_charge_port=?, aux_battery_voltage=?, dc_battery_voltage=?, dc_battery_current=?, dc_battery_power=?,\
-    cumulative_energy_charged=?, cumulative_energy_discharged=?, battery_min_temperature=?, battery_max_temperature=?, battery_inlet_temperature=?, last_extended=? WHERE akey=?', [
+    cumulative_energy_charged=?, cumulative_energy_discharged=?, battery_min_temperature=?, battery_max_temperature=?, battery_inlet_temperature=?, external_temperature=?, last_extended=? WHERE akey=?', [
         extendedObj.soh, extendedObj.charging, extendedObj.rapidChargePort, extendedObj.normalChargePort, extendedObj.slowChargePort, extendedObj.auxBatteryVoltage, extendedObj.dcBatteryVoltage, extendedObj.dcBatteryCurrent,
-        extendedObj.dcBatteryPower, extendedObj.cumulativeEnergyCharged, extendedObj.cumulativeEnergyDischarged, extendedObj.batteryMinTemperature, extendedObj.batteryMaxTemperature, extendedObj.batteryInletTemperature, now, akey
+        extendedObj.dcBatteryPower, extendedObj.cumulativeEnergyCharged, extendedObj.cumulativeEnergyDischarged, extendedObj.batteryMinTemperature, extendedObj.batteryMaxTemperature, extendedObj.batteryInletTemperature, extendedObj.externalTemperature, now, akey
     ], err => {
         if (!err) {
             db.query('INSERT INTO statistics (soh, charging, rapid_charge_port, normal_charge_port, slow_charge_port, aux_battery_voltage, dc_battery_voltage, \
-            dc_battery_current, dc_battery_power, cumulative_energy_charged, cumulative_energy_discharged, battery_min_temperature, battery_max_temperature, battery_inlet_temperature, timestamp, akey) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+            dc_battery_current, dc_battery_power, cumulative_energy_charged, cumulative_energy_discharged, battery_min_temperature, battery_max_temperature, battery_inlet_temperature, external_temperature, timestamp, akey) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                 extendedObj.soh, extendedObj.charging, extendedObj.rapidChargePort, extendedObj.normalChargePort, extendedObj.slowChargePort, extendedObj.auxBatteryVoltage, extendedObj.dcBatteryVoltage, extendedObj.dcBatteryCurrent,
-                extendedObj.dcBatteryPower, extendedObj.cumulativeEnergyCharged, extendedObj.cumulativeEnergyDischarged, extendedObj.batteryMinTemperature, extendedObj.batteryMaxTemperature, extendedObj.batteryInletTemperature, now, akey
+                extendedObj.dcBatteryPower, extendedObj.cumulativeEnergyCharged, extendedObj.cumulativeEnergyDischarged, extendedObj.batteryMinTemperature, extendedObj.batteryMaxTemperature, extendedObj.batteryInletTemperature, extendedObj.externalTemperature, now, akey
             ], (err, dbRes) => callback(err, (!err && dbRes)));
         } else callback(err);
     });
@@ -73,7 +73,7 @@ const postExtended = (akey, extendedObj, callback) => {
  */
 const getExtended = (akey, callback) => {
     db.query('SELECT soh, charging, rapid_charge_port, normal_charge_port, slow_charge_port, aux_battery_voltage, dc_battery_voltage, dc_battery_current, dc_battery_power, \
-    cumulative_energy_charged, cumulative_energy_discharged, battery_min_temperature, battery_max_temperature, battery_inlet_temperature, last_extended FROM sync WHERE akey=?', [
+    cumulative_energy_charged, cumulative_energy_discharged, battery_min_temperature, battery_max_temperature, battery_inlet_temperature, external_temperature, last_extended FROM sync WHERE akey=?', [
         akey
     ], (err, queryRes) => callback(err, ((!err && queryRes) ? queryRes[0] : null)));
 };

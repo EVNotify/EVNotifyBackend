@@ -14,12 +14,15 @@ CREATE TABLE IF NOT EXISTS `settings` (
     `email` VARCHAR(1000) DEFAULT NULL,
     `telegram` INT(100) DEFAULT 0,
     `abrp` VARCHAR(36) DEFAULT NULL,
+    `abrp_token` VARCHAR(36) DEFAULT NULL,
+    `auto_soc` TINYINT(1) DEFAULT 0,
     `summary` TINYINT(1) DEFAULT 0,
     `soc` INT(3) DEFAULT 70,
     `lng` VARCHAR(20) DEFAULT 'en',
     `push` TINYINT(1) DEFAULT 0,
     `car` VARCHAR(100) DEFAULT NULL,
     `consumption` FLOAT(99, 2) DEFAULT 13,
+    `capacity` FLOAT(99, 2) DEFAULT NULL,
     `device` VARCHAR(100) DEFAULT NULL,
     PRIMARY KEY (`user`),
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
@@ -45,6 +48,7 @@ CREATE TABLE IF NOT EXISTS `sync` (
     `battery_min_temperature` FLOAT DEFAULT 0,
     `battery_max_temperature` FLOAT DEFAULT 0,
     `battery_inlet_temperature` FLOAT DEFAULT 0,
+    `external_temperature` FLOAT DEFAULT 0,
     `latitude` DECIMAL(10, 8) DEFAULT 0,
     `longitude` DECIMAL(11, 8) DEFAULT 0,
     `gps_speed` FLOAT DEFAULT 0,
@@ -79,6 +83,7 @@ CREATE TABLE IF NOT EXISTS `statistics` (
     `battery_min_temperature` FLOAT DEFAULT NULL,
     `battery_max_temperature` FLOAT DEFAULT NULL,
     `battery_inlet_temperature` FLOAT DEFAULT NULL,
+    `external_temperature` FLOAT DEFAULT NULL,
     `latitude` DECIMAL(10, 8) DEFAULT NULL,
     `longitude` DECIMAL(11, 8) DEFAULT NULL,
     `gps_speed` FLOAT DEFAULT NULL,
@@ -119,6 +124,24 @@ CREATE TABLE IF NOT EXISTS `logs` (
     `title` VARCHAR(255) DEFAULT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
+);
+
+-- robots table structure
+CREATE TABLE IF NOT EXISTS `robots` (
+    `id` VARCHAR(36) NOT NULL,
+    `quote` VARCHAR(255) DEFAULT NULL,
+    `order` INT DEFAULT 0,
+    PRIMARY KEY(`id`)
+);
+
+-- robots_transactions table structure
+CREATE TABLE IF NOT EXISTS `robots_transactions` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `akey` VARCHAR(6) NOT NULL,
+    `robot` VARCHAR(36) NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`),
+    FOREIGN KEY (`robot`) REFERENCES `robots`(`id`)
 );
 
 -- login table structure for web interface

@@ -59,11 +59,12 @@ const getChargingSpeeds = () => ({
  * @param {String} car the car to use for calculation
  * @param {Number} soc the current state of charge car has
  * @param {Number} consumption the current consumption to use for calculation
+ * @param {Number} [capacity] optional given static consumption - if not given, the default capacity for given car will be used
  * @returns {Number} the calculated left range for given state of charge in kilometers
  */
-const calculateRange = (car, soc, consumption) => {
+const calculateRange = (car, soc, consumption, capacity) => {
     const capacities = getCapacities();
-    const total = parseInt((capacities[car] / consumption) * 100) || 0;
+    const total = parseInt(((capacity || capacities[car]) / consumption) * 100) || 0;
 
     return parseInt(total * ((soc === 100) ? 1 : '0.' + ((soc < 10) ? ('0' + parseInt(soc)) : parseInt(soc)))) || 0;
 };
@@ -74,14 +75,15 @@ const calculateRange = (car, soc, consumption) => {
  * @param {Number} soc the current state of charge the car has
  * @param {Boolean} charging whether or not car is currently charging
  * @param {String} port on which port car is charging (slow_charge_port|normal_charge_port|rapid_charge_port)
- * @param {Number} speed optional charging speed - if not given, default charging speed of car will be used (for given port)
+ * @param {Number} [speed] optional charging speed - if not given, default charging speed of car will be used (for given port)
+ * @param {Number} [capacity] optional static capacity - if not given, default capacity based on given car will be used
  * @returns {Object} object containing estimated decimal times for different charge ports or specific port if charging and port given
  */
-const calculateTime = (car, soc, charging, port, speed) => {
+const calculateTime = (car, soc, charging, port, speed, capacity) => {
     const capacities = getCapacities();
     const speeds = getChargingSpeeds();
 
-    const amountToCharge = capacities[car] - parseFloat(capacities[car] * ((soc === 100) ? 1 : '0.' + ((soc < 10) ? ('0' + parseInt(soc)) : parseInt(soc)))).toFixed(2) || 0;
+    const amountToCharge = (capacity || capacities[car]) - parseFloat((capacity || capacities[car]) * ((soc === 100) ? 1 : '0.' + ((soc < 10) ? ('0' + parseInt(soc)) : parseInt(soc)))).toFixed(2) || 0;
     const realChargingSpeed = ((charging && speed) ? (speed * -1) : false);
 
     return {

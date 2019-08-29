@@ -18,6 +18,7 @@ const express = require('express'),
         key: fs.readFileSync(srv_config.PRIVATE_KEY_PATH, 'utf-8'),
         cert: fs.readFileSync(srv_config.CERTIFICATE_PATH, 'utf-8')
     }, app) : false),
+    rookout = require('rookout'),
     Rollbar = require('rollbar'),
     rollbar = ((srv_config.ROLLBAR_TOKEN) ? new Rollbar({
         accessToken: srv_config.ROLLBAR_TOKEN,
@@ -48,6 +49,7 @@ const express = require('express'),
     stations = require('./modules/stations'),
     logs = require('./modules/logs'),
     qr = require('./modules/qr'),
+    robots = require('./modules/robots'),
     abrpIntegration = require('./modules/integrations/abrp'),
     webAccount = require('./modules/web/account');
 
@@ -97,6 +99,8 @@ app.use((req, res, next) => {
 // moesif middleware
 if (moesif) app.use(moesif);
 
+if (srv_config.ROOKOUT_TOKEN) rookout.start({token: srv_config.ROOKOUT_TOKEN});
+
 // last activity track
 app.use((req, res, next) => {
     if (req.body.akey) db.query('UPDATE accounts SET lastactivity=? WHERE akey=?', [parseInt(new Date() / 1000), req.body.akey], () => next());
@@ -132,6 +136,7 @@ app.get('/station', stations.getStation);
 app.get('/stationphoto', stations.getStationPhoto);
 app.get('/stationcards', stations.getStationCards);
 app.get('/logs', logs.getLogs);
+app.get('/logdetail/latest', logs.getLatestLog);
 app.get('/logdetail', logs.getLog);
 app.post('/logdetail', logs.createLog);
 app.put('/logdetail', logs.updateLog);
@@ -142,6 +147,8 @@ app.post('/sendqr', qr.sendQR);
 app.delete('/qr', qr.deleteQR);
 app.get('/qr', qr.qrStatus);
 app.post('/qrnotify', qr.qrNotify);
+app.get('/robots', robots.getRobots);
+app.post('/robot', robots.buyRobot);
 app.post('/debug', (req, res) => {
     if (typeof req.body.data === 'string') {
         db.query('INSERT INTO debug (data, akey, timestamp) VALUES (?, ?, ?)', [
