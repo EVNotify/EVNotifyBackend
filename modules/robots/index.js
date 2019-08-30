@@ -19,7 +19,7 @@ const getRobots = async (req, res) => {
         token.validateToken(req.query.akey, req.query.token, async (err, valid) => {
             if (!err) {
                 if (valid) {
-                    const robots = await query('SELECT * FROM robots ORDER BY `order`');
+                    const robots = await query('SELECT * FROM robots ORDER BY RAND()');
                     const boughtRobots = await query('SELECT * FROM robots_transactions WHERE akey=?', [req.query.akey]);
 
                     res.json(robots.map((robot) => {
