@@ -17,7 +17,7 @@
     "mocha": "6.0.0",
     "moesif-express": "2.9.7",
     "mysql": "2.17.0",
-    "node-telegram-bot-api": "0.30.0",
+    "node-telegram-bot-api": "0.40.0",
     "nodemailer": "5.1.1",
     "npm": "6.10.2",
     "password-hash": "1.2.2",
