@@ -4,7 +4,7 @@
   "description": "backend for evnotify",
   "main": "server.js",
   "dependencies": {
-    "@paypal/checkout-server-sdk": "^1.0.1",
+    "@paypal/checkout-server-sdk": "^1.0.2",
     "bcrypt": "3.0.4",
     "body-parser": "1.18.3",
     "chai": "4.2.0",
