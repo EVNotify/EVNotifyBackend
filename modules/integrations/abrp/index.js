@@ -35,7 +35,7 @@ const auth = (req, res, next) => {
 };
 
 const getToken = (code, callback) => {
-    request.get(`${srv_config.ABRP_URL}/token?client_id=${srv_config.ABRP_CLIENT_ID}&client_secret=${srv_config.ABRP_CLIENT_SECRET}&code=${code}`, {
+    request.get(`${srv_config.ABRP_API_URL}/token?client_id=${srv_config.ABRP_CLIENT_ID}&client_secret=${srv_config.ABRP_CLIENT_SECRET}&code=${code}`, {
         json: true
     }, (err, resp, body) => {
         if (!err && body && body.access_token) {
