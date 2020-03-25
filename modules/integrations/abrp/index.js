@@ -75,16 +75,16 @@ const submitData = (akey) => {
         const now = parseInt(new Date() / 1000);
 
         if (!err && dbRes && (data = dbRes[0])) {
-            const socUpToDate = now < data.last_soc + 30;
-            const locationUpToDate = now < data.last_location + 30;
+            const socUpToDate = now < data.last_soc + 300;
+            const locationUpToDate = now < data.last_location + 300;
             
             if (data.abrp && cars[data.car] && (data.soc_display || data.soc_bms) && socUpToDate) {
                 const abrpData = {
                     utc: new Date() / 1000,
                     soc: data.soc_display || data.soc_bms,
-                    speed: locationUpToDate ? data.gps_speed * 3.6 || null : null,
-                    lat: locationUpToDate ? data.latitude : null,
-                    lon: locationUpToDate ? data.longitude : null,
+                    speed: locationUpToDate ? data.gps_speed * 3.6 || 0 : 0,
+                    lat: locationUpToDate ? data.latitude : 0,
+                    lon: locationUpToDate ? data.longitude : 0,
                     is_charging: data.charging,
                     car_model: cars[data.car],
                     power: data.dc_battery_power,
