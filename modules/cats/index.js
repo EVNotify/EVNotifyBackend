@@ -33,6 +33,7 @@ const getCats = async (req, res) => {
                             release_date: cat.release_date,
                             release_price: cat.release_price,
                             follow_up_price: cat.follow_up_price,
+                            required_cat: cat.required_cat,
                             bought
                         };
                     }));
