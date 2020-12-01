@@ -151,6 +151,7 @@ CREATE TABLE IF NOT EXISTS `cats` (
     `id` VARCHAR(36) NOT NULL,
     `quote` VARCHAR(255) DEFAULT NULL,
     `order` INT DEFAULT 0,
+    `tag` VARCHAR(255) DEFAULT NULL,
     `release_date` INT(10) DEFAULT 0,
     `release_price` INT(10) DEFAULT 0,
     `follow_up_price` INT(10) DEFAULT 0,
