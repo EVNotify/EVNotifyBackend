@@ -146,6 +146,28 @@ CREATE TABLE IF NOT EXISTS `robots_transactions` (
     FOREIGN KEY (`robot`) REFERENCES `robots`(`id`)
 );
 
+-- cats table structure
+CREATE TABLE IF NOT EXISTS `cats` (
+    `id` VARCHAR(36) NOT NULL,
+    `quote` VARCHAR(255) DEFAULT NULL,
+    `order` INT DEFAULT 0,
+    `release_date` INT(10) DEFAULT 0,
+    `release_price` INT(10) DEFAULT 0,
+    `follow_up_price` INT(10) DEFAULT 0,
+    `required_cat` VARCHAR(36) DEFAULT NULL,
+    PRIMARY KEY(`id`)
+);
+
+-- cats_transactions table structure
+CREATE TABLE IF NOT EXISTS `cats_transactions` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `akey` VARCHAR(6) NOT NULL,
+    `cat` VARCHAR(36) NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`),
+    FOREIGN KEY (`cat`) REFERENCES `cats`(`id`)
+);
+
 -- login table structure for web interface
 CREATE TABLE IF NOT EXISTS `login` (
     `id` INT NOT NULL AUTO_INCREMENT,
