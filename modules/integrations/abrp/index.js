@@ -11,7 +11,11 @@ const cars = {
     AMPERA_E: 'opel:ampera-e:17:60:other',
     BOLT_EV: 'chevy:bolt:17:60:other',
     ZOE_Q210: 'renault:zoe:q210:22:other',
+    ZOE_ZE50: 'renault:zoe:20:52:r110',
     ID_3: 'volkswagen:id3:20:58:mr',
+    ID_4: 'volkswagen:id4:21:77',
+    ENYAQ_IV80: 'skoda:enyaq:21:77:meb',
+    IONIQ_5: 'hyundai:ioniq5:22:58',
     IONIQ_FL_EV: 'hyundai:ioniq:19:38:other'
 };
 
