@@ -80,7 +80,7 @@ const submitData = (akey) => {
         akey
     ], (err, dbRes) => {
         let data;
-        const now = parseInt(new Date() / 1000);
+        const now = Math.floor(Date.now() / 1000);
 
         if (!err && dbRes && (data = dbRes[0])) {
             const socUpToDate = now < data.last_soc + 300;
@@ -88,7 +88,7 @@ const submitData = (akey) => {
             
             if (data.abrp && cars[data.car] && (data.soc_display || data.soc_bms) && socUpToDate) {
                 const abrpData = {
-                    utc: new Date() / 1000,
+                    utc: now,
                     soc: data.soc_display || data.soc_bms,
                     speed: locationUpToDate ? data.gps_speed * 3.6 || 0 : 0,
                     lat: locationUpToDate ? data.latitude : 0,

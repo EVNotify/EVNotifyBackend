@@ -16,7 +16,7 @@ const srv_config = require('./../../srv_config.json'),
  * @param {Function} callback callback function
  */
 const postSoC = (akey, socObj, callback) => {
-    const now = parseInt(new Date() / 1000);
+    const now = Math.floor(Date.now() / 1000);
 
     db.query('UPDATE sync SET soc_display=?, soc_bms=?, last_soc=? WHERE akey=?', [
         socObj.display, socObj.bms, now, akey
@@ -48,7 +48,7 @@ const getSoC = (akey, callback) => {
  * @param {Function} callback callback function
  */
 const postExtended = (akey, extendedObj, callback) => {
-    const now = parseInt(new Date() / 1000);
+    const now = Math.floor(Date.now() / 1000);
 
 
     db.query('UPDATE sync SET soh=?, charging=?, rapid_charge_port=?, normal_charge_port=?, slow_charge_port=?, aux_battery_voltage=?, dc_battery_voltage=?, dc_battery_current=?, dc_battery_power=?,\
@@ -85,7 +85,7 @@ const getExtended = (akey, callback) => {
  * @param {Function} callback callback function
  */
 const postLocation = (akey, locationObj, callback) => {
-    const now = parseInt(new Date() / 1000);
+    const now = Math.floor(Date.now() / 1000);
 
     db.query('UPDATE sync SET latitude=?, longitude=?, gps_speed=?, accuracy=?, location_timestamp=?, last_location=? WHERE akey=?', [
         locationObj.latitude, locationObj.longitude, locationObj.speed, locationObj.accuracy, locationObj.timestamp, now, akey
