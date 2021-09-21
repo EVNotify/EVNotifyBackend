@@ -189,3 +189,6 @@ CREATE TABLE IF NOT EXISTS `devices` (
     FOREIGN KEY (`user`) REFERENCES `login`(`id`),
     FOREIGN KEY (`akey`) REFERENCES `accounts`(`akey`)
 );
+
+-- Drop index on logs if present
+CREATE INDEX logs_akey_idx  ON logs (akey);
