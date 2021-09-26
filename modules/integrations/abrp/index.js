@@ -1,5 +1,6 @@
 const request = require('request');
 const srv_config = require('../../../srv_config.json');
+const srv_errors = require('../../../srv_errors.json');
 
 const db = require('../../db');
 const token = require('../../token');
@@ -120,7 +121,41 @@ const submitData = (akey) => {
     });
 };
 
+const unlink = (req, res) => {
+    const akey = req.params.akey;
+
+    // check required params
+    if (!akey || !req.body.token) {
+        return res.status(400).json({
+            error: srv_errors.INVALID_PARAMETERS
+        });
+    }
+
+    token.validateToken(akey, req.body.token, (err, valid) => {
+        if (!err) {
+            if (valid) {
+                db.query('UPDATE settings SET abrp=NULL, abrp_token=NULL WHERE akey=?', [akey], (err) => {
+                    res.json({
+                        unlinked: !err
+                    });
+                });
+            } else {
+                // invalid token
+                res.status(401).json({
+                    error: srv_errors.INVALID_TOKEN
+                });
+            }
+        } else {
+            res.status(422).json({
+                error: srv_errors.UNPROCESSABLE_ENTITY,
+                debug: ((srv_config.DEBUG) ? err : null)
+            });
+        }
+    });
+};
+
 module.exports = {
     auth,
-    submitData
+    submitData,
+    unlink
 };

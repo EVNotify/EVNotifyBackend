@@ -177,6 +177,7 @@ app.post('/web/register', webAccount.register);
 app.post('/web/login', webAccount.login);
 // integrations routes
 app.get('/integrations/abrp/auth/:akey/:token', abrpIntegration.auth);
+app.post('/integrations/abrp/unlink/:akey', abrpIntegration.unlink);
 
 // requested route does not exist
 app.use((req, res) => res.status(404).json({
