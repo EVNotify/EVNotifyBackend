@@ -9,6 +9,7 @@ const cars = {
     IONIQ_BEV: 'hyundai:ioniq:17:28:other',
     KONA_EV: 'hyundai:kona:19:64:other',
     NIRO_EV: 'kia:niro:19:64:other',
+    E_SOUL: 'kia:soul:19:64:other',
     AMPERA_E: 'opel:ampera-e:17:60:other',
     BOLT_EV: 'chevy:bolt:17:60:other',
     ZOE_Q210: 'renault:zoe:q210:22:other',
