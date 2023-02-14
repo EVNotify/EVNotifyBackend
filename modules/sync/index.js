@@ -69,7 +69,7 @@ const postExtended = (akey, extendedObj, callback) => {
         akey,
     ], (err, queryRes) => {
         if (!err && queryRes) {
-            const lastExtended = queryRes[0] ? queryRes[0].last_soc : 0;
+            const lastExtended = queryRes[0] ? queryRes[0].last_extended : 0;
 
             db.query('UPDATE sync SET soh=?, charging=?, rapid_charge_port=?, normal_charge_port=?, slow_charge_port=?, aux_battery_voltage=?, dc_battery_voltage=?, dc_battery_current=?, dc_battery_power=?,\
                 cumulative_energy_charged=?, cumulative_energy_discharged=?, battery_min_temperature=?, battery_max_temperature=?, battery_inlet_temperature=?, external_temperature=?, odo=?, last_extended=? WHERE akey=?', [
