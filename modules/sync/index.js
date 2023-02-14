@@ -114,13 +114,26 @@ const getExtended = (akey, callback) => {
 const postLocation = (akey, locationObj, callback) => {
     const now = parseInt(new Date() / 1000);
 
-    db.query('UPDATE sync SET latitude=?, longitude=?, gps_speed=?, accuracy=?, location_timestamp=?, last_location=? WHERE akey=?', [
-        locationObj.latitude, locationObj.longitude, locationObj.speed, locationObj.accuracy, locationObj.timestamp, now, akey
-    ], err => {
-        if (!err) {
-            db.query('INSERT INTO statistics (latitude, longitude, gps_speed, accuracy, location_timestamp, timestamp, akey) VALUES (?, ?, ?, ?, ?, ?, ?)', [
+    db.query('SELECT last_location FROM sync WHERE akey=?', [
+        akey,
+    ], (err, queryRes) => {
+        if (!err && queryRes) {
+            const lastLocation = queryRes[0] ? queryRes[0].last_location : 0;
+
+            db.query('UPDATE sync SET latitude=?, longitude=?, gps_speed=?, accuracy=?, location_timestamp=?, last_location=? WHERE akey=?', [
                 locationObj.latitude, locationObj.longitude, locationObj.speed, locationObj.accuracy, locationObj.timestamp, now, akey
-            ], (err, dbRes) => callback(err, (!err && dbRes)));
+            ], err => {
+                if (!err) {
+                    if (updatedRecently(now, lastLocation)) {
+                        callback(err, (!err && dbRes));
+                        return;
+                    }
+
+                    db.query('INSERT INTO statistics (latitude, longitude, gps_speed, accuracy, location_timestamp, timestamp, akey) VALUES (?, ?, ?, ?, ?, ?, ?)', [
+                        locationObj.latitude, locationObj.longitude, locationObj.speed, locationObj.accuracy, locationObj.timestamp, now, akey
+                    ], (err, dbRes) => callback(err, (!err && dbRes)));
+                } else callback(err);
+            });
         } else callback(err);
     });
 };
