@@ -9,6 +9,8 @@ const srv_config = require('./../../srv_config.json'),
     abrp = require('./../integrations/abrp'),
     token = require('./../token');
 
+const updatedRecently = (now, dbTimestamp) => now - 5 < dbTimestamp;
+
 /**
  * Updates the current state of charge value within database and adds statistic record
  * @param {String} akey the AKey
@@ -18,14 +20,27 @@ const srv_config = require('./../../srv_config.json'),
 const postSoC = (akey, socObj, callback) => {
     const now = parseInt(new Date() / 1000);
 
-    db.query('UPDATE sync SET soc_display=?, soc_bms=?, last_soc=? WHERE akey=?', [
-        socObj.display, socObj.bms, now, akey
-    ], (err, dbRes) => {
-        if (!err && dbRes) {
-            abrp.submitData(akey);
-            db.query('INSERT INTO statistics (akey, soc_display, soc_bms, timestamp) VALUES (?, ?, ?, ?)', [
-                akey, socObj.display, socObj.bms, now
-            ], (err, dbRes) => callback(err, (!err && dbRes)));
+    db.query('SELECT last_soc FROM sync WHERE akey=?', [
+        akey,
+    ], (err, queryRes) => {
+        if (!err && queryRes) {
+            const lastSoc = queryRes[0] ? queryRes[0].last_soc : 0;
+
+            db.query('UPDATE sync SET soc_display=?, soc_bms=?, last_soc=? WHERE akey=?', [
+                socObj.display, socObj.bms, now, akey
+            ], (err, dbRes) => {
+                if (!err && dbRes) {
+                    if (updatedRecently(now, lastSoc)) {
+                        callback(err, (!err && dbRes));
+                        return;
+                    }
+
+                    abrp.submitData(akey);
+                    db.query('INSERT INTO statistics (akey, soc_display, soc_bms, timestamp) VALUES (?, ?, ?, ?)', [
+                        akey, socObj.display, socObj.bms, now
+                    ], (err, dbRes) => callback(err, (!err && dbRes)));
+                } else callback(err);
+            });
         } else callback(err);
     });
 };
