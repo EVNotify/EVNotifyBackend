@@ -78,7 +78,7 @@ const postExtended = (akey, extendedObj, callback) => {
             ], err => {
                 if (!err) {
                     if (updatedRecently(now, lastExtended)) {
-                        callback(err, (!err && dbRes));
+                        callback(null, true);
                         return;
                     }
 
@@ -125,7 +125,7 @@ const postLocation = (akey, locationObj, callback) => {
             ], err => {
                 if (!err) {
                     if (updatedRecently(now, lastLocation)) {
-                        callback(err, (!err && dbRes));
+                        callback(null, true);
                         return;
                     }
 
