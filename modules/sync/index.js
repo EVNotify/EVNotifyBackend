@@ -18,7 +18,7 @@ const updatedRecently = (now, dbTimestamp) => now - 5 < dbTimestamp;
  * @param {Function} callback callback function
  */
 const postSoC = (akey, socObj, callback) => {
-    const now = parseInt(new Date() / 1000);
+    const now = Math.floor(Date.now() / 1000);
 
     db.query('SELECT last_soc FROM sync WHERE akey=?', [
         akey,
@@ -63,7 +63,7 @@ const getSoC = (akey, callback) => {
  * @param {Function} callback callback function
  */
 const postExtended = (akey, extendedObj, callback) => {
-    const now = parseInt(new Date() / 1000);
+    const now = Math.floor(Date.now() / 1000);
 
     db.query('SELECT last_extended FROM sync WHERE akey=?', [
         akey,
@@ -112,7 +112,7 @@ const getExtended = (akey, callback) => {
  * @param {Function} callback callback function
  */
 const postLocation = (akey, locationObj, callback) => {
-    const now = parseInt(new Date() / 1000);
+    const now = Math.floor(Date.now() / 1000);
 
     db.query('SELECT last_location FROM sync WHERE akey=?', [
         akey,

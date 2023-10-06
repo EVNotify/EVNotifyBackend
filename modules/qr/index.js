@@ -232,7 +232,7 @@ module.exports = {
         qrStatus(req.query.code, (err, codeObj) => {
             if (!err && codeObj) {
                 // prevent access if not charging or data is to old (older than 10 minutes)
-                if (!codeObj.charging || (new Date() / 1000 - 600) > codeObj.last_soc) {
+                if (!codeObj.charging || (Date.now() / 1000 - 600) > codeObj.last_soc) {
                     res.status(401).json({
                         error: srv_errors.ACCESS_DENIED,
                         debug: ((srv_config.DEBUG) ? codeObj : null)
@@ -274,7 +274,7 @@ module.exports = {
             let dbObj;
 
             if (!err && dbRes && (dbObj = dbRes[0])) {
-                const now = parseInt(new Date() / 1000);
+                const now = Math.floor(Date.now() / 1000);
 
                 // valid, compare last_qr timestamp to determine if limit reached
                 if ((dbObj.last_qr || 0) + 600 < now) {

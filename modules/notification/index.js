@@ -33,7 +33,7 @@ const send = (req, res) => {
         if (!err && dbRes && (userObj = dbRes[0]) != null) {
             // validate token
             if (userObj.token === req.body.token) {
-                const now = parseInt(new Date() / 1000);
+                const now = Math.floor(Date.now() / 1000);
 
                 // valid, compare last_notification timestamp to determine if limit reached
                 if ((userObj.last_notification || 0) + 60 < now) {

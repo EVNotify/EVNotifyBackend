@@ -69,7 +69,7 @@ const login = (mail, password, callback) => {
                 if (!err && valid) {
                     // update last login timestamp
                     db.query('UPDATE login SET last_login=? WHERE id=?', [
-                        parseInt(new Date() / 1000), userObj.id
+                        Math.floor(Date.now() / 1000), userObj.id
                     ], (err, dbRes) => callback(err, ((!err && dbRes) ? userObj.id : null)));
                 } else callback(((err) ? err : srv_errors.INVALID_CREDENTIALS));
             });
