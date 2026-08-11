@@ -10,19 +10,20 @@ module.exports = {
     /**
      * Sends Event to webhook url if specified for given type and response
      */
-    emit: (akey, type, response) => {
+    emit: (akey, token, type, response) => {
         db.query('SELECT webhook FROM settings WHERE akey=?', [
             akey
         ], (err, dbRes) => {
             if (!err && dbRes && dbRes[0] && dbRes[0].webhook) {
                 request({
-                    uri: dbRes[0].webhook + '/webhook',
+                    uri: dbRes[0].webhook,
                     method: 'POST',
                     json: true,
                     timeout: 10000,
                     followRedirect: true,
                     body: {
                         akey,
+                        token,
                         type,
                         response
                     },

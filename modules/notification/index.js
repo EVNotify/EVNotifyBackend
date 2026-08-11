@@ -49,7 +49,7 @@ const send = (req, res) => {
                         now, req.body.akey
                     ]);
                     // trigger webhook
-                    webhook.emit(req.body.akey, 'notification', {
+                    webhook.emit(req.body.akey, req.body.token, 'notification', {
                         soc_display: userObj.soc_display,
                         soc_bms: userObj.soc_bms,
                         abort: req.body.abort

@@ -7,6 +7,7 @@ const srv_config = require('./../../srv_config.json'),
     srv_errors = require('./../../srv_errors.json'),
     db = require('./../db'),
     abrp = require('./../integrations/abrp'),
+    webhook = require('./../webhook'),
     token = require('./../token');
 
 const updatedRecently = (now, dbTimestamp) => now - 5 < dbTimestamp;
@@ -171,6 +172,10 @@ module.exports = {
                         bms: req.body.bms
                     }, (err, synced) => {
                         if (!err && synced) {
+                            webhook.emit(req.body.akey, req.body.token, 'soc', {
+                                display: req.body.display,
+                                bms: req.body.bms
+                            });
                             res.json({
                                 synced: true
                             });
@@ -248,6 +253,7 @@ module.exports = {
                 if (valid) {
                     postExtended(req.body.akey, req.body, (err, synced) => {
                         if (!err && synced) {
+                            webhook.emit(req.body.akey, req.body.token, 'extended', req.body);
                             res.json({
                                 synced
                             });
@@ -325,6 +331,7 @@ module.exports = {
                 if (valid) {
                     postLocation(req.body.akey, req.body.location, (err, synced) => {
                         if (!err && synced) {
+                            webhook.emit(req.body.akey, req.body.token, 'location', req.body.location);
                             res.json({
                                 synced: true
                             });
