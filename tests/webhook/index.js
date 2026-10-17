@@ -408,7 +408,7 @@ describe('webhook HTTPS transport protection', () => {
         loader = loadModule('./modules/webhook', {
             './modules/db': { query: (sql, params, cb) => cb(null, [{ webhook: 'https://example.test/hook' }]) },
             dns: { lookup: (hostname, options, cb) => cb(null, [{ address: '8.8.8.8', family: 4 }]) },
-            request: (options, callback) => realRequest(options, err => {
+            request: options => realRequest(options, err => {
                 // Expected connection failure belongs to the fixture, not webhook delivery.
                 try {
                     assert.strictEqual(err, expectedError);

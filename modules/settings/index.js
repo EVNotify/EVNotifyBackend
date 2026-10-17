@@ -109,7 +109,7 @@ module.exports = {
             if (!err) {
                 if (valid) {
                     // set settings
-                    setSettings(req.body.akey, req.body.settings, (err, settings) => {
+                    setSettings(req.body.akey, req.body.settings, err => {
                         if (!err) {
                             const updatedSettings = Object.assign({}, req.body.settings);
                             delete updatedSettings.webhook;

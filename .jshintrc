@@ -2,6 +2,9 @@
     "undef": true,
     "unused": true,
     "esversion": 6,
+    "node": true,
+    "mocha": true,
+    "multistr": true,
     "globals": {
         "require": false,
         "module": false,
