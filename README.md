@@ -17,7 +17,7 @@ Backend for [EVNotify](https://github.com/EVNotify/EVNotify).
 
 Webhooks are configured by an administrator on request, directly in the user's `settings.webhook` database column. `GET /settings` returns the configured URL. `PUT /settings` ignores any submitted `webhook` value and omits it from its response; users cannot change or disable delivery through the API. To disable delivery, an administrator sets the database value to `NULL` or an empty string.
 
-Stored webhook URLs must be absolute HTTP or HTTPS URLs with a hostname and a valid port. Invalid URLs are logged and skipped without interrupting API requests.
+Stored webhook URLs must be absolute HTTPS URLs with a hostname and a valid port. HTTP and invalid URLs are logged and skipped before DNS lookup or delivery, without interrupting API requests. Administrators must replace existing HTTP URLs with HTTPS endpoints; stored values are not automatically changed.
 
 Destinations must resolve exclusively to public IPv4 or IPv6 addresses. Loopback, private, link-local (including cloud metadata), reserved, and other non-public addresses are blocked, including alternate IP spellings and IPv4-mapped IPv6 addresses containing blocked IPv4 addresses. DNS lookup failures or a lookup taking longer than 10 seconds skip delivery. Connections use a checked address without resolving again; proxies and redirects are disabled for all webhook requests. Blocked destinations are logged without changing the stored URL or interrupting API requests.
 

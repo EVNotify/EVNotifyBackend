@@ -15,10 +15,10 @@ const URL = require('url').URL;
 
 const validateUrl = uri => {
     try {
-        if (typeof uri !== 'string' || !/^https?:\/\//i.test(uri) || /\s/.test(uri)) return null;
+        if (typeof uri !== 'string' || !/^https:\/\//i.test(uri) || /\s/.test(uri)) return null;
         // Check syntax and port bounds, then use request's parser for host policy.
         const url = parseUrl(new URL(uri).href);
-        if (!url.hostname || url.hostname === 'unix') return null;
+        if (url.protocol !== 'https:' || !url.hostname || url.hostname === 'unix') return null;
         return url;
     } catch (err) {
         return null;

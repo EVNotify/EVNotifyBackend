@@ -1,7 +1,8 @@
 const assert = require('assert');
 const { loadModule } = require('../helpers');
 const realRequest = require('request');
-const http = require('http');
+const fs = require('fs');
+const path = require('path');
 const https = require('https');
 
 describe('webhook module', () => {
@@ -86,7 +87,7 @@ describe('webhook module', () => {
         '[2001:db8::1]', '[3fff::1]', '[4000::1]'
     ].forEach(host => {
         it('blocks non-public literal address ' + host, () => {
-            destination = 'http://' + host + '/hook';
+            destination = 'https://' + host + '/hook';
             assert.doesNotThrow(() => emit({}));
             assert.strictEqual(requests.length, 0);
             assert.strictEqual(dnsQueries.length, 0);
@@ -201,6 +202,29 @@ describe('webhook module', () => {
         });
     });
 
+    [
+        'http://example.test/hook',
+        'HTTP://example.test/hook',
+        'http://evnotify.de/hook',
+        'http://api.evnotify.com/hook'
+    ].forEach(url => {
+        it('rejects HTTP before DNS lookup or delivery for ' + url, () => {
+            destination = url;
+            assert.doesNotThrow(() => emit({ token: 'secret-token' }));
+            assert.deepStrictEqual(dnsQueries, []);
+            assert.deepStrictEqual(requests, []);
+            assert.strictEqual(loggedErrors.length, 1);
+            assert.strictEqual(loggedErrors[0].message, 'Invalid webhook URL; delivery skipped');
+        });
+    });
+
+    it('accepts a case-insensitive HTTPS scheme', () => {
+        destination = 'HTTPS://example.test/hook';
+        emit({});
+        assert.strictEqual(requests.length, 1);
+        assert.strictEqual(requests[0].uri, 'https://example.test/hook');
+    });
+
     it('logs synchronous delivery errors without throwing', () => {
         synchronousError = new Error('request construction failed');
         assert.doesNotThrow(() => emit({}));
@@ -244,8 +268,6 @@ describe('webhook module', () => {
     });
 
     [
-        'http://evnotify.de/hook',
-        'http://api.evnotify.com/hook',
         'https://fakeevnotify.de/hook',
         'https://fakeevnotify.com/hook',
         'https://evnotify.de.attacker.com/hook',
@@ -304,7 +326,7 @@ describe('webhook module', () => {
     });
 });
 
-describe('webhook HTTP transport protection', () => {
+describe('webhook HTTPS transport protection', () => {
     let loader;
     let server;
     let originalHttpsConnect;
@@ -319,11 +341,13 @@ describe('webhook HTTP transport protection', () => {
         originalHttpsConnect = null;
     });
 
-    it('uses the pinned lookup with real HTTP, preserves Host, and does not follow redirects', done => {
+    it('uses the pinned lookup with real HTTPS, preserves Host, and does not follow redirects', done => {
         let received = 0;
         let lookups = 0;
         let pinnedLookups = 0;
-        server = http.createServer((req, res) => {
+        const cert = fs.readFileSync(path.join(__dirname, 'fixtures/server-cert.pem'));
+        const key = fs.readFileSync(path.join(__dirname, 'fixtures/server-key.pem'));
+        server = https.createServer({ cert, key }, (req, res) => {
             received++;
             req.resume();
             res.writeHead(302, { Location: 'http://127.0.0.1:' + server.address().port + '/internal' });
@@ -333,7 +357,7 @@ describe('webhook HTTP transport protection', () => {
             const port = server.address().port;
             server.on('request', req => assert.strictEqual(req.headers.host, 'example.test:' + port));
             loader = loadModule('./modules/webhook', {
-                './modules/db': { query: (sql, params, cb) => cb(null, [{ webhook: 'http://example.test:' + port + '/hook' }]) },
+                './modules/db': { query: (sql, params, cb) => cb(null, [{ webhook: 'https://example.test:' + port + '/hook' }]) },
                 dns: { lookup: (hostname, options, cb) => {
                     lookups++;
                     cb(null, [{ address: '8.8.8.8', family: 4 }]);
@@ -341,6 +365,7 @@ describe('webhook HTTP transport protection', () => {
                 request: (options, callback) => {
                     // Route the approved public address to a local fixture only in this test.
                     // The real request library must pass our lookup through to Node's socket.
+                    options.ca = cert; // Trust only the fixture certificate; keep TLS verification enabled.
                     const lookup = options.lookup;
                     options.lookup = (hostname, lookupOptions, cb) => {
                         pinnedLookups++;
