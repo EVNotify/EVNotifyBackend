@@ -62,14 +62,25 @@ describe('settings module', () => {
         });
     });
 
-    it('replaces the webhook URL and still encrypts email', () => {
-        const settings = { email: 'mail@example.com', webhook: 'https://new.example/hook' };
-        const res = createResponse();
-        loader.module.setSettings(request(settings), res);
-        assert.strictEqual(res.statusCode, 200);
-        assert.strictEqual(storedWebhook, settings.webhook);
-        assert.strictEqual(queries[0].params[0], 'enc:mail@example.com');
-        assert.deepStrictEqual(res.body, { settings });
+    ['https://new.example/hook', null, ''].forEach(value => {
+        it('ignores submitted webhook ' + JSON.stringify(value) + ' while saving other settings', () => {
+            const settings = Object.freeze({ email: 'mail@example.com', soc: 80, webhook: value });
+            const res = createResponse();
+            loader.module.setSettings(request(settings), res);
+            assert.strictEqual(res.statusCode, 200);
+            assert.strictEqual(storedWebhook, 'https://existing.example/hook');
+            assert.strictEqual(queries.length, 1);
+            assert.ok(!queries[0].sql.includes('webhook'));
+            assert.strictEqual(queries[0].params[0], 'enc:mail@example.com');
+            assert.strictEqual(queries[0].params[3], 80);
+            assert.deepStrictEqual(res.body, { settings: { email: 'mail@example.com', soc: 80 } });
+            assert.strictEqual(settings.webhook, value);
+
+            const getRes = createResponse();
+            loader.module.getSettings(request(), getRes);
+            assert.strictEqual(getRes.statusCode, 200);
+            assert.strictEqual(getRes.body.settings.webhook, 'https://existing.example/hook');
+        });
     });
 
     it('preserves the existing URL when webhook is omitted, without an extra query', () => {
@@ -79,16 +90,7 @@ describe('settings module', () => {
         assert.strictEqual(storedWebhook, 'https://existing.example/hook');
         assert.strictEqual(queries.length, 1);
         assert.ok(!queries[0].sql.includes('webhook'));
-    });
-
-    [null, ''].forEach(value => {
-        it('explicitly disables webhooks with ' + JSON.stringify(value), () => {
-            const res = createResponse();
-            loader.module.setSettings(request({ webhook: value }), res);
-            assert.strictEqual(res.statusCode, 200);
-            assert.strictEqual(storedWebhook, value);
-            assert.strictEqual(res.body.settings.webhook, value);
-        });
+        assert.deepStrictEqual(res.body, { settings: { email: 'mail@example.com' } });
     });
 
     [undefined, null, 'invalid'].forEach(settings => {
