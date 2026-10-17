@@ -1,190 +1,141 @@
-/**
- * @file tests/settings/index.js
- * @author GPlay97
- * @description Tests for settings module
- */
 const assert = require('assert');
-const path = require('path');
-const srv_errors = require('./../../srv_errors.json');
-
-const createResponse = onJson => ({
-    statusCode: 200,
-    status(code) {
-        this.statusCode = code;
-        return this;
-    },
-    json(payload) {
-        onJson(this.statusCode, payload);
-    }
-});
-
-const loadSettingsModule = stubs => {
-    const modulePath = path.resolve(__dirname, './../../modules/settings');
-    const resolvedModulePath = require.resolve(modulePath);
-    const dbPath = require.resolve(path.resolve(__dirname, './../../modules/db'));
-    const tokenPath = require.resolve(path.resolve(__dirname, './../../modules/token'));
-    const encryptionPath = require.resolve(path.resolve(__dirname, './../../modules/encryption'));
-    const replacements = [
-        [dbPath, stubs.db],
-        [tokenPath, stubs.token],
-        [encryptionPath, stubs.encryption]
-    ];
-    const originals = new Map();
-
-    delete require.cache[resolvedModulePath];
-
-    replacements.forEach(([target, value]) => {
-        originals.set(target, require.cache[target]);
-        require.cache[target] = {
-            id: target,
-            filename: target,
-            loaded: true,
-            exports: value
-        };
-    });
-
-    const settings = require(modulePath);
-
-    return {
-        settings,
-        restore: () => {
-            delete require.cache[resolvedModulePath];
-
-            replacements.forEach(([target]) => {
-                const original = originals.get(target);
-
-                if (original) require.cache[target] = original;
-                else delete require.cache[target];
-            });
-        }
-    };
-};
+const { loadModule, createResponse } = require('../helpers');
+const errors = require('../../srv_errors.json');
 
 describe('settings module', () => {
-    it('returns the webhook setting in getSettings', done => {
-        const loader = loadSettingsModule({
-            db: {
+    let loader;
+    let queries;
+    let dbError;
+    let authError;
+    let valid;
+    let storedWebhook;
+
+    beforeEach(() => {
+        queries = [];
+        dbError = null;
+        authError = null;
+        valid = true;
+        storedWebhook = 'https://existing.example/hook';
+        loader = loadModule('./modules/settings', {
+            './modules/db': {
                 query: (sql, params, callback) => {
-                    assert.ok(sql.includes('summary, webhook FROM settings'));
-                    assert.deepStrictEqual(params, ['ABC123']);
-                    callback(null, [{
-                        email: 'encrypted-mail',
-                        webhook: 'https://example.test/evnotify',
-                        summary: 1
-                    }]);
+                    queries.push({ sql, params });
+                    assert.strictEqual((sql.match(/\?/g) || []).length, params.length);
+                    if (sql.startsWith('SELECT')) {
+                        assert.deepStrictEqual(params, ['ABC123']);
+                        callback(dbError, [{ email: 'enc:mail@example.com', webhook: storedWebhook }]);
+                    } else {
+                        assert.strictEqual(params[params.length - 1], 'ABC123');
+                        if (!dbError && sql.includes('webhook=?')) storedWebhook = params[params.length - 2];
+                        callback(dbError, { affectedRows: 1 });
+                    }
                 }
             },
-            token: {
+            './modules/token': {
                 validateToken: (akey, token, callback) => {
                     assert.strictEqual(akey, 'ABC123');
                     assert.strictEqual(token, 'secret-token');
-                    callback(null, true);
+                    callback(authError, valid);
                 }
             },
-            encryption: {
-                decrypt: value => {
-                    assert.strictEqual(value, 'encrypted-mail');
-                    return 'user@example.com';
-                },
-                encrypt: value => value
+            './modules/encryption': {
+                encrypt: value => 'enc:' + value,
+                decrypt: value => value.slice(4)
             }
         });
-
-        loader.settings.getSettings({
-            query: {
-                akey: 'ABC123',
-                token: 'secret-token'
-            }
-        }, createResponse((statusCode, payload) => {
-            loader.restore();
-            assert.strictEqual(statusCode, 200);
-            assert.strictEqual(payload.settings.email, 'user@example.com');
-            assert.strictEqual(payload.settings.webhook, 'https://example.test/evnotify');
-            done();
-        }));
     });
 
-    it('persists the webhook setting in setSettings', done => {
-        let queryValues;
-        const loader = loadSettingsModule({
-            db: {
-                query: (sql, params, callback) => {
-                    assert.ok(sql.includes('summary=?, webhook=? WHERE akey=?'));
-                    queryValues = params;
-                    callback(null, [{}]);
-                }
-            },
-            token: {
-                validateToken: (akey, token, callback) => {
-                    assert.strictEqual(akey, 'ABC123');
-                    assert.strictEqual(token, 'secret-token');
-                    callback(null, true);
-                }
-            },
-            encryption: {
-                decrypt: value => value,
-                encrypt: value => 'enc:' + value
-            }
-        });
-        const requestBody = {
-            akey: 'ABC123',
-            token: 'secret-token',
-            settings: {
-                email: 'user@example.com',
-                telegram: 0,
-                push: 1,
-                soc: 20,
-                consumption: 17,
-                capacity: 64,
-                car: 'ioniq',
-                device: 'android',
-                lng: 'en',
-                summary: 1,
-                webhook: 'https://example.test/evnotify'
-            }
-        };
+    afterEach(() => loader.restore());
 
-        loader.settings.setSettings({
-            body: requestBody
-        }, createResponse((statusCode, payload) => {
-            loader.restore();
-            assert.strictEqual(statusCode, 200);
-            assert.strictEqual(queryValues[0], 'enc:user@example.com');
-            assert.strictEqual(queryValues[10], 'https://example.test/evnotify');
-            assert.strictEqual(queryValues[11], 'ABC123');
-            assert.strictEqual(payload.settings.webhook, 'https://example.test/evnotify');
-            done();
-        }));
+    const request = settings => ({
+        body: { akey: 'ABC123', token: 'secret-token', settings },
+        query: { akey: 'ABC123', token: 'secret-token' }
     });
 
-    it('rejects missing settings payloads', done => {
-        const loader = loadSettingsModule({
-            db: {
-                query: () => {
-                    throw new Error('db should not be called');
-                }
-            },
-            token: {
-                validateToken: () => {
-                    throw new Error('token should not be called');
-                }
-            },
-            encryption: {
-                decrypt: value => value,
-                encrypt: value => value
-            }
+    it('reads the webhook setting and decrypts email', () => {
+        const res = createResponse();
+        loader.module.getSettings(request(), res);
+        assert.strictEqual(res.statusCode, 200);
+        assert.ok(queries[0].sql.includes('webhook'));
+        assert.deepStrictEqual(res.body.settings, {
+            email: 'mail@example.com', webhook: storedWebhook
+        });
+    });
+
+    it('replaces the webhook URL and still encrypts email', () => {
+        const settings = { email: 'mail@example.com', webhook: 'https://new.example/hook' };
+        const res = createResponse();
+        loader.module.setSettings(request(settings), res);
+        assert.strictEqual(res.statusCode, 200);
+        assert.strictEqual(storedWebhook, settings.webhook);
+        assert.strictEqual(queries[0].params[0], 'enc:mail@example.com');
+        assert.deepStrictEqual(res.body, { settings });
+    });
+
+    it('preserves the existing URL when webhook is omitted, without an extra query', () => {
+        const res = createResponse();
+        loader.module.setSettings(request({ email: 'mail@example.com' }), res);
+        assert.strictEqual(res.statusCode, 200);
+        assert.strictEqual(storedWebhook, 'https://existing.example/hook');
+        assert.strictEqual(queries.length, 1);
+        assert.ok(!queries[0].sql.includes('webhook'));
+    });
+
+    [null, ''].forEach(value => {
+        it('explicitly disables webhooks with ' + JSON.stringify(value), () => {
+            const res = createResponse();
+            loader.module.setSettings(request({ webhook: value }), res);
+            assert.strictEqual(res.statusCode, 200);
+            assert.strictEqual(storedWebhook, value);
+            assert.strictEqual(res.body.settings.webhook, value);
+        });
+    });
+
+    [undefined, null, 'invalid'].forEach(settings => {
+        it('rejects invalid settings payload ' + JSON.stringify(settings), () => {
+            const res = createResponse();
+            loader.module.setSettings(request(settings), res);
+            assert.strictEqual(res.statusCode, 400);
+            assert.deepStrictEqual(res.body.error, errors.INVALID_PARAMETERS);
+            assert.strictEqual(queries.length, 0);
+        });
+    });
+
+    ['getSettings', 'setSettings'].forEach(handler => {
+        it(handler + ' rejects missing credentials without querying the database', () => {
+            const res = createResponse();
+            const req = request({ webhook: 'https://new.example/hook' });
+            delete req.body.token;
+            delete req.query.token;
+            loader.module[handler](req, res);
+            assert.strictEqual(res.statusCode, 400);
+            assert.strictEqual(queries.length, 0);
         });
 
-        loader.settings.setSettings({
-            body: {
-                akey: 'ABC123',
-                token: 'secret-token'
-            }
-        }, createResponse((statusCode, payload) => {
-            loader.restore();
-            assert.strictEqual(statusCode, 400);
-            assert.deepStrictEqual(payload.error, srv_errors.INVALID_PARAMETERS);
-            done();
-        }));
+        it(handler + ' rejects invalid authentication without querying settings', () => {
+            valid = false;
+            const res = createResponse();
+            loader.module[handler](request({ webhook: 'https://new.example/hook' }), res);
+            assert.strictEqual(res.statusCode, 401);
+            assert.deepStrictEqual(res.body.error, errors.INVALID_TOKEN);
+            assert.strictEqual(queries.length, 0);
+        });
+
+        it(handler + ' handles authentication lookup failure', () => {
+            authError = new Error('authentication lookup failed');
+            const res = createResponse();
+            loader.module[handler](request({}), res);
+            assert.strictEqual(res.statusCode, 422);
+            assert.strictEqual(queries.length, 0);
+        });
+
+        it(handler + ' reports database failures without changing the stored URL', () => {
+            dbError = new Error('database unavailable');
+            const res = createResponse();
+            loader.module[handler](request({ webhook: 'https://new.example/hook' }), res);
+            assert.strictEqual(res.statusCode, 422);
+            assert.deepStrictEqual(res.body.error, errors.UNPROCESSABLE_ENTITY);
+            assert.strictEqual(storedWebhook, 'https://existing.example/hook');
+        });
     });
 });

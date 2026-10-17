@@ -15,7 +15,9 @@ Backend for [EVNotify](https://github.com/EVNotify/EVNotify).
 
 ## Webhooks
 
-If a user has a `webhook` URL stored in `settings`, the backend sends a `POST` request to that URL for these event types:
+Configure a webhook by including `webhook` in the `settings` object of an authenticated `PUT /settings` request, alongside your other settings. `GET /settings` returns the configured URL. Omitting `webhook` from an update preserves its current value; setting it to `null` or `""` disables delivery.
+
+The backend sends a JSON `POST` directly to the configured URL, including its path, after successful sync or notification requests:
 
 - `soc`
 - `location`
@@ -27,17 +29,33 @@ The JSON payload contains:
 ```json
 {
   "akey": "ABC123",
-  "token": "user-token",
   "type": "soc",
   "response": {}
 }
 ```
 
+| Event type | `response` contents |
+| --- | --- |
+| `soc` | Submitted `display` and `bms` readings |
+| `location` | Submitted `location` object |
+| `extended` | Submitted telemetry body, with `token` removed |
+| `notification` | `soc_display`, `soc_bms`, and the submitted `abort` flag |
+
+The account's API `token` is included only as an outer payload field when the URL uses HTTPS and its hostname is exactly `evnotify.de`, `evnotify.com`, or a subdomain of either. Matching is case insensitive and requires a dot boundary: `api.evnotify.de` qualifies, but `fakeevnotify.de` and `evnotify.de.attacker.com` do not. Other destinations receive events without a token. Requests carrying tokens never follow redirects.
+
+Delivery happens in the background with a 10-second request timeout and no retries. Transport errors are logged; HTTP failure status codes are not checked. A successful API response does not confirm webhook delivery. Rejected API requests and rate-limited notifications do not emit events.
+
 ## Development
 
 Install dependencies with `npm install`.
 
-Run the test suite with:
+Run the isolated settings, webhook, sync, and notification tests without a backend or database:
+
+```bash
+./node_modules/.bin/mocha tests/settings/index.js tests/webhook/index.js tests/sync/index.js tests/notification/index.js
+```
+
+The full suite also includes account integration tests, which require a running backend at `TEST_URL` (or the configured local port) and a local test database configured in `srv_config.json`. Its setup creates the database and imports the schema:
 
 ```bash
 npm test

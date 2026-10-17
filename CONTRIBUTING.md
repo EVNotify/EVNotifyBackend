@@ -28,7 +28,7 @@ The complete source code is available open source here, but out of the box your 
 - You have to take care of keeping everything up-to-date - this means, your OS, packages and - the source code from this repository by itself. At the end I'll explain, how you can do this easily.
 - You may need to have your own domain - and a HTTPS certificate running on it - to encrypt the traffic that receives and sends out of the server. It's possible to run the server in HTTP mode, but that's not recommended.
 - Out of the box, you'll not be able to send notifications - to enable that feature, you'll need to provide some options in a config file that will be explained later. Keep in mind, that based on your needs, you need to register for some services, which may require some installation or other things (e.g. mail server, Telegram Bot Token, ..)
-- Out of the box, your server will not automatically track uncaught exceptions or analyze the usage. To be able to do so, you'll need to specify them in the config file, which will be explained later, as mentioned previously.
+- To track uncaught exceptions with Rollbar, configure `ROLLBAR_TOKEN` as described below.
 
 #### First-time-setup
 So, now we will setup the Backend for EVNotify. This step is required only once.
@@ -67,8 +67,6 @@ Here are optional keys, which can be specified within the _srv_config.json_ file
 - `FIREBASE_URL` - url of firebase project
 ###### Rollbar (automated error tracking)
 - `ROLLBAR_TOKEN` - the token of your Rollbar project
-###### Moesif (automated API traffic and usage analyzation)
-- `MOESIF_TOKEN` - the token of your Moesif project
 ###### GoingElectric (for stations finder)
 - `GE_API_URL` - the URL to the GoingElectric API (currently _https://api.goingelectric.de_)
 - `GE_API_KEY` - the key for the GoingElectric API (Format: `?key=XXXX`)

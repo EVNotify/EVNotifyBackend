@@ -1,115 +1,141 @@
-/**
- * @file tests/webhook/index.js
- * @author GPlay97
- * @description Tests for webhook module
- */
 const assert = require('assert');
-const path = require('path');
-
-const loadWebhookModule = stubs => {
-    const modulePath = path.resolve(__dirname, './../../modules/webhook');
-    const resolvedModulePath = require.resolve(modulePath);
-    const dbPath = require.resolve(path.resolve(__dirname, './../../modules/db'));
-    const requestPath = require.resolve('request');
-    const replacements = [
-        [dbPath, stubs.db],
-        [requestPath, stubs.request]
-    ];
-    const originals = new Map();
-
-    delete require.cache[resolvedModulePath];
-
-    replacements.forEach(([target, value]) => {
-        originals.set(target, require.cache[target]);
-        require.cache[target] = {
-            id: target,
-            filename: target,
-            loaded: true,
-            exports: value
-        };
-    });
-
-    const webhook = require(modulePath);
-
-    return {
-        webhook,
-        restore: () => {
-            delete require.cache[resolvedModulePath];
-
-            replacements.forEach(([target]) => {
-                const original = originals.get(target);
-
-                if (original) require.cache[target] = original;
-                else delete require.cache[target];
-            });
-        }
-    };
-};
+const { loadModule } = require('../helpers');
 
 describe('webhook module', () => {
-    it('sends the event payload to the stored webhook url', done => {
-        let requestOptions;
-        const loader = loadWebhookModule({
-            db: {
+    let loader;
+    let requests;
+    let destination;
+    let rows;
+    let dbError;
+    let transportError;
+    let loggedErrors;
+    let originalConsoleError;
+
+    beforeEach(() => {
+        requests = [];
+        destination = 'https://example.test/evnotify';
+        rows = undefined;
+        dbError = null;
+        transportError = null;
+        loggedErrors = [];
+        originalConsoleError = console.error;
+        console.error = err => loggedErrors.push(err);
+        loader = loadModule('./modules/webhook', {
+            './modules/db': {
                 query: (sql, params, callback) => {
                     assert.ok(sql.includes('SELECT webhook FROM settings'));
                     assert.deepStrictEqual(params, ['ABC123']);
-                    callback(null, [{
-                        webhook: 'https://example.test/evnotify'
-                    }]);
+                    callback(dbError, rows === undefined ? [{ webhook: destination }] : rows);
                 }
             },
             request: (options, callback) => {
-                requestOptions = options;
-                callback(null);
+                requests.push(options);
+                callback(transportError);
             }
-        });
-
-        loader.webhook.emit('ABC123', 'secret-token', 'soc', {
-            display: 80
-        });
-
-        setImmediate(() => {
-            loader.restore();
-
-            assert.ok(requestOptions);
-            assert.strictEqual(requestOptions.uri, 'https://example.test/evnotify');
-            assert.strictEqual(requestOptions.method, 'POST');
-            assert.strictEqual(requestOptions.json, true);
-            assert.deepStrictEqual(requestOptions.body, {
-                akey: 'ABC123',
-                token: 'secret-token',
-                type: 'soc',
-                response: {
-                    display: 80
-                }
-            });
-            done();
         });
     });
 
-    it('does not send a request when no webhook is configured', done => {
-        let called = false;
-        const loader = loadWebhookModule({
-            db: {
-                query: (sql, params, callback) => callback(null, [{
-                    webhook: null
-                }])
-            },
-            request: () => {
-                called = true;
-            }
-        });
+    afterEach(() => {
+        console.error = originalConsoleError;
+        if (loader) loader.restore();
+    });
 
-        loader.webhook.emit('ABC123', 'secret-token', 'location', {
-            lat: 1,
-            lng: 2
-        });
+    const emit = response => loader.module.emit('ABC123', 'secret-token', 'extended', response);
 
-        setImmediate(() => {
-            loader.restore();
-            assert.strictEqual(called, false);
-            done();
+    it('posts to the stored URL and preserves event data without forwarding credentials', () => {
+        emit({ soh: 98 });
+        assert.strictEqual(requests.length, 1);
+        assert.strictEqual(requests[0].uri, destination);
+        assert.strictEqual(requests[0].method, 'POST');
+        assert.strictEqual(requests[0].json, true);
+        assert.strictEqual(requests[0].timeout, 10000);
+        assert.deepStrictEqual(requests[0].body, {
+            akey: 'ABC123', type: 'extended', response: { soh: 98 }
         });
+    });
+
+    [
+        'https://evnotify.de/hook',
+        'https://evnotify.com/hook',
+        'https://api.evnotify.de/hook',
+        'https://api.evnotify.com/hook',
+        'https://nested.api.evnotify.de/hook',
+        'https://nested.api.evnotify.com/hook',
+        'https://API.EVNOTIFY.DE/hook',
+        'https://API.EVNOTIFY.COM/hook',
+        'https://evnotify.de:443/hook',
+        'https://attacker.com@evnotify.de/hook'
+    ].forEach(url => {
+        it('sends the token once and prevents redirects for ' + url, () => {
+            destination = url;
+            const response = Object.freeze({ akey: 'ABC123', token: 'secret-token', soh: 98 });
+            emit(response);
+            assert.strictEqual(requests[0].body.token, 'secret-token');
+            assert.deepStrictEqual(requests[0].body.response, { akey: 'ABC123', soh: 98 });
+            assert.strictEqual(requests[0].followRedirect, false);
+            assert.strictEqual(requests[0].followAllRedirects, false);
+            assert.strictEqual(response.token, 'secret-token');
+        });
+    });
+
+    [
+        'http://evnotify.de/hook',
+        'http://api.evnotify.com/hook',
+        'https://fakeevnotify.de/hook',
+        'https://fakeevnotify.com/hook',
+        'https://evnotify.de.attacker.com/hook',
+        'https://evnotify.com.attacker.de/hook',
+        'https://evnotify.de.com/hook',
+        'https://evnotify.com.de/hook',
+        'https://evnotify.dev/hook',
+        'https://evnotify.company/hook',
+        'https://api.evnotify.de.attacker.com/hook',
+        'https://evnotify.de@attacker.com/hook',
+        'https://evnotify.com:password@attacker.com/hook',
+        'https://example.test/evnotify.de?domain=evnotify.com',
+        'https://evnotify.de./hook',
+        'not a URL'
+    ].forEach(url => {
+        it('omits both token fields for ' + url, () => {
+            destination = url;
+            const response = Object.freeze({ token: 'secret-token', soh: 98 });
+            emit(response);
+            assert.ok(!Object.prototype.hasOwnProperty.call(requests[0].body, 'token'));
+            assert.deepStrictEqual(requests[0].body.response, { soh: 98 });
+            assert.strictEqual(response.token, 'secret-token');
+        });
+    });
+
+    [null, ''].forEach(url => {
+        it('does not send when the configured URL is ' + JSON.stringify(url), () => {
+            destination = url;
+            emit({});
+            assert.strictEqual(requests.length, 0);
+        });
+    });
+
+    [[], null].forEach(result => {
+        it('does not send when settings lookup returns ' + JSON.stringify(result), () => {
+            rows = result;
+            emit({});
+            assert.strictEqual(requests.length, 0);
+        });
+    });
+
+    it('does not send on database lookup failure', () => {
+        dbError = new Error('lookup failed');
+        emit({});
+        assert.strictEqual(requests.length, 0);
+    });
+
+    it('preserves array response payloads', () => {
+        emit([1, 2]);
+        assert.deepStrictEqual(requests[0].body.response, [1, 2]);
+    });
+
+    it('logs transport errors without throwing', () => {
+        transportError = new Error('connection timed out');
+        assert.doesNotThrow(() => emit({}));
+        assert.deepStrictEqual(loggedErrors, [transportError]);
     });
 });

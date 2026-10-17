@@ -30,7 +30,8 @@ const getSettings = (akey, callback) => {
  * @param {Function} callback callback function
  */
 const setSettings = (akey, settings, callback) => {
-    db.query('UPDATE settings SET email=?, telegram=?, push=?, soc=?, consumption=?, capacity=?, car=?, device=?, lng=?, summary=?, webhook=? WHERE akey=?', [
+    const hasWebhook = Object.prototype.hasOwnProperty.call(settings, 'webhook');
+    const values = [
         ((settings.email) ? encryption.encrypt(settings.email) : ''),
         settings.telegram,
         settings.push,
@@ -40,10 +41,15 @@ const setSettings = (akey, settings, callback) => {
         settings.car,
         settings.device,
         settings.lng,
-        settings.summary,
-        settings.webhook,
-        akey
-    ], (err, dbRes) => callback(err, ((!err && dbRes && dbRes[0]) ? dbRes[0] : null)));
+        settings.summary
+    ];
+
+    if (hasWebhook) values.push(settings.webhook);
+    values.push(akey);
+
+    db.query('UPDATE settings SET email=?, telegram=?, push=?, soc=?, consumption=?, capacity=?, car=?, device=?, lng=?, summary=?' +
+        (hasWebhook ? ', webhook=?' : '') + ' WHERE akey=?', values,
+        (err, dbRes) => callback(err, ((!err && dbRes && dbRes[0]) ? dbRes[0] : null)));
 };
 
 module.exports = {
