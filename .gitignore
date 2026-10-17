@@ -2,6 +2,5 @@ srv_config.json
 pm2_config.json
 node_modules/
 deploy.sh
-package-lock.json
 launch.json
 firebase.json

@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Node 8 / MySQL 5.7.34
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:5.7.34
+        env:
+          MYSQL_ROOT_PASSWORD: ci-password
+          MYSQL_DATABASE: evnotify_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci-password"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialize test database
+        env:
+          MYSQL_CONTAINER: ${{ job.services.mysql.id }}
+        run: |
+          docker exec "$MYSQL_CONTAINER" mysql -uroot -pci-password --execute='SELECT VERSION()'
+          docker exec -i "$MYSQL_CONTAINER" mysql -uroot -pci-password evnotify_test < modules/db/db_template.sql
+      - name: Run backend and tests on Node 8.17.0
+        run: |
+          docker run --rm --network host \
+            --volume "$GITHUB_WORKSPACE:/app" --workdir /app \
+            node:8.17.0 bash .github/scripts/ci.sh

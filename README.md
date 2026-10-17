@@ -1,7 +1,7 @@
 # EVNotifyBackend
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/EVNotify/EVNotifyBackend.svg)](https://greenkeeper.io/)
-[![Build Status](https://travis-ci.org/EVNotify/EVNotifyBackend.svg?branch=greenkeeper%2Finitial)](https://travis-ci.org/EVNotify/EVNotifyBackend)
+[![CI](https://github.com/EVNotify/EVNotifyBackend/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/EVNotify/EVNotifyBackend/actions/workflows/ci.yml)
 
 Backend for [EVNotify](https://github.com/EVNotify/EVNotify).
 
@@ -51,7 +51,7 @@ Delivery happens in the background with a 10-second request timeout and no retri
 
 ## Development
 
-Install dependencies with `npm install`.
+Install dependencies with `npm install`. GitHub Actions runs the full test suite in Docker using Node 8.17.0 and MySQL 5.7.34, with a disposable test database and the committed dependency lockfile.
 
 Run the isolated settings, webhook, sync, and notification tests without a backend or database:
 
