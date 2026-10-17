@@ -45,4 +45,4 @@ check();
 NODE
 
 # The MySQL service was initialized before this container started.
-npm --ignore-scripts test
+node node_modules/mocha/bin/_mocha tests/*
