@@ -12,6 +12,7 @@ describe('webhook module', () => {
     let rows;
     let dbError;
     let transportError;
+    let transportResponse;
     let synchronousError;
     let loggedErrors;
     let originalConsoleError;
@@ -29,6 +30,7 @@ describe('webhook module', () => {
         rows = undefined;
         dbError = null;
         transportError = null;
+        transportResponse = { statusCode: 200 };
         synchronousError = null;
         dnsAddresses = [{ address: '8.8.8.8', family: 4 }];
         dnsError = null;
@@ -64,7 +66,7 @@ describe('webhook module', () => {
             request: (options, callback) => {
                 if (synchronousError) throw synchronousError;
                 requests.push(options);
-                callback(transportError);
+                callback(transportError, transportResponse);
             }
         });
     });
@@ -319,10 +321,36 @@ describe('webhook module', () => {
         assert.deepStrictEqual(requests[0].body.response, [1, 2]);
     });
 
-    it('logs transport errors without throwing', () => {
-        transportError = new Error('connection timed out');
+    [200, 204].forEach(statusCode => {
+        it('does not log successful HTTP ' + statusCode + ' responses', () => {
+            transportResponse = { statusCode };
+            emit({});
+            assert.strictEqual(loggedErrors.length, 0);
+        });
+    });
+
+    [302, 400, 404, 500].forEach(statusCode => {
+        it('logs HTTP ' + statusCode + ' failures without sensitive data', () => {
+            destination = 'https://user:password@example.test/private?secret=value';
+            transportResponse = { statusCode, body: 'private response body' };
+            assert.doesNotThrow(() => emit({ private: 'private payload' }));
+            assert.strictEqual(loggedErrors.length, 1);
+            assert.strictEqual(loggedErrors[0].message, 'Webhook delivery failed: HTTP ' + statusCode);
+            const log = loggedErrors[0].stack;
+            ['user:password', 'example.test', '/private', 'secret=value', 'secret-token',
+                'private response body', 'private payload'].forEach(value => {
+                assert.ok(!log.includes(value));
+            });
+        });
+    });
+
+    it('logs transport errors once without throwing or exposing error details', () => {
+        transportError = new Error('connection timed out for https://example.test/?token=secret-token');
+        transportResponse = { statusCode: 500 };
         assert.doesNotThrow(() => emit({}));
+        assert.strictEqual(loggedErrors.length, 1);
         assert.strictEqual(loggedErrors[0].message, 'Webhook delivery failed');
+        assert.ok(!loggedErrors[0].stack.includes('secret-token'));
     });
 });
 

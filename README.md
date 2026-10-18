@@ -47,7 +47,7 @@ The JSON payload contains:
 
 The account's API `token` is included only as an outer payload field when the URL uses HTTPS and its hostname is exactly `evnotify.de`, `evnotify.com`, or a subdomain of either. Matching is case insensitive and requires a dot boundary: `api.evnotify.de` qualifies, but `fakeevnotify.de` and `evnotify.de.attacker.com` do not. Other destinations receive events without a token. Requests carrying tokens never follow redirects.
 
-Delivery happens in the background with a 10-second request timeout and no retries. Transport errors are logged; HTTP failure status codes are not checked. A successful API response does not confirm webhook delivery. Rejected API requests and rate-limited notifications do not emit events.
+Delivery happens in the background with a 10-second request timeout and no retries. Transport errors and non-2xx HTTP responses (including redirects) are logged. HTTP failure logs include the status code without URLs, credentials, payloads, or response bodies. A successful API response does not confirm webhook delivery. Rejected API requests and rate-limited notifications do not emit events.
 
 ## Development
 

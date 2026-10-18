@@ -136,8 +136,12 @@ module.exports = {
                             lookup,
                             family: destination.family,
                             body
-                        }, err => {
-                            if (err) console.error(new Error('Webhook delivery failed'));
+                        }, (err, response) => {
+                            if (err) {
+                                console.error(new Error('Webhook delivery failed'));
+                            } else if (response && (response.statusCode < 200 || response.statusCode >= 300)) {
+                                console.error(new Error('Webhook delivery failed: HTTP ' + response.statusCode));
+                            }
                         });
                     } catch (err) {
                         console.error(new Error('Webhook delivery failed'));
