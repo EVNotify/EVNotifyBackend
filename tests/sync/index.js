@@ -126,4 +126,15 @@ describe('sync webhook events', () => {
         assert.deepStrictEqual(events, []);
         assert.strictEqual(queries.length, 0);
     });
+
+    [undefined, null].forEach(location => {
+        it('rejects ' + location + ' location before accessing its properties', () => {
+            const res = createResponse();
+            loader.module.postLocation({ body: { akey: 'ABC123', token: 'secret-token', location } }, res);
+            assert.strictEqual(res.statusCode, 400);
+            assert.deepStrictEqual(res.body.error, errors.INVALID_PARAMETERS);
+            assert.strictEqual(queries.length, 0);
+            assert.deepStrictEqual(events, []);
+        });
+    });
 });

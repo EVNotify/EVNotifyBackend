@@ -320,7 +320,7 @@ module.exports = {
      */
     postLocation: (req, res) => {
         // check required params
-        if (!req.body.akey || !req.body.token || !req.body.location == null || typeof req.body.location !== 'object') {
+        if (!req.body.akey || !req.body.token || req.body.location == null || typeof req.body.location !== 'object') {
             return res.status(400).json({
                 error: srv_errors.INVALID_PARAMETERS
             });
