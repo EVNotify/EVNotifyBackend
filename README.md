@@ -51,7 +51,7 @@ Delivery happens in the background with a 10-second request timeout and no retri
 
 ## Development
 
-Install dependencies with `npm install`. GitHub Actions runs the full test suite in Docker using Node 8.17.0 and MySQL 5.7.34, with a disposable test database and the committed dependency lockfile.
+Install dependencies with `npm install`. GitHub Actions runs the full test suite in Docker using Node 8.17.0 and MySQL 5.7.34, with a disposable test database.
 
 Run the isolated settings, webhook, sync, and notification tests without a backend or database:
 

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 node --version
-npm ci --unsafe-perm --no-audit
+npm install --unsafe-perm --no-audit --package-lock=false
 
 node <<'NODE'
 const fs = require('fs');
