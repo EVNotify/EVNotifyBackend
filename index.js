@@ -26,17 +26,6 @@ const express = require('express'),
         environment: ((srv_config.DEBUG) ? 'development' : 'production'),
         captureUnhandledRejections: true
     }) : false),
-    moesifExpress = require('moesif-express'),
-    moesif = ((srv_config.MOESIF_TOKEN) ? moesifExpress({
-        applicationId: srv_config.MOESIF_TOKEN,
-        identifyUser: req => req.body.akey,
-        getApiVersion: () => '2',
-        skip: req => {
-            const path = req.path.toLowerCase();
-            
-            return path === '/location' || path === '/debug' || path === '/soc' || path === '/extended'
-        }
-    }) : false),
     db = require('./modules/db'),
     account = require('./modules/account'),
     sync = require('./modules/sync'),
@@ -96,9 +85,6 @@ app.use((req, res, next) => {
     };
     next();
 });
-
-// moesif middleware
-if (moesif) app.use(moesif);
 
 if (srv_config.ROOKOUT_TOKEN) rookout.start({token: srv_config.ROOKOUT_TOKEN});
 

@@ -15,7 +15,7 @@ const srv_config = require('./../../srv_config.json'),
  * @param {Function} callback callback function
  */
 const getSettings = (akey, callback) => {
-    db.query('SELECT email, telegram, abrp, push, soc, consumption, capacity, car, device, lng, summary FROM settings WHERE akey=?', [
+    db.query('SELECT email, telegram, abrp, push, soc, consumption, capacity, car, device, lng, summary, webhook FROM settings WHERE akey=?', [
         akey
     ], (err, dbRes) => {
         if (!err && dbRes && dbRes[0] && dbRes[0].email) dbRes[0].email = encryption.decrypt(dbRes[0].email);
@@ -30,7 +30,7 @@ const getSettings = (akey, callback) => {
  * @param {Function} callback callback function
  */
 const setSettings = (akey, settings, callback) => {
-    db.query('UPDATE settings SET email=?, telegram=?, push=?, soc=?, consumption=?, capacity=?, car=?, device=?, lng=?, summary=? WHERE akey=?', [
+    const values = [
         ((settings.email) ? encryption.encrypt(settings.email) : ''),
         settings.telegram,
         settings.push,
@@ -42,7 +42,10 @@ const setSettings = (akey, settings, callback) => {
         settings.lng,
         settings.summary,
         akey
-    ], (err, dbRes) => callback(err, ((!err && dbRes && dbRes[0]) ? dbRes[0] : null)));
+    ];
+
+    db.query('UPDATE settings SET email=?, telegram=?, push=?, soc=?, consumption=?, capacity=?, car=?, device=?, lng=?, summary=? WHERE akey=?', values,
+        (err, dbRes) => callback(err, ((!err && dbRes && dbRes[0]) ? dbRes[0] : null)));
 };
 
 module.exports = {
@@ -106,10 +109,12 @@ module.exports = {
             if (!err) {
                 if (valid) {
                     // set settings
-                    setSettings(req.body.akey, req.body.settings, (err, settings) => {
+                    setSettings(req.body.akey, req.body.settings, err => {
                         if (!err) {
+                            const updatedSettings = Object.assign({}, req.body.settings);
+                            delete updatedSettings.webhook;
                             res.json({
-                                settings: req.body.settings
+                                settings: updatedSettings
                             });
                         } else {
                             res.status(422).json({
