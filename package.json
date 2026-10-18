@@ -6,7 +6,7 @@
   "dependencies": {
     "@paypal/checkout-server-sdk": "^1.0.1",
     "bcrypt": "3.0.4",
-    "body-parser": "1.18.3",
+    "body-parser": "1.20.6",
     "chai": "4.2.0",
     "chai-http": "4.3.0",
     "cors": "2.8.5",
