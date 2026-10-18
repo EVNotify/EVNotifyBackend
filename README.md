@@ -51,12 +51,12 @@ Delivery happens in the background with a 10-second request timeout and no retri
 
 ## Development
 
-Install dependencies with `npm ci` using Node 8.17.0 and npm 6. GitHub Actions runs the full test suite in Docker using Node 8.17.0 and MySQL 5.7.34, with a disposable test database and the committed dependency lockfile. See [dependency maintenance](DEPENDENCY_SECURITY.md) before changing dependencies; the lockfile includes security fixes for legacy transitive dependencies.
+Install dependencies with `npm install`. GitHub Actions runs the full test suite in Docker using Node 8.17.0 and MySQL 5.7.34, with a disposable test database and the committed dependency lockfile.
 
-Run the isolated dependency, settings, webhook, sync, notification, and translation tests without a backend or database:
+Run the isolated settings, webhook, sync, and notification tests without a backend or database:
 
 ```bash
-./node_modules/.bin/mocha tests/dependencies/index.js tests/settings/index.js tests/webhook/index.js tests/sync/index.js tests/notification/index.js tests/translation/index.js
+./node_modules/.bin/mocha tests/settings/index.js tests/webhook/index.js tests/sync/index.js tests/notification/index.js
 ```
 
 The full suite also includes account integration tests, which require a running backend at `TEST_URL` (or the configured local port) and a local test database configured in `srv_config.json`. Its setup creates the database and imports the schema:

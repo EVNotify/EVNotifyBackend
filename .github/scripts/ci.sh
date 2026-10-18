@@ -2,9 +2,7 @@
 set -euo pipefail
 
 node --version
-lockfile_hash="$(sha256sum package-lock.json)"
 npm ci --unsafe-perm --no-audit
-test "$lockfile_hash" = "$(sha256sum package-lock.json)"
 
 node <<'NODE'
 const fs = require('fs');

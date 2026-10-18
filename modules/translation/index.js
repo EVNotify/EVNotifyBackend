@@ -5,20 +5,10 @@
  */
 const fs = require('fs'),
     path = require('path'),
+    stringInject = require('stringinject').default,
     allowedLng = ['en', 'de'];
 
 let translations = {};
-
-// Preserve the placeholder semantics previously provided by stringinject.
-const stringInject = (text, data) => {
-    if (Array.isArray(data)) {
-        return text.replace(/{(\d)}/g, (placeholder, key) => data[key]);
-    }
-    if (data instanceof Object && Object.keys(data).length) {
-        return text.replace(/{([^}]+)}/g, (placeholder, key) => data[key] || placeholder);
-    }
-    return text;
-};
 
 /**
  * Function which translates the text (or a general placeholder) into the specified language
