@@ -1,4 +1,10 @@
 {
+    "EXTENDED_TELEMETRY_HISTORY": "Erweiterte Telemetrie",
+    "BATTERY_CELL_VOLTAGE_MIN_V": "Minimale Zellspannung (V)",
+    "BATTERY_CELL_VOLTAGE_MAX_V": "Maximale Zellspannung (V)",
+    "BATTERY_CELL_VOLTAGE_DELTA_V": "Zellspannungsdifferenz (V)",
+    "BATTERY_FAN_LEVEL_RAW": "Batterielüfterstufe (Rohwert)",
+    "ODOMETER_KM": "Kilometerstand (km)",
     "SOC_HISTORY": "Ladezustandshistorie",
     "SOC_DISPLAY": "Ladezustand (Display)",
     "SOC_BMS": "Ladezustand (BMS)",

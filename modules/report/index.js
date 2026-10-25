@@ -71,6 +71,18 @@ const worksheets = {
                     "excel_name": "SPEED"
                 },
             ],
+        },
+        {
+            "name": "EXTENDED_TELEMETRY_HISTORY",
+            "condition": ["battery_cell_voltage_min", "battery_cell_voltage_max", "battery_cell_voltage_delta", "battery_fan_speed", "odo"],
+            "sql_columns": [
+                { "name": "timestamp", "type": "date", "excel_name": "DATE_TIME" },
+                { "name": "battery_cell_voltage_min", "type": "number", "excel_name": "BATTERY_CELL_VOLTAGE_MIN_V" },
+                { "name": "battery_cell_voltage_max", "type": "number", "excel_name": "BATTERY_CELL_VOLTAGE_MAX_V" },
+                { "name": "battery_cell_voltage_delta", "type": "number", "excel_name": "BATTERY_CELL_VOLTAGE_DELTA_V" },
+                { "name": "battery_fan_speed", "type": "number", "excel_name": "BATTERY_FAN_LEVEL_RAW" },
+                { "name": "odo", "type": "number", "excel_name": "ODOMETER_KM" }
+            ]
         }
     ]
 };
