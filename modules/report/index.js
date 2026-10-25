@@ -71,6 +71,18 @@ const worksheets = {
                     "excel_name": "SPEED"
                 },
             ],
+        },
+        {
+            "name": "EXTENDED_TELEMETRY_HISTORY",
+            "condition": ["battery_cell_voltage_min", "battery_cell_voltage_max", "battery_cell_voltage_delta", "battery_fan_speed", "odo"],
+            "sql_columns": [
+                { "name": "timestamp", "type": "date", "excel_name": "DATE_TIME" },
+                { "name": "battery_cell_voltage_min", "type": "number", "excel_name": "BATTERY_CELL_VOLTAGE_MIN_V" },
+                { "name": "battery_cell_voltage_max", "type": "number", "excel_name": "BATTERY_CELL_VOLTAGE_MAX_V" },
+                { "name": "battery_cell_voltage_delta", "type": "number", "excel_name": "BATTERY_CELL_VOLTAGE_DELTA_V" },
+                { "name": "battery_fan_speed", "type": "number", "excel_name": "BATTERY_FAN_LEVEL_RAW" },
+                { "name": "odo", "type": "number", "excel_name": "ODOMETER_KM" }
+            ]
         }
     ]
 };
@@ -126,6 +138,7 @@ const createReport = (akey, token, callback) => {
                             let wb = new excel.Workbook(),
                                 wss = worksheets.log.map(e => new Worksheet(wb, lng, e));
                             dataRes.forEach(e => wss.forEach(w => w.processRow(e)));
+                            // eslint-disable-next-line no-warning-comments
                             // TODO dynamic filename (tmp file which need to be unlinked and streamed to user..)
                             wb.write('Excel.xlsx');
                             callback(null, 'Excel.xlsx');
@@ -141,6 +154,7 @@ const logExportReport = (data) => {
     return new Promise((resolve, reject) => {
         const randomFile = 'tmp_logexportreport_' + crypto.randomBytes(20).toString('hex') + '.xlsx';
         try {
+            // eslint-disable-next-line no-warning-comments
             // TODO lng..
             const wb = new excel.Workbook({
                 dateFormat: 'm/d/yy hh:mm:ss',

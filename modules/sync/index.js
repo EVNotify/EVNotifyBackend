@@ -8,7 +8,8 @@ const srv_config = require('./../../srv_config.json'),
     db = require('./../db'),
     abrp = require('./../integrations/abrp'),
     webhook = require('./../webhook'),
-    token = require('./../token');
+    token = require('./../token'),
+    telemetry = require('./telemetry');
 
 const updatedRecently = (now, dbTimestamp) => now - 5 < dbTimestamp;
 
@@ -65,32 +66,26 @@ const getSoC = (akey, callback) => {
  */
 const postExtended = (akey, extendedObj, callback) => {
     const now = parseInt(new Date() / 1000);
+    const supplied = telemetry.supplied(extendedObj);
+    const columns = supplied.map(field => telemetry.fields[field]);
+    const values = supplied.map(field => telemetry.storedValue(extendedObj, field));
 
-    db.query('SELECT last_extended FROM sync WHERE akey=?', [
-        akey,
-    ], (err, queryRes) => {
-        if (!err && queryRes) {
-            const lastExtended = queryRes[0] ? queryRes[0].last_extended : 0;
+    db.query('SELECT last_extended FROM sync WHERE akey=?', [akey], (err, queryRes) => {
+        if (err || !queryRes) return callback(err);
+        const lastExtended = queryRes[0] ? queryRes[0].last_extended : 0;
+        const assignments = columns.concat(['last_extended']).map(column => column + '=?');
 
-            db.query('UPDATE sync SET soh=?, charging=?, rapid_charge_port=?, normal_charge_port=?, slow_charge_port=?, aux_battery_voltage=?, dc_battery_voltage=?, dc_battery_current=?, dc_battery_power=?,\
-                cumulative_energy_charged=?, cumulative_energy_discharged=?, battery_min_temperature=?, battery_max_temperature=?, battery_inlet_temperature=?, external_temperature=?, odo=?, last_extended=? WHERE akey=?', [
-                extendedObj.soh, extendedObj.charging, extendedObj.rapidChargePort, extendedObj.normalChargePort, extendedObj.slowChargePort, extendedObj.auxBatteryVoltage, extendedObj.dcBatteryVoltage, extendedObj.dcBatteryCurrent,
-                extendedObj.dcBatteryPower, extendedObj.cumulativeEnergyCharged, extendedObj.cumulativeEnergyDischarged, extendedObj.batteryMinTemperature, extendedObj.batteryMaxTemperature, extendedObj.batteryInletTemperature, extendedObj.externalTemperature, extendedObj.odo, now, akey
-            ], err => {
-                if (!err) {
-                    if (updatedRecently(now, lastExtended)) {
-                        callback(null, true);
-                        return;
-                    }
+        db.query('UPDATE sync SET ' + assignments.join(', ') + ' WHERE akey=?',
+            values.concat([now, akey]), err => {
+                if (err) return callback(err);
+                if (updatedRecently(now, lastExtended)) return callback(null, true);
 
-                    db.query('INSERT INTO statistics (soh, charging, rapid_charge_port, normal_charge_port, slow_charge_port, aux_battery_voltage, dc_battery_voltage, \
-                    dc_battery_current, dc_battery_power, cumulative_energy_charged, cumulative_energy_discharged, battery_min_temperature, battery_max_temperature, battery_inlet_temperature, external_temperature, odo, timestamp, akey) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-                        extendedObj.soh, extendedObj.charging, extendedObj.rapidChargePort, extendedObj.normalChargePort, extendedObj.slowChargePort, extendedObj.auxBatteryVoltage, extendedObj.dcBatteryVoltage, extendedObj.dcBatteryCurrent,
-                        extendedObj.dcBatteryPower, extendedObj.cumulativeEnergyCharged, extendedObj.cumulativeEnergyDischarged, extendedObj.batteryMinTemperature, extendedObj.batteryMaxTemperature, extendedObj.batteryInletTemperature, extendedObj.externalTemperature, extendedObj.odo, now, akey
-                    ], (err, dbRes) => callback(err, (!err && dbRes)));
-                } else callback(err);
+                // History contains only this submission, never retained current values.
+                const historyColumns = columns.concat(['timestamp', 'akey']);
+                db.query('INSERT INTO statistics (' + historyColumns.join(', ') + ') VALUES (' +
+                    historyColumns.map(() => '?').join(', ') + ')', values.concat([now, akey]),
+                    (err, dbRes) => callback(err, (!err && dbRes)));
             });
-        } else callback(err);
     });
 };
 
@@ -100,10 +95,9 @@ const postExtended = (akey, extendedObj, callback) => {
  * @param {Function} callback callback function
  */
 const getExtended = (akey, callback) => {
-    db.query('SELECT soh, charging, rapid_charge_port, normal_charge_port, slow_charge_port, aux_battery_voltage, dc_battery_voltage, dc_battery_current, dc_battery_power, \
-    cumulative_energy_charged, cumulative_energy_discharged, battery_min_temperature, battery_max_temperature, battery_inlet_temperature, external_temperature, odo, last_extended FROM sync WHERE akey=?', [
-        akey
-    ], (err, queryRes) => callback(err, ((!err && queryRes) ? queryRes[0] : null)));
+    const columns = Object.keys(telemetry.fields).map(field => telemetry.fields[field]).concat(['last_extended']);
+    db.query('SELECT ' + columns.join(', ') + ' FROM sync WHERE akey=?', [akey],
+        (err, queryRes) => callback(err, ((!err && queryRes) ? telemetry.serialize(queryRes[0]) : null)));
 };
 
 /**
@@ -241,8 +235,8 @@ module.exports = {
         });
     },
     postExtended: (req, res) => {
-        // check required params
-        if (!req.body.akey || !req.body.token) {
+        // Validate the entire submission before any telemetry writes.
+        if (!req.body.akey || !req.body.token || !telemetry.valid(req.body)) {
             return res.status(400).json({
                 error: srv_errors.INVALID_PARAMETERS
             });

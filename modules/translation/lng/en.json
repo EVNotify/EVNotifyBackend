@@ -1,4 +1,10 @@
 {
+    "EXTENDED_TELEMETRY_HISTORY": "Extended telemetry history",
+    "BATTERY_CELL_VOLTAGE_MIN_V": "Cell voltage minimum (V)",
+    "BATTERY_CELL_VOLTAGE_MAX_V": "Cell voltage maximum (V)",
+    "BATTERY_CELL_VOLTAGE_DELTA_V": "Cell voltage delta (V)",
+    "BATTERY_FAN_LEVEL_RAW": "Battery fan level (raw)",
+    "ODOMETER_KM": "Odometer (km)",
     "SOC_HISTORY": "State of charge history",
     "SOC_DISPLAY": "State of charge (Display)",
     "SOC_BMS": "State of charge (BMS)",
