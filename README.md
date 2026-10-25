@@ -101,20 +101,7 @@ Delivery happens in the background with a 10-second request timeout and no retri
 
 Install dependencies with `npm install`. GitHub Actions runs the full test suite in Docker using Node 8.17.0 and MySQL 5.7.34, with a disposable test database.
 
-JavaScript linting runs separately in CI with Node 24 and pinned JSHint 2.13.6. This tooling does not change the backend's Node 8 runtime or dependencies. Hound's older JavaScript parser is disabled.
-
-The lint check reports warnings on added or modified JavaScript lines, checks new files completely, and fails syntax errors anywhere in a changed file. Existing warnings outside changed lines remain separate cleanup work. Pull requests compare against their base commit; pushes to `master` compare against the previous commit. The three existing report/export TODOs have individual ESLint suppressions; other CodeFactor checks remain enabled.
-
-To run the same lint check locally, install tooling outside the application directory and select the commits to compare:
-
-```bash
-lint_tools=$(mktemp -d)
-npm install --prefix "$lint_tools" --no-save --package-lock=false --ignore-scripts --no-audit --no-fund jshint@2.13.6
-node .github/scripts/lint-changes.test.js "$lint_tools/node_modules/jshint"
-node .github/scripts/lint-changes.js "$lint_tools/node_modules/jshint" "$(git merge-base origin/master HEAD)" HEAD
-```
-
-Run these tooling commands with Node 24. The check reads committed revisions; commit local changes before checking them.
+Hound's older JavaScript parser is disabled. The three existing report/export TODOs have individual ESLint suppressions; other CodeFactor checks remain enabled.
 
 Run the isolated settings, webhook, sync, notification, and XLSX tests without a backend or database:
 

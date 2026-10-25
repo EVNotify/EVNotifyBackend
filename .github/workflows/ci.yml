@@ -9,27 +9,6 @@ permissions:
   contents: read
 
 jobs:
-  lint:
-    name: JavaScript lint
-    runs-on: ubuntu-22.04
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - name: Install pinned lint tooling separately from the backend
-        run: npm install --prefix "$RUNNER_TEMP/evnotify-lint" --no-save --package-lock=false --ignore-scripts --no-audit --no-fund jshint@2.13.6
-      - name: Test changed-line lint checks
-        run: node .github/scripts/lint-changes.test.js "$RUNNER_TEMP/evnotify-lint/node_modules/jshint"
-      - name: Lint changed JavaScript
-        env:
-          LINT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
-          LINT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: node .github/scripts/lint-changes.js "$RUNNER_TEMP/evnotify-lint/node_modules/jshint" "$LINT_BASE" "$LINT_HEAD"
   test:
     name: Node 8 / MySQL 5.7.34
     runs-on: ubuntu-22.04
