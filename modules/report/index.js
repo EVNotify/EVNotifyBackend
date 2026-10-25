@@ -138,6 +138,7 @@ const createReport = (akey, token, callback) => {
                             let wb = new excel.Workbook(),
                                 wss = worksheets.log.map(e => new Worksheet(wb, lng, e));
                             dataRes.forEach(e => wss.forEach(w => w.processRow(e)));
+                            // eslint-disable-next-line no-warning-comments
                             // TODO dynamic filename (tmp file which need to be unlinked and streamed to user..)
                             wb.write('Excel.xlsx');
                             callback(null, 'Excel.xlsx');
@@ -153,6 +154,7 @@ const logExportReport = (data) => {
     return new Promise((resolve, reject) => {
         const randomFile = 'tmp_logexportreport_' + crypto.randomBytes(20).toString('hex') + '.xlsx';
         try {
+            // eslint-disable-next-line no-warning-comments
             // TODO lng..
             const wb = new excel.Workbook({
                 dateFormat: 'm/d/yy hh:mm:ss',

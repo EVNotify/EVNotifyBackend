@@ -137,6 +137,7 @@ const exportLog = async (akey, id, email) => {
         const statistics = (await query(`SELECT * FROM ${table} WHERE akey=? AND timestamp >= ? AND timestamp <= ?`, [akey, log.start, log.end]));
 
         return report.logExportReport(statistics).then((file) => {
+            // eslint-disable-next-line no-warning-comments
             // TODO localize
             mail.simpleSend(email, 'Log-Export', 'Log-Export', [{
                 filename: 'Export.xlsx',
